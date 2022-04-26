@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/orderCreationTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Создание заказа"
+            android:textColor="@color/secondary_color"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/serviceTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Введите услугу"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/orderCreationTitle" />
+
+        <TextView
+            android:id="@+id/toTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/rounded_background"
+            android:backgroundTint="@color/primary_color"
+            android:gravity="center"
+            android:paddingVertical="10dp"
+            android:text="Куда"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/serviceTitle" />
+
+        <EditText
+            android:id="@+id/toCity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Введите город"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/toArea"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toTitle" />
+
+        <EditText
+            android:id="@+id/toArea"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Укажите область"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/toCity"
+            app:layout_constraintTop_toBottomOf="@+id/toTitle" />
+
+        <EditText
+            android:id="@+id/toPlace"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Укажите место"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toCity" />
+
+        <EditText
+            android:id="@+id/selectDateTime"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="укажите дату и время"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toPlace" />
+
+        <EditText
+            android:id="@+id/comment"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="start|top"
+            android:hint="Добавьте комментарии"
+            android:paddingHorizontal="30dp"
+            android:paddingVertical="15dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_min="85dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/selectDateTime" />
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/photo"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="15dp"
+            app:layout_constraintDimensionRatio="1:1"
+            app:layout_constraintEnd_toStartOf="@+id/toName"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/comment"
+            app:cardBackgroundColor="@color/edittext_field_color"
+            app:cardCornerRadius="15dp">
+
+            <ImageView
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_photo" />
+
+        </androidx.cardview.widget.CardView>
+
+        <EditText
+            android:id="@+id/toName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Введите имя"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toTopOf="@+id/toTelNumber"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/photo"
+            app:layout_constraintTop_toTopOf="@+id/photo"
+            app:layout_constraintVertical_chainStyle="spread_inside" />
+
+        <EditText
+            android:id="@+id/toTelNumber"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Укажите номер"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toTopOf="@+id/paymentMethod"
+            app:layout_constraintEnd_toEndOf="@+id/toName"
+            app:layout_constraintStart_toStartOf="@+id/toName"
+            app:layout_constraintTop_toBottomOf="@+id/toName" />
+
+        <Button
+            android:id="@+id/order"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="@color/primary_color"
+            android:paddingHorizontal="30dp"
+            android:paddingVertical="17dp"
+            android:text="Заказать"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            app:cornerRadius="10dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.51"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/paymentMethod"
+            app:layout_constraintWidth_percent="0.5" />
+
+        <Spinner
+            android:id="@+id/paymentMethod"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/spinner_back"
+            android:entries="@array/paymentMethods"
+            app:layout_constraintBottom_toBottomOf="@+id/photo"
+            app:layout_constraintEnd_toEndOf="@+id/toName"
+            app:layout_constraintStart_toStartOf="@+id/toName"
+            app:layout_constraintTop_toBottomOf="@+id/toTelNumber" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/orderCreationTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Создание заказа"
+            android:textColor="@color/secondary_color"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/fromTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/rounded_background"
+            android:backgroundTint="@color/primary_color"
+            android:gravity="center"
+            android:paddingVertical="10dp"
+            android:text="Откуда"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/orderCreationTitle" />
+
+        <EditText
+            android:id="@+id/fromCity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Введите город"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/fromArea"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fromTitle" />
+
+        <EditText
+            android:id="@+id/fromArea"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Укажите область"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/fromCity"
+            app:layout_constraintTop_toBottomOf="@+id/fromTitle" />
+
+        <EditText
+            android:id="@+id/fromPlace"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Укажите место"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/fromTime"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fromCity" />
+
+        <TextView
+            android:id="@+id/fromTime"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Укажите время"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/fromPlace"
+            app:layout_constraintTop_toBottomOf="@+id/fromArea" />
+
+        <TextView
+            android:id="@+id/toTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/rounded_background"
+            android:backgroundTint="@color/primary_color"
+            android:gravity="center"
+            android:paddingVertical="10dp"
+            android:text="Куда"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fromPlace" />
+
+        <EditText
+            android:id="@+id/toCity"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Введите город"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/toArea"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toTitle" />
+
+        <EditText
+            android:id="@+id/toArea"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="15dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Укажите область"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/toCity"
+            app:layout_constraintTop_toBottomOf="@+id/toTitle" />
+
+        <EditText
+            android:id="@+id/toPlace"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Укажите место"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toCity" />
+
+        <EditText
+            android:id="@+id/toName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Введите имя"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toStartOf="@+id/toTelNumber"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toPlace" />
+
+        <EditText
+            android:id="@+id/toTelNumber"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="center"
+            android:hint="Укажите номер"
+            android:paddingHorizontal="10dp"
+            android:paddingVertical="19dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/toName"
+            app:layout_constraintTop_toBottomOf="@+id/toPlace" />
+
+        <EditText
+            android:id="@+id/comment"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/input_field_background_rounded"
+            android:gravity="start|top"
+            android:hint="Добавьте комментарии"
+            android:paddingHorizontal="30dp"
+            android:paddingVertical="15dp"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_min="120dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toName" />
+
+        <Button
+            android:id="@+id/order"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:backgroundTint="@color/primary_color"
+            android:paddingHorizontal="30dp"
+            android:paddingVertical="17dp"
+            android:text="Заказать"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="1"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/comment"
+            app:layout_constraintWidth_percent="0.5"
+            app:cornerRadius="10dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>

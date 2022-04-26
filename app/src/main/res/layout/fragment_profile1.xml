@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="@dimen/sideMargin">
+
+            <TextView
+                android:id="@+id/name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/montserrat"
+                android:textColor="@color/primary_color"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/telNumber"
+                app:layout_constraintEnd_toStartOf="@+id/avatar"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/avatar"
+                app:layout_constraintVertical_chainStyle="packed"
+                tools:text="Николай" />
+
+            <TextView
+                android:id="@+id/telNumber"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/montserrat"
+                android:textColor="@color/secondary_color"
+                android:textSize="18sp"
+                app:layout_constraintBottom_toBottomOf="@+id/avatar"
+                app:layout_constraintEnd_toStartOf="@+id/avatar"
+                app:layout_constraintHorizontal_bias="0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/name"
+                tools:text="+7 (495) 510-55-55" />
+
+            <ImageView
+                android:id="@+id/avatar"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:src="@drawable/ic_avatar"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintWidth_percent="0.3" />
+
+            <EditText
+                android:id="@+id/nameET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:fontFamily="@font/montserrat"
+                android:gravity="start|center_vertical"
+                android:hint="Имя"
+                android:importantForAutofill="no"
+                android:inputType="textPersonName"
+                android:textCursorDrawable="@null"
+                android:textSize="16sp"
+                android:theme="@style/EditTextTheme"
+                app:layout_constraintBottom_toTopOf="@+id/telNumberET"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/avatar" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/telNumberET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:fontFamily="@font/montserrat"
+                android:gravity="start|center_vertical"
+                android:hint="Номер телефона"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:textCursorDrawable="@null"
+                android:textSize="16sp"
+                android:theme="@style/EditTextTheme"
+                app:layout_constraintBottom_toTopOf="@+id/emailET"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/nameET" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/emailET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:fontFamily="@font/montserrat"
+                android:gravity="start|center_vertical"
+                android:hint="E-mail"
+                android:importantForAutofill="no"
+                android:inputType="textEmailAddress"
+                android:textCursorDrawable="@null"
+                android:textSize="16sp"
+                android:theme="@style/EditTextTheme"
+                app:layout_constraintBottom_toTopOf="@+id/paymentCardET"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/telNumberET" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/paymentCardET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:fontFamily="@font/montserrat"
+                android:gravity="start|center_vertical"
+                android:hint="Карта оплаты"
+                android:importantForAutofill="no"
+                android:inputType="number"
+                android:textCursorDrawable="@null"
+                android:textSize="16sp"
+                android:theme="@style/EditTextTheme"
+                app:layout_constraintBottom_toTopOf="@+id/cityAreaET"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/emailET" />
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/cityAreaET"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:fontFamily="@font/montserrat"
+                android:gravity="start|center_vertical"
+                android:hint="Город/область"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:textCursorDrawable="@null"
+                android:textSize="16sp"
+                android:theme="@style/EditTextTheme"
+                app:layout_constraintBottom_toTopOf="@+id/office"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/paymentCardET" />
+
+            <Button
+                android:id="@+id/office"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/montserrat"
+                android:paddingBottom="12dp"
+                android:paddingTop="12dp"
+                android:text="КАБИНЕТ"
+                android:textColor="@color/button_text_color"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/primary_color"
+                app:cornerRadius="10dp"
+                app:layout_constraintBottom_toTopOf="@+id/officeRV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cityAreaET" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/officeRV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:layout_constraintBottom_toTopOf="@+id/addOfficeItems"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/office"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_profile_advert" />
+
+            <TextView
+                android:id="@+id/addOfficeItems"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Добавить"
+                app:layout_constraintBottom_toTopOf="@+id/storage"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/officeRV"
+                app:drawableStartCompat="@drawable/ic_add" />
+
+            <Button
+                android:id="@+id/storage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/montserrat"
+                android:paddingBottom="12dp"
+                android:paddingTop="12dp"
+                android:text="СКЛАД"
+                android:textColor="@color/button_text_color"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/primary_color"
+                app:cornerRadius="10dp"
+                app:layout_constraintBottom_toTopOf="@+id/storageRV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/addOfficeItems" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/storageRV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:layout_constraintBottom_toTopOf="@+id/addStorageItems"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/storage"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_profile_advert" />
+
+            <TextView
+                android:id="@+id/addStorageItems"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Добавить"
+                app:layout_constraintBottom_toTopOf="@+id/garage"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/storageRV"
+                app:drawableStartCompat="@drawable/ic_add" />
+
+            <Button
+                android:id="@+id/garage"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:fontFamily="@font/montserrat"
+                android:paddingBottom="12dp"
+                android:paddingTop="12dp"
+                android:text="ГАРАЖ"
+                android:textColor="@color/button_text_color"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                app:backgroundTint="@color/primary_color"
+                app:cornerRadius="10dp"
+                app:layout_constraintBottom_toTopOf="@+id/garageRV"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/addStorageItems" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/garageRV"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                app:layout_constraintBottom_toTopOf="@+id/addGarageItems"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/garage"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_profile_advert" />
+
+            <TextView
+                android:id="@+id/addGarageItems"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Добавить"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/garageRV"
+                app:drawableStartCompat="@drawable/ic_add" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </ScrollView>
+
+</LinearLayout>

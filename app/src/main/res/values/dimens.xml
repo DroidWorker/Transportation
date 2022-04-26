@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="sideMargin">25dp</dimen>
+    <dimen name="pageMarginAndOffset">50dp</dimen>
+    <dimen name="pageMargin">20dp</dimen>
+    <dimen name="offset">30dp</dimen>
+    <dimen name="tab_spacing_half">5dp</dimen>
+</resources>

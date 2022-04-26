@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/login_graph"
+    app:startDestination="@+id/loginFragment">
+
+    <action
+        android:id="@+id/openMainFragment"
+        app:destination="@+id/main_graph"
+        app:popUpTo="@+id/loginFragment"
+        app:popUpToInclusive="true" />
+
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.app.transportation.ui.login.LoginFragment"
+        android:label="LoginFragment" />
+
+    <fragment
+        android:id="@+id/registrationFragment"
+        android:name="com.app.transportation.ui.login.RegistrationFragment"
+        android:label="RegistrationFragment" />
+
+    <fragment
+        android:id="@+id/passwordRestorationFragment"
+        android:name="com.app.transportation.ui.login.PasswordRestorationFragment"
+        android:label="PasswordRestorationFragment" />
+
+    <fragment
+        android:id="@+id/smsCodeInputFragment"
+        android:name="com.app.transportation.ui.login.SmsCodeInputFragment" />
+
+    <fragment
+        android:id="@+id/newPasswordFragment"
+        android:name="com.app.transportation.ui.login.NewPasswordFragment" />
+
+</navigation>

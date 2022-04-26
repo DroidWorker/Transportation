@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Transportation</string>
+    <string name="continue_without_registration"><u>Продолжить без регистрации</u></string>
+    <string name="expand_text"><u>Читать полностью</u></string>
+    <string name="collapse_text"><u>Свернуть</u></string>
+    <string name="successful_registration">Регистрация прошла успешно! Можете авторизоваться!</string>
+    <string name="not_all_fields_filled">Не все поля заполнены</string>
+    <string name="login_exists">Пользователь с таким логином уже существует</string>
+    <string name="invalid_email">Введен некорректный e-mail</string>
+    <string name="invalid_phone">Введен некорректный номер телефона</string>
+    <string name="invalid_code">Введен некорректный код или истекло время восстановления</string>
+    <string name="database_error">Проблемы с сервером</string>
+    <string name="unexpected_error">Ошибка! Свяжитесь с разработчиком приложения.</string>
+    <string name="user_not_found">Пользователь не найден</string>
+    <string name="phone_not_found">Номер телефона не найден</string>
+    <string name="email_not_found">E-mail не найден</string>
+    <string name="incorrect_password">Неверный пароль</string>
+    <string name="sign_in">Войдите в аккаунт</string>
+    <string name="restoration_expired">Время для восстановления истекло</string>
+    <string name="password_is_short">Длина пароля должна быть не менее 8 символов</string>
+
+    <string-array name="paymentMethods">
+        <item>Способ оплаты</item>
+        <item>Наличные</item>
+        <item>Перевод на карту</item>
+    </string-array>
+</resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="nav_bar_color">@color/background</color>
+    <color name="primary_color">#EB7F00</color>
+    <color name="secondary_color">#ffffff</color>
+    <color name="bottom_nav_color">#202020</color>
+    <color name="background">#424242</color>
+    <color name="title_color">@color/white</color>
+    <color name="hint_color">#ABABAB</color>
+    <color name="edittext_field_color">#676767</color>
+    <color name="border_color">#636363</color>
+    <color name="service_type_background">#353535</color>
+    <color name="white_black_button_text_color">#000000</color>
+    <color name="service_description_background_color">#525252</color>
+    <color name="decline_button_background_feedback_color">#ffffff</color>
+</resources>

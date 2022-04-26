@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_graph"
+    app:startDestination="@+id/mainFragment">
+
+    <action
+        android:id="@+id/openLoginFragment"
+        app:destination="@+id/login_graph"
+        app:popUpTo="@+id/mainFragment"
+        app:popUpToInclusive="true" />
+
+    <include app:graph="@navigation/login_graph" />
+
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.app.transportation.ui.MainFragment"
+        android:label="Экран" />
+
+    <fragment
+        android:id="@+id/advertisementsFragment"
+        android:name="com.app.transportation.ui.AdvertisementsFragment" />
+
+    <fragment
+        android:id="@+id/advertDetailsFragment"
+        android:name="com.app.transportation.ui.AdvertDetailsFragment" />
+
+    <fragment
+        android:id="@+id/orderDetailsFragment"
+        android:name="com.app.transportation.ui.OrderDetailsFragment" />
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.app.transportation.ui.ProfileFragment" />
+
+    <fragment
+        android:id="@+id/feedbacksRequestsFragment"
+        android:name="com.app.transportation.ui.FeedbacksRequestsFragment" />
+
+    <fragment
+        android:id="@+id/notificationsFragment"
+        android:name="com.app.transportation.ui.NotificationsFragment" />
+
+    <fragment
+        android:id="@+id/createOrderCategorySelectorFragment"
+        android:name="com.app.transportation.ui.CreateOrderCategorySelectorFragment" />
+
+    <fragment
+        android:id="@+id/creatingOrderFragment"
+        android:name="com.app.transportation.ui.create_order_fragments.CreatingOrderPpAndKuFragment" />
+
+    <fragment
+        android:id="@+id/creatingAdvertisementFragment"
+        android:name="com.app.transportation.ui.create_order_fragments.CreatingAdvertisementFragment" />
+
+    <fragment
+        android:id="@+id/descriptionEditorFragment"
+        android:name="com.app.transportation.ui.create_order_fragments.DescriptionEditorFragment" />
+
+    <dialog
+        android:id="@+id/addCityDF"
+        android:name="com.app.transportation.ui.AddCityDF"
+        android:label="Добавить город" />
+    <fragment
+        android:id="@+id/creatingOrderAtFragment"
+        android:name="com.app.transportation.ui.create_order_fragments.CreatingOrderAtFragment"
+        android:label="CreatingOrderAtFragment" />
+    <fragment
+        android:id="@+id/creatingOrderPFragment"
+        android:name="com.app.transportation.ui.create_order_fragments.CreatingOrderPFragment"
+        android:label="CreatingOrderPFragment" />
+    <fragment
+        android:id="@+id/creatingOrderRisFragment"
+        android:name="com.app.transportation.ui.create_order_fragments.CreatingOrderRisFragment"
+        android:label="CreatingOrderRisFragment" />
+
+</navigation>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/menu_background"
+    android:padding="20dp">
+
+    <ImageView
+        android:id="@+id/shareIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_share"
+        app:layout_constraintEnd_toStartOf="@+id/shareText"
+        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/shareText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat"
+        android:gravity="end"
+        android:text="Поделиться"
+        android:textColor="@color/secondary_color"
+        app:layout_constraintBottom_toBottomOf="@+id/shareIcon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/shareIcon"
+        app:layout_constraintTop_toTopOf="@+id/shareIcon"
+        app:layout_constraintWidth_percent="0.8" />
+
+    <View
+        android:id="@+id/shareLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintBottom_toBottomOf="@+id/shareIcon"
+        app:layout_constraintEnd_toEndOf="@+id/shareText"
+        app:layout_constraintStart_toStartOf="@+id/shareIcon"
+        app:layout_constraintTop_toTopOf="@+id/shareIcon" />
+
+    <ImageView
+        android:id="@+id/logoutIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/ic_exit"
+        app:layout_constraintEnd_toStartOf="@+id/shareText"
+        app:layout_constraintHorizontal_bias="1"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/shareIcon" />
+
+    <TextView
+        android:id="@+id/logoutText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat"
+        android:gravity="end"
+        android:text="Выход"
+        android:textColor="@color/secondary_color"
+        app:layout_constraintBottom_toBottomOf="@+id/logoutIcon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/logoutIcon"
+        app:layout_constraintTop_toTopOf="@+id/logoutIcon"
+        app:layout_constraintWidth_percent="0.8" />
+
+    <View
+        android:id="@+id/logoutLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintBottom_toBottomOf="@+id/logoutIcon"
+        app:layout_constraintEnd_toEndOf="@+id/logoutText"
+        app:layout_constraintStart_toStartOf="@+id/logoutIcon"
+        app:layout_constraintTop_toTopOf="@+id/logoutIcon" />
+
+    <TextView
+        android:id="@+id/currentTheme"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/montserrat"
+        android:text="Светлая тема"
+        android:textColor="@color/secondary_color"
+        app:layout_constraintEnd_toEndOf="@+id/logoutLayout"
+        app:layout_constraintStart_toStartOf="@+id/logoutLayout"
+        app:layout_constraintTop_toBottomOf="@+id/logoutLayout" />
+
+    <androidx.appcompat.widget.SwitchCompat
+        android:id="@+id/themeSwitcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:thumb="@drawable/switch_thumb_selector"
+        app:track="@drawable/switch_track_selector"
+        app:layout_constraintEnd_toEndOf="@+id/logoutLayout"
+        app:layout_constraintStart_toStartOf="@+id/logoutLayout"
+        app:layout_constraintTop_toBottomOf="@+id/currentTheme" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
