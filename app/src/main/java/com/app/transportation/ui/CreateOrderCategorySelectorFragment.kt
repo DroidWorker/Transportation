@@ -61,6 +61,7 @@ class CreateOrderCategorySelectorFragment : Fragment() {
         b.rv.adapter = adapter
 
         if (mode==0) {//cabunet call
+            adapter.mode=0
             adapter.onClick = { i: Int, i1: Int ->
                 var ParentId: Int = i
                 var ItemId: Int = i1
@@ -148,9 +149,15 @@ class CreateOrderCategorySelectorFragment : Fragment() {
     }
 
     private fun applyFlowCollectors() {
-        viewModel.addAdvertScreenCategoriesFlowAll().collectWithLifecycle(viewLifecycleOwner) {
-            adapter.submitList(it)
+        if (mode==0){
+            viewModel.addAdvertScreenCategoriesFlow(categoryId).collectWithLifecycle(viewLifecycleOwner) {
+                adapter.submitList(it)
+            }
         }
+        else
+            viewModel.addAdvertScreenCategoriesFlowAll().collectWithLifecycle(viewLifecycleOwner) {
+                adapter.submitList(it)
+            }
     }
 
     private fun applyListeners() {

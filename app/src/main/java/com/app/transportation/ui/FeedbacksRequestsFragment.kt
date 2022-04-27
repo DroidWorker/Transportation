@@ -9,13 +9,18 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.app.transportation.MainActivity
 import com.app.transportation.R
+import com.app.transportation.core.collectWithLifecycle
+import com.app.transportation.core.stringToDate
 import com.app.transportation.data.database.entities.FeedbackRequest
 import com.app.transportation.databinding.FragmentFeedbacksRequestsBinding
 import com.app.transportation.ui.adapters.FeedbacksRequestsAdapter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.forEach
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
@@ -26,6 +31,8 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
     private val b get() = binding!!
 
     private val adapter by lazy { FeedbacksRequestsAdapter() }
+
+    private val viewModel by activityViewModels<MainViewModel>()
 
     private val prefs: SharedPreferences by inject(named("MainSettings"))
 
@@ -76,7 +83,7 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
 
     private fun applyTabColors() {
         if (feedbacksRequestsActiveTab == "requests") {
-            (activity as? MainActivity)?.b?.title?.text = "Мои заявки"
+            (activity as? MainActivity)?.b?.title?.text = "Мои заказы"
             b.requestsTab.setCardBackgroundColor(selectedColor)
             b.feedbacksTab.setCardBackgroundColor(unselectedColor)
         } else {
@@ -88,21 +95,24 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
 
     private fun applyAdapters() {
         b.feedbacksRequestsRV.adapter = adapter
-
+        viewModel.getCategoryOrders(0)
         applyList()
     }
 
     private fun applyList() {
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            val list =
-                if (feedbacksRequestsActiveTab == "requests")
-                    listOf(
-                        FeedbackRequest(0, 0, "Массажист", "Тюмень, Тюменская обл., ул. Мельникайте, 55"),
-                        FeedbackRequest(1, 0, "Плиточник", "Тюмень, Тюменская обл., ул. Мельникайте, 55"),
-                        FeedbackRequest(2, 0, "Плиточник", "Тюмень, Тюменская обл., ул. Мельникайте, 55")
-                    )
-                else
-                    listOf(
+        var list : List<FeedbackRequest>? = listOf()
+                if (feedbacksRequestsActiveTab == "requests") {
+                        var arrlist : ArrayList<FeedbackRequest> = ArrayList()
+                        viewModel.ordersSF.collectWithLifecycle(viewLifecycleOwner){
+                            it.toList().forEach{ order ->
+                                arrlist.add(FeedbackRequest((order.id).toLong(), 0, order.title, order.toLocation, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), 0))
+                            }
+                            list =arrlist.toList()
+                            adapter.submitList(list)
+                        }
+                }
+                else{
+                    list = listOf(
                         FeedbackRequest(0, 1, "Здесь заголовок объявления",
                             "Николай оставил запрос на исполнение вашей заявки в" +
                                     "категории грузовые перевозки. Нажмите, чтобы узнать подробнее"),
@@ -113,8 +123,8 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
                             "Николай оставил запрос на исполнение вашей заявки в" +
                                     "категории грузовые перевозки. Нажмите, чтобы узнать подробнее")
                     )
-            adapter.submitList(list)
         }
+        adapter.submitList(list)
     }
 
     private fun applyListeners() {

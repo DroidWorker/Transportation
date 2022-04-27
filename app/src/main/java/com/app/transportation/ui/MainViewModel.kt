@@ -103,6 +103,11 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
         updateFilterThirdLevelCategories(categoryId)
     }
+    fun getCategoryOrders(categoryId: Int) = viewModelScope.launch(Dispatchers.IO) {
+            updateOrders(true, categoryId)
+
+        updateFilterThirdLevelCategories(categoryId)
+    }
 
     private suspend fun updateAdverts(
         updateCache: Boolean = false,
@@ -188,40 +193,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     fun clearCachedAdverts() = viewModelScope.launch(Dispatchers.IO) {
         cachedAdvertsSF.tryEmit(emptyList())
     }
-
-    /*fun updateAdvertInfo(id: Int) = viewModelScope.launch(Dispatchers.IO) {
-        when (val result = repository.getAdvertInfo(id.toString())) {
-            is AdvertInfoResponse.Success -> {
-                val advert = result.run {
-                    Advert(
-                        id = id,
-                        viewType = 0,
-                        categoryId = categoryId,
-                        category = category,
-
-                    )
-                }
-            }
-            is AdvertInfoResponse.Failure -> Unit
-        }
-    }*/
-
-    /*fun getOrders() = viewModelScope.launch(Dispatchers.IO) {
-        (repository.getOrderList() as? OrderListResponse.Success)?.let { response ->
-            response.orderMap.map {
-                Order(
-                    id = it.key.toInt(),
-                    viewType = 0,
-                    categoryId = it.value.categoryId.toInt(),
-                    category = it.value.category,
-                    title = "",
-                    date = it.value.date,
-                    time = it.value.time,
-                    price = it.value.payment
-                )
-            }.let { cachedOrdersSF.tryEmit(it) }
-        }
-    }*/
 
     val profileFlow = repository.profileFlow()
         .flowOn(Dispatchers.IO)

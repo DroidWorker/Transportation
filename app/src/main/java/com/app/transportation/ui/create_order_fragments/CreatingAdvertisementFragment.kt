@@ -193,6 +193,7 @@ class CreatingAdvertisementFragment : Fragment() {
         if (mode==1)
             viewModel.addAdvertScreenCategoriesFlowFourthLevel(categoryId).collectWithLifecycle(viewLifecycleOwner) {
                 var data : ArrayList<String> = ArrayList()
+                data.add("выбрать из списка")
                 it.forEach{item ->
                     data.add(item.name)
                 }

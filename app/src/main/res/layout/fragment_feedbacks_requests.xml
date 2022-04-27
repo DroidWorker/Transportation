@@ -55,7 +55,7 @@
             android:layout_height="match_parent"
             android:fontFamily="@font/montserrat"
             android:gravity="center"
-            android:text="Мои заявки"
+            android:text="Мои заказы"
             android:textColor="@color/white"
             app:autoSizeMaxTextSize="16sp"
             app:autoSizeMinTextSize="10sp"

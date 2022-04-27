@@ -1,6 +1,7 @@
 package com.app.transportation.ui.adapters
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -50,7 +51,10 @@ class FeedbacksRequestsAdapter :
             location.text = item.subtitle
             date.text = item.dateTime.dateToString("dd/MM/yyyy")
             time.text = item.dateTime.dateToString("HH:mm")
-            price.text = item.price.toString() + " руб"
+            if (item.price!=0)
+                price.text = item.price.toString() + " руб"
+            else
+                price.visibility= View.GONE
         }
 
     }
