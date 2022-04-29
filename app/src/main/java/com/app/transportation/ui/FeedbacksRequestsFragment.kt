@@ -105,7 +105,7 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
                         var arrlist : ArrayList<FeedbackRequest> = ArrayList()
                         viewModel.ordersSF.collectWithLifecycle(viewLifecycleOwner){
                             it.toList().forEach{ order ->
-                                arrlist.add(FeedbackRequest((order.id).toLong(), 0, order.title, order.toLocation, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), 0))
+                                arrlist.add(FeedbackRequest((order.id).toLong(), 0, order.title, order.toCity+" "+order.toRegion+" "+order.toPlace, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), 0))
                             }
                             list =arrlist.toList()
                             adapter.submitList(list)

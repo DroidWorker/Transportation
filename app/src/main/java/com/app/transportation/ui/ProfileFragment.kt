@@ -55,6 +55,7 @@ class ProfileFragment : Fragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
+
         viewModel.updateProfile()
 
         setupAdapters()
@@ -68,8 +69,29 @@ class ProfileFragment : Fragment() {
         b.profileRV.adapter = profileAdapter
 
         profileAdapter.apply {
-            onEditClick = {
+            onEditClick = {realId : Int, categoryId : Int ->
+                var destinationRes = R.id.creatingOrderFragment
 
+                if (viewModel.isCustomer.value == false) {
+                    destinationRes = R.id.creatingAdvertisementFragment
+                } else {
+                    when (categoryId) {
+                        15,16,17,159,160 -> destinationRes = R.id.creatingOrderFragment
+                        18,19,20,157,158 -> destinationRes = R.id.creatingOrderFragment
+                        5,6,7,35,36,37,38,39,40,41,42,43,44,45,46 -> {
+                            if (categoryId == 5)
+                                destinationRes = R.id.creatingOrderFragment
+                            else if (categoryId == 6 || categoryId == 7 || categoryId == 37 || categoryId == 38 || categoryId == 39 || categoryId == 40 || categoryId == 41)
+                                destinationRes = R.id.creatingOrderAtFragment
+                            else if (categoryId == 45 || categoryId == 44)
+                                destinationRes = R.id.creatingOrderPFragment
+                        }
+                        47,48 -> destinationRes = R.id.creatingOrderPFragment
+                        9,10,11,126,127,128,129,130,131,132,133,134,135,136,137 -> destinationRes = R.id.creatingOrderPFragment
+                        21,22,23 -> destinationRes = R.id.creatingOrderRisFragment
+                    }
+                }
+                findNavController().navigate(destinationRes, bundleOf("id" to realId, "isEdit" to 1))
             }
             onDeleteClick = { isOrder: Boolean, id: Int, position: Int ->
                 viewModel.deleteAdvert(isOrder, id, position)

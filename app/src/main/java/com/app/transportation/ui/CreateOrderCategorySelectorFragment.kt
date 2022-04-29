@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast.LENGTH_LONG
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -17,6 +18,7 @@ import com.app.transportation.data.database.entities.SelectorCategory
 import com.app.transportation.databinding.FragmentCreateOrderCategorySelectorBinding
 import com.app.transportation.ui.adapters.AdvertisementsAdapter
 import com.app.transportation.ui.adapters.CreateOrderCategorySelectorAdapter
+import com.google.android.material.snackbar.Snackbar
 
 class CreateOrderCategorySelectorFragment : Fragment() {
 
@@ -43,7 +45,12 @@ class CreateOrderCategorySelectorFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         (activity as? MainActivity)?.apply {
-            b.title.text = "Профиль"
+            if(mode==3) {
+                b.title.text = "Выберите категорию"
+                Snackbar.make(view, "Выберите категорию", Snackbar.LENGTH_LONG).show()
+            }
+            else
+                b.title.text = "Профиль"
             b.toolbars.isVisible = true
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }

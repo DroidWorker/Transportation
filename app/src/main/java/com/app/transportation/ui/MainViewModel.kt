@@ -171,8 +171,12 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     title = entry.value.description,
                     date = entry.value.date,
                     time = entry.value.time,
-                    fromLocation = "${entry.value.fromRegion}, ${entry.value.fromCity}, ${entry.value.fromPlace}",
-                    toLocation = "${entry.value.toRegion}, ${entry.value.toCity}, ${entry.value.toPlace}",
+                    fromCity = "${entry.value.fromCity}",
+                    fromRegion = "${entry.value.fromRegion}",
+                    fromPlace = "${entry.value.fromPlace}",
+                    toCity = "${entry.value.toCity}",
+                    toRegion = "${entry.value.toRegion}",
+                    toPlace = "${entry.value.toPlace}",
                     payment = entry.value.payment,
                     description = entry.value.description,
                     photo = entry.value.photo
@@ -225,7 +229,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                             viewType = 2,
                             title = advert.title + " (заказ)",
                             realId = advert.id,
-                            categoryId = advert.categoryId
+                            categoryId = advert.subcategoryId//advert.categoryId
                         )
                     )
                 }
@@ -239,7 +243,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                             viewType = 2,
                             title = advert.title,
                             realId = advert.id,
-                            categoryId = advert.categoryId
+                            categoryId = advert.subcategoryId//advert.categoryId
                         )
                     )
                 }
@@ -254,6 +258,36 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             send(list)
         }
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(0L, 0L), 1)
+
+    val userOrdersAdvertsFlow = channelFlow {
+        advertCategoriesFlow.collectLatest { advertCats ->
+            val firstLevelCatsDeferred = async { advertCats.filter { it.level == 1 } }
+            //val thirdLevelCatsDeferred = advertCats.filter { it.level == 3 }
+
+            val list = mutableListOf<Advert>()
+            var index = 0L
+            firstLevelCatsDeferred.await().forEach {
+                getOrders()?.filter { order ->
+                    secondLevelCategoriesFlow.value
+                        .find { cat -> cat.id == order.categoryId }?.parentId == it.id
+                }?.forEach { advert ->
+                    list.add(
+                        advert
+                    )
+                }
+                getAdverts()?.filter { order ->
+                    secondLevelCategoriesFlow.value
+                        .find { cat -> cat.id == order.categoryId }?.parentId == it.id
+                }?.forEach { advert ->
+                    list.add(
+                        advert
+                    )
+                }
+            }
+            send(list)
+        }
+    }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(0L, 0L), 1)
+
 
     fun updateProfile() = viewModelScope.launch(Dispatchers.IO) {
         //messageEvent.tryEmit("Обновление профиля...")
@@ -384,6 +418,23 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
     }
 
+    fun editAdvert(title: String,
+                   price: String,
+                   description: String,
+                   categoryId: String,
+                   photos: List<String>)=
+        viewModelScope.launch(Dispatchers.IO) {
+            when (val result = repository.editAdvert(title, price, description, categoryId, photos)) {
+                is AdvertCreateResponse.Success -> {
+                    if (result.id != null)
+                        messageEvent.tryEmit("Объявление добавлено!")
+                }
+                is AdvertCreateResponse.Failure -> {
+                    messageEvent.tryEmit("Ошибка при создании объявления!")
+                }
+            }
+        }
+
     fun createOrder(
         category: String,
         fromCity: String,
@@ -399,6 +450,47 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         payment: String
     ) = viewModelScope.launch(Dispatchers.IO) {
         val result = repository.createOrder(
+            category = category,
+            fromCity = fromCity,
+            fromRegion = fromRegion,
+            fromPlace = fromPlace,
+            fromDateTime = fromDateTime,
+            toCity = toCity,
+            toRegion = toRegion,
+            toPlace = toPlace,
+            description = description,
+            name = name,
+            phone = phone,
+            payment = payment
+        )
+        when (result) {
+            is AdvertCreateResponse.Success -> {
+                if (result.id != null)
+                    messageEvent.tryEmit("Объявление добавлено!")
+            }
+            is AdvertCreateResponse.Failure -> {
+                messageEvent.tryEmit("Ошибка при создании объявления!")
+            }
+        }
+    }
+
+    fun editOrder(
+        orderId: String,
+        category: String?,
+        fromCity: String?,
+        fromRegion: String?,
+        fromPlace: String?,
+        fromDateTime: String?,
+        toCity: String?,
+        toRegion: String?,
+        toPlace: String?,
+        description: String?,
+        name: String?,
+        phone: String?,
+        payment: String?
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val result = repository.editOrder(
+            orderId = orderId,
             category = category,
             fromCity = fromCity,
             fromRegion = fromRegion,

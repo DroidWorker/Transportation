@@ -10,6 +10,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
+import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.core.currentTime
 import com.app.transportation.core.formatDate
 import com.app.transportation.core.millisToString
@@ -19,6 +20,7 @@ import com.app.transportation.ui.MainViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
+import kotlinx.coroutines.flow.forEach
 
 class CreatingOrderAtFragment : Fragment() {
 
@@ -28,7 +30,7 @@ class CreatingOrderAtFragment : Fragment() {
     private val viewModel by activityViewModels<MainViewModel>()
 
     private val categoryId by lazy { arguments?.getInt("id", 1) ?: 1 }
-
+    private val isEdit by lazy {arguments?.getInt("isEdit", 0) ?: 0}
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -48,8 +50,26 @@ class CreatingOrderAtFragment : Fragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
+        if (isEdit==1) {
+            b.orderCreationTitle.text = "Редактирование заказа"
+            b.order.text = "Применить"
+
+            viewModel.userOrdersAdvertsFlow.collectWithLifecycle(this) {
+                it.forEach { item ->
+                    if (item.id==categoryId) {
+                        b.selectDateTime.setText(item.time)
+                        b.toCity.setText(item.toCity)
+                        b.toArea.setText(item.toRegion)
+                        b.toPlace.setText(item.toPlace)
+                        b.comment.setText(item.description)
+                    }
+                }
+            }
+        }
+
         b.toName.setText(viewModel.profileFlow.value?.name)
         b.toTelNumber.setText(viewModel.profileFlow.value?.telNumber)
+        b.toCity.setText(viewModel.profileFlow.value?.cityArea)
 
         applyListeners()
     }
@@ -60,31 +80,49 @@ class CreatingOrderAtFragment : Fragment() {
         }
 
         b.order.setOnClickListener {
-            if (!allFieldsFilled()) {
-                viewModel.messageEvent.tryEmit("Заполнены не все поля!")
-                return@setOnClickListener
-            }
+            if (isEdit==0) {
+                if (!allFieldsFilled()) {
+                    viewModel.messageEvent.tryEmit("Заполнены не все поля!")
+                    return@setOnClickListener
+                }
 
-            var paymentMethod = "cash"
-            when(b.paymentMethod.selectedItemId){
-                1 as Long -> paymentMethod="cash"
-                2 as Long -> paymentMethod="card"
-            }
+                var paymentMethod = "cash"
+                when (b.paymentMethod.selectedItemId) {
+                    1 as Long -> paymentMethod = "cash"
+                    2 as Long -> paymentMethod = "card"
+                }
 
-            viewModel.createOrder(
-                category = categoryId.toString(),
-                fromCity = "",
-                fromRegion = "",
-                fromPlace = "",
-                fromDateTime = viewModel.dateTime,
-                description = b.comment.text.toString(),
-                toCity = b.toCity.text.toString(),
-                toRegion = b.toArea.text.toString(),
-                toPlace = b.toPlace.text.toString(),
-                name = b.toName.text.toString(),
-                phone = b.toTelNumber.text.toString(),
-                payment = paymentMethod
-            )
+                viewModel.createOrder(
+                    category = categoryId.toString(),
+                    fromCity = "",
+                    fromRegion = "",
+                    fromPlace = "",
+                    fromDateTime = viewModel.dateTime,
+                    description = b.comment.text.toString(),
+                    toCity = b.toCity.text.toString(),
+                    toRegion = b.toArea.text.toString(),
+                    toPlace = b.toPlace.text.toString(),
+                    name = b.toName.text.toString(),
+                    phone = b.toTelNumber.text.toString(),
+                    payment = paymentMethod
+                )
+            }
+            else{//if edit clicked
+                viewModel.editOrder(
+                    orderId = categoryId.toString(),
+                    category = categoryId.toString(),
+                    description = if(b.comment.text.isNotBlank()) b.comment.text.toString() else null,
+                    fromCity = null,
+                    fromRegion = null,
+                    fromPlace = null,
+                    fromDateTime = if(viewModel.dateTime != "") viewModel.dateTime else null,
+                    toCity = if(b.toCity.text.isNotBlank()) b.toCity.text.toString() else null,
+                    toRegion = if(b.toArea.text.isNotBlank()) b.toArea.text.toString() else null,
+                    toPlace = if(b.toPlace.text.isNotBlank()) b.toPlace.text.toString() else null,
+                    name = if(b.toName.text.isNotBlank()) b.toName.text.toString() else null,
+                    phone = if (b.toTelNumber.text.isNotBlank()) b.toTelNumber.text.toString() else null,
+                    payment = "cash")
+            }
 
             findNavController().navigateUp()
         }

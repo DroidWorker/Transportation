@@ -298,6 +298,36 @@ class Repository(private val dao: MainDao) : KoinComponent {
         json.decodeFromString<AdvertCreateResponse.Success>(responseBody)
     }.getOrElse { AdvertCreateResponse.Failure(it.stackTraceToString()) }.also { println("it= $it") }
 
+    suspend fun editAdvert(
+        title: String,
+        price: String,
+        description: String,
+        categoryId: String,
+        photos: List<String>
+    ): AdvertCreateResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/advert_update",
+                formParameters = Parameters.build {
+                    if (title!=null)append("title", title)
+                    if (price!=null)append("price", price)
+                    if (description!=null)append("description", description)
+                    if (categoryId!=null)append("category", categoryId)
+                    if (photos!=null)append("image", "[${photos.joinToString()}]")
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        println("responseBody = $responseBody")
+
+        json.decodeFromString<AdvertCreateResponse.Success>(responseBody)
+    }.getOrElse { AdvertCreateResponse.Failure(it.stackTraceToString()) }.also { println("it= $it") }
+
     suspend fun getAdvertList(category: String? = null): AdvertListResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AdvertListResponse.Failure("token is null")
         val response: HttpResponse =
@@ -446,6 +476,49 @@ class Repository(private val dao: MainDao) : KoinComponent {
                     append("name", name)
                     append("phone", phone)
                     append("payment", payment)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        json.decodeFromString<AdvertCreateResponse.Success>(responseBody)
+    }.getOrElse { AdvertCreateResponse.Failure(it.stackTraceToString()) }
+
+    suspend fun editOrder(
+        orderId: String,
+        category: String?,
+        fromCity: String?,
+        fromRegion: String?,
+        fromPlace: String?,
+        fromDateTime: String?,
+        toCity: String?,
+        toRegion: String?,
+        toPlace: String?,
+        description: String?,
+        name: String?,
+        phone: String?,
+        payment: String?
+    ): AdvertCreateResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/order_update",
+                formParameters = Parameters.build {
+                    append("id", orderId)
+                    if(category!=null)append("category", category)
+                    if(fromCity!=null)append("from_city", fromCity)
+                    if(fromRegion!=null)append("from_region", fromRegion)
+                    if(fromPlace!=null)append("from_place", fromPlace)
+                    if(fromDateTime!=null)append("from_datetime", fromDateTime)
+                    if(toCity!=null)append("to_city", toCity)
+                    if(toRegion!=null)append("to_region", toRegion)
+                    if(toPlace!=null)append("to_place", toPlace)
+                    if(description!=null)append("description", description)
+                    if(name!=null)append("name", name)
+                    if(phone!=null)append("phone", phone)
+                    if(payment!=null)append("payment", payment)
                 }
             ) {
                 headers { append("X-Access-Token", token) }

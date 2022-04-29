@@ -56,8 +56,8 @@ class OrderDetailsFragment : Fragment() {
         viewModel.cachedOrder.collectWithLifecycle(viewLifecycleOwner) { advert ->
             advert?.apply {
                 b.orderName.text = title
-                b.fromLocation.text = fromLocation
-                b.toLocation.text = toLocation
+                b.fromLocation.text = fromCity+" "+fromRegion+ " "+fromPlace
+                b.toLocation.text = toCity+""+toRegion+""+toPlace
                 b.date.text = date
                 b.time.text = time
                 b.comment.text = title

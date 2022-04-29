@@ -13,7 +13,11 @@ data class Advert(
     var price: String? = null,
     var description: String = "",
     var photo: List<String> = emptyList(),
-    var fromLocation: String = "",
-    var toLocation: String = "",
+    var fromCity: String = "",
+    var fromRegion: String = "",
+    var fromPlace: String = "",
+    var toCity: String = "",
+    var toRegion: String = "",
+    var toPlace: String = "",
     var payment: String = ""
 )
