@@ -10,10 +10,11 @@ import com.app.transportation.data.database.entities.SelectorCategory
 import com.app.transportation.databinding.EmptyItemBinding
 import com.app.transportation.databinding.ItemAdvertCategoryTextItemBinding
 import com.app.transportation.databinding.ItemCategoryBinding
+import com.app.transportation.databinding.ItemCategoryImageBinding
 
 class CreateOrderCategorySelectorAdapter :
     ListAdapter<SelectorCategory, RecyclerView.ViewHolder>(DiffCallback()) {
-    var mode = 0//0-call from cabinet 1-call from main screen 2-show 4level categories
+    var mode = 0//0-call from cabinet 1-call from main screen 2-show 4level categories 4-CategoryImageAdapter
     var onClick: ((Int, Int) -> Unit)? = null
 
     var viewState : HashMap<Int, Boolean> = HashMap<Int, Boolean>()
@@ -25,8 +26,10 @@ class CreateOrderCategorySelectorAdapter :
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
 
         val layoutInflater = LayoutInflater.from(parent.context)
-        return if (viewType == 2)
+        return if (viewType == 2&&mode!=4)
             CategoryViewHolder(ItemCategoryBinding.inflate(layoutInflater, parent, false))
+        else if(viewType==2&&mode==4)
+            CategoryImageViewHolder(ItemCategoryImageBinding.inflate(layoutInflater, parent, false))
         else if(viewType == 3&&mode!=2)
             TextViewHolder(ItemAdvertCategoryTextItemBinding.inflate(layoutInflater, parent, false))
         else if (mode!=2)
@@ -39,8 +42,12 @@ class CreateOrderCategorySelectorAdapter :
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) =
         with(getItem(position)) {
-            if (level == 2)
+            if (level == 2&&mode!=4)
                 (holder as CategoryViewHolder).bind(this)
+            else if(level == 2&& mode==4) {
+                parentIds.add(parentId)
+                (holder as CategoryImageViewHolder).bind(this)
+            }
             else if(level == 3&&mode!=2)
                 (holder as TextViewHolder).bind(this)
             else if(mode!=2){
@@ -68,7 +75,7 @@ class CreateOrderCategorySelectorAdapter :
             //root.setOnClickListener { onClick?.invoke(item.realId) }
             root.setOnClickListener { onClick?.invoke(item.parentId, item.realId) }
             text.text = item.name
-            if (mode==1&&viewState[item.parentId]==false){
+            if (mode==1||mode==4&&viewState[item.parentId]==false){
                 text.visibility=View.GONE
             }
             else
@@ -100,6 +107,23 @@ class CreateOrderCategorySelectorAdapter :
                 })
             }
             binding.button.text = item.name
+        }
+    }
+
+    inner class CategoryImageViewHolder(private  val binding: ItemCategoryImageBinding):
+    RecyclerView.ViewHolder(binding.root){
+
+        fun bind(item: SelectorCategory){
+            if (mode==4&&!viewState.containsKey(item.realId)){
+                viewState[item.realId] = false
+            }
+            if (mode==4){
+                binding.frameLayout.setOnClickListener(View.OnClickListener {
+                    viewState[item.realId] = viewState[item.realId] != true
+                    notifyDataSetChanged()
+                })
+            }
+            binding.category.text = item.name
         }
     }
 

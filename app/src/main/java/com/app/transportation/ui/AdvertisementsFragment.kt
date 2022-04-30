@@ -95,7 +95,7 @@ class AdvertisementsFragment : Fragment() {
             }
         } else {//if customer
             b.servicesRV.adapter = adapter1
-            adapter1.mode=1
+            adapter1.mode=4
             adapter1.onClick = { i: Int, i1: Int ->
                 var ParentId: Int = i
                 var ItemId: Int = i1

@@ -24,7 +24,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:scaleType="centerCrop"
-            app:srcCompat="@drawable/card_gradient_dark" />
+            app:srcCompat="@drawable/card_gradient" />
     </FrameLayout>
 
     <LinearLayout
