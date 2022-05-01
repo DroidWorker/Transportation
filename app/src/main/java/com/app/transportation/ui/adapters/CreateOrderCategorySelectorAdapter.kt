@@ -1,18 +1,26 @@
 package com.app.transportation.ui.adapters
 
+import com.app.transportation.R
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.res.Resources
+import android.content.res.TypedArray
+import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.app.transportation.MainActivity
 import com.app.transportation.data.database.entities.SelectorCategory
 import com.app.transportation.databinding.EmptyItemBinding
 import com.app.transportation.databinding.ItemAdvertCategoryTextItemBinding
 import com.app.transportation.databinding.ItemCategoryBinding
 import com.app.transportation.databinding.ItemCategoryImageBinding
 
-class CreateOrderCategorySelectorAdapter :
+
+ class CreateOrderCategorySelectorAdapter :
     ListAdapter<SelectorCategory, RecyclerView.ViewHolder>(DiffCallback()) {
     var mode = 0//0-call from cabinet 1-call from main screen 2-show 4level categories 4-CategoryImageAdapter
     var onClick: ((Int, Int) -> Unit)? = null
@@ -22,9 +30,19 @@ class CreateOrderCategorySelectorAdapter :
 
     var openID = 0//used with 4level categories
 
+    lateinit var ctx : Context
+     var imgTableIds : HashMap<Int, Int> = HashMap()
+     init {
+         imgTableIds.put(4,0)
+         imgTableIds.put(8,1)
+         imgTableIds.put(12,2)
+         imgTableIds.put(13,3)
+         imgTableIds.put(14,4)
+         imgTableIds.put(24,5)
+     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-
+ctx = parent.getContext()
         val layoutInflater = LayoutInflater.from(parent.context)
         return if (viewType == 2&&mode!=4)
             CategoryViewHolder(ItemCategoryBinding.inflate(layoutInflater, parent, false))
@@ -75,7 +93,7 @@ class CreateOrderCategorySelectorAdapter :
             //root.setOnClickListener { onClick?.invoke(item.realId) }
             root.setOnClickListener { onClick?.invoke(item.parentId, item.realId) }
             text.text = item.name
-            if (mode==1||mode==4&&viewState[item.parentId]==false){
+            if ((mode==1||mode==4)&&viewState[item.parentId]==false){
                 text.visibility=View.GONE
             }
             else
@@ -113,6 +131,7 @@ class CreateOrderCategorySelectorAdapter :
     inner class CategoryImageViewHolder(private  val binding: ItemCategoryImageBinding):
     RecyclerView.ViewHolder(binding.root){
 
+        @SuppressLint("ResourceType")
         fun bind(item: SelectorCategory){
             if (mode==4&&!viewState.containsKey(item.realId)){
                 viewState[item.realId] = false
@@ -123,6 +142,9 @@ class CreateOrderCategorySelectorAdapter :
                     notifyDataSetChanged()
                 })
             }
+            var imgs : TypedArray = ctx.getResources().obtainTypedArray(R.array.myDrawables);
+
+            binding.catimage.setImageResource(imgs.getResourceId(imgTableIds.getValue(item.realId), 0))
             binding.category.text = item.name
         }
     }

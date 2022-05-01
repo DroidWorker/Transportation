@@ -12,7 +12,7 @@
         android:layout_height="match_parent">
 
         <ImageView
-            android:id="@+id/ic_jo"
+            android:id="@+id/catimage"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="fitXY"

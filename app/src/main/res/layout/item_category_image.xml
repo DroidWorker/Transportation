@@ -17,11 +17,11 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
-            android:id="@+id/ic_jo"
+            android:id="@+id/catimage"
             android:layout_width="match_parent"
             android:layout_height="100dp"
             android:scaleType="centerCrop"
-            app:srcCompat="@drawable/ic_job_item" />
+            app:srcCompat="@drawable/food" />
 
         <ImageView
             android:id="@+id/cardfilter"

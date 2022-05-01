@@ -70,7 +70,6 @@ class CreatingOrderAtFragment : Fragment() {
         b.toName.setText(viewModel.profileFlow.value?.name)
         b.toTelNumber.setText(viewModel.profileFlow.value?.telNumber)
         b.toCity.setText(viewModel.profileFlow.value?.cityArea)
-
         applyListeners()
     }
 

@@ -128,13 +128,14 @@ class MainFragment : Fragment() {
     private fun applyRVAdapter() {
         b.serviceTypesRV.addItemDecoration(RVDecoration(25, true))
         b.serviceTypesRV.adapter = serviceTypeAdapter
-
         serviceTypeAdapter.lastCheckedCategoryId = lastCheckedCategoryId
         serviceTypeAdapter.onClick = {
             //TODO some refresh things in this fragment
             lastCheckedCategoryId = this
             serviceTypeAdapter.lastCheckedCategoryId = this
             serviceTypeAdapter.notifyDataSetChanged()
+            findNavController().navigate(R.id.advertisementsFragment,
+                bundleOf("categoryId" to lastCheckedCategoryId, "type" to 0, "clickedItemId" to this))
             //viewModel.serviceTypeClicked(this)
         }
     }

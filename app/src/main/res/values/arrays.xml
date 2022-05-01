@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="myDrawables">
+        <item id="4">@drawable/services_offers</item>
+        <item id="8">@drawable/constructions</item>
+        <item id="12">@drawable/passtransp</item>
+        <item id="13">@drawable/trucking</item>
+        <item id="14">@drawable/specequipment</item>
+        <item id="24">@drawable/food</item>
+    </array>
+</resources>

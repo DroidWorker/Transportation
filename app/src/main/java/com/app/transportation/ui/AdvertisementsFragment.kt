@@ -15,6 +15,7 @@ import com.app.transportation.R
 import com.app.transportation.core.collect
 import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.core.repeatOnLifecycle
+import com.app.transportation.data.database.entities.SelectorCategory
 import com.app.transportation.data.database.entities.ServiceType
 import com.app.transportation.databinding.FragmentAdvertisementsBinding
 import com.app.transportation.databinding.PopupMenuServicesFilterBinding
@@ -38,7 +39,7 @@ class AdvertisementsFragment : Fragment() {
 
     private val categoryId by lazy { arguments?.getInt("categoryId") ?: 0 }
     private val type by lazy { arguments?.getInt("type") ?: 0 }//0-customer 1-seller
-
+private val orderItemShouldOpenId by lazy { arguments?.getInt("clickedItemId") ?: -1 }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -96,6 +97,7 @@ class AdvertisementsFragment : Fragment() {
         } else {//if customer
             b.servicesRV.adapter = adapter1
             adapter1.mode=4
+
             adapter1.onClick = { i: Int, i1: Int ->
                 var ParentId: Int = i
                 var ItemId: Int = i1
@@ -127,7 +129,17 @@ class AdvertisementsFragment : Fragment() {
                 adapter1.submitList(it)
             }*/
             viewModel.addAdvertScreenCategoriesFlowAll().collectWithLifecycle(viewLifecycleOwner) {
-                adapter1.submitList(it)
+                var list : ArrayList<SelectorCategory> = ArrayList()
+                if (orderItemShouldOpenId!=0){
+                    it.forEach{ item ->
+                        if (item.realId==orderItemShouldOpenId||item.parentId==orderItemShouldOpenId){
+                            list.add(item)
+                        }
+                    }
+                    adapter1.submitList(list.toList())
+                }
+                else
+                    adapter1.submitList(it)
             }
             b.createOrder.visibility = View.VISIBLE
         }
