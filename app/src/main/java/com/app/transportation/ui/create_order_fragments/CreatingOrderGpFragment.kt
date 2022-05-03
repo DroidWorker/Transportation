@@ -1,15 +1,18 @@
 package com.app.transportation.ui.create_order_fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.app.transportation.MainActivity
 import com.app.transportation.R
 import com.app.transportation.core.collectWithLifecycle
+import com.app.transportation.core.repeatOnLifecycle
 import com.app.transportation.databinding.FragmentCreatingOrderGpBinding
 import com.app.transportation.ui.MainViewModel
 
@@ -23,11 +26,14 @@ class CreatingOrderGpFragment : Fragment() {
 
     private val viewModel by activityViewModels<MainViewModel>()
 
+    private var ctx : Context? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        ctx = activity
         binding = FragmentCreatingOrderGpBinding.inflate(inflater, container, false)
         return b.root
     }
@@ -63,7 +69,13 @@ class CreatingOrderGpFragment : Fragment() {
 
         b.toName.setText(viewModel.profileFlow.value?.name)
         b.toTelNumber.setText(viewModel.profileFlow.value?.telNumber)
-        b.toCity.setText(viewModel.profileFlow.value?.cityArea)
+        var strings = viewModel.profileFlow.value?.cityArea?.split("[","/","*","-","+"," ","&","$","#","@","!","^","&","\\","|","]")
+        b.fromCity.setText(strings?.get(0))
+        b.toCity.setText(strings?.get(0))
+        if(strings?.size!! >1) {
+            b.toArea.setText(strings?.get(strings?.size-1))
+            b.fromArea.setText(strings?.get(strings?.size-1))
+        }
 
         applyInitialData()
 
@@ -136,6 +148,23 @@ class CreatingOrderGpFragment : Fragment() {
         b.addGarageItems.setOnClickListener {
 
         }*/
+    }
+
+    private fun applyCollectors() = viewLifecycleOwner.repeatOnLifecycle {
+        if (1==1)
+            viewModel.addAdvertScreenCategoriesFlowFourthLevel(id.toInt()).collectWithLifecycle(viewLifecycleOwner) {
+                var data : ArrayList<String> = ArrayList()
+                data.add("выбрать из списка")
+                it.forEach{item ->
+                    data.add(item.name)
+                }
+                val adapter: ArrayAdapter<String> = ArrayAdapter<String>(ctx!!, android.R.layout.simple_spinner_item, data)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                b.spinnerSelectCategory3.adapter = adapter
+
+                if (data.size>1)
+                    b.spinnerSelectCategory3.visibility = View.VISIBLE
+            }
     }
 
     override fun onDestroyView() {

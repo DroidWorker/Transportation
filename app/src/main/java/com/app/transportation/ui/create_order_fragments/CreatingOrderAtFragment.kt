@@ -1,19 +1,20 @@
 package com.app.transportation.ui.create_order_fragments
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
+import android.widget.ImageView
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
-import com.app.transportation.core.collectWithLifecycle
-import com.app.transportation.core.currentTime
-import com.app.transportation.core.formatDate
-import com.app.transportation.core.millisToString
+import com.app.transportation.core.*
 import com.app.transportation.databinding.FragmentCreatingOrderAtBinding
 import com.app.transportation.databinding.FragmentCreatingOrderPpAndKuBinding
 import com.app.transportation.ui.MainViewModel
@@ -29,6 +30,8 @@ class CreatingOrderAtFragment : Fragment() {
 
     private val viewModel by activityViewModels<MainViewModel>()
 
+    private var ctx : Context? = null
+
     private val categoryId by lazy { arguments?.getInt("id", 1) ?: 1 }
     private val isEdit by lazy {arguments?.getInt("isEdit", 0) ?: 0}
 
@@ -37,6 +40,7 @@ class CreatingOrderAtFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        ctx = activity
         binding = FragmentCreatingOrderAtBinding.inflate(inflater, container, false)
         return b.root
     }
@@ -69,8 +73,13 @@ class CreatingOrderAtFragment : Fragment() {
 
         b.toName.setText(viewModel.profileFlow.value?.name)
         b.toTelNumber.setText(viewModel.profileFlow.value?.telNumber)
-        b.toCity.setText(viewModel.profileFlow.value?.cityArea)
+        var strings = viewModel.profileFlow.value?.cityArea?.split("[","/","*","-","+"," ","&","$","#","@","!","^","&","\\","|","]")
+        b.toCity.setText(strings?.get(0))
+        if(strings?.size!! >1) {
+            b.toArea.setText(strings?.get(strings?.size-1))
+        }
         applyListeners()
+        applyCollectors()
     }
 
     private fun applyListeners() {
@@ -125,6 +134,23 @@ class CreatingOrderAtFragment : Fragment() {
 
             findNavController().navigateUp()
         }
+    }
+
+    private fun applyCollectors() = viewLifecycleOwner.repeatOnLifecycle {
+        if (1==1)
+            viewModel.addAdvertScreenCategoriesFlowFourthLevel(categoryId).collectWithLifecycle(viewLifecycleOwner) {
+                var data : ArrayList<String> = ArrayList()
+                data.add("выбрать из списка")
+                it.forEach{item ->
+                    data.add(item.name)
+                }
+                val adapter: ArrayAdapter<String> = ArrayAdapter<String>(ctx!!, android.R.layout.simple_spinner_item, data)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                b.spinnerSelectCategory2.adapter = adapter
+
+                if (data.size>1)
+                    b.spinnerSelectCategory2.visibility = View.VISIBLE
+            }
     }
 
     private fun allFieldsFilled(): Boolean {

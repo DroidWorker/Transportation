@@ -69,10 +69,10 @@ class ProfileFragment : Fragment() {
         b.profileRV.adapter = profileAdapter
 
         profileAdapter.apply {
-            onEditClick = {realId : Int, categoryId : Int ->
+            onEditClick = {title : String, realId : Int, categoryId : Int ->
                 var destinationRes = R.id.creatingOrderFragment
 
-                if (viewModel.isCustomer.value == false) {
+                if (!title.contains("(заказ)")) {
                     destinationRes = R.id.creatingAdvertisementFragment
                 } else {
                     when (categoryId) {

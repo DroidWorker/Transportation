@@ -16,7 +16,7 @@ class ProfileAdapter :
     var mode = 0;
 
     var onClick: (Int.() -> Unit)? = null
-    var onEditClick: ((realId : Int, advId : Int) -> Unit)? = null
+    var onEditClick: ((title : String, realId : Int, advId : Int) -> Unit)? = null
     var onDeleteClick: ((isOrder: Boolean, id: Int, position: Int) -> Unit)? = null
     var onAddItemClick: (Int.() -> Unit)? = null
 
@@ -70,7 +70,7 @@ class ProfileAdapter :
             title.text = item.title
 
             root.setOnClickListener { item.realId?.let { id -> onClick?.invoke(id) } }
-            edit.setOnClickListener { item.realId?.let { id -> onEditClick?.invoke(item.realId, item.categoryId!!) } }
+            edit.setOnClickListener { item.realId?.let { id -> onEditClick?.invoke(item.title, item.realId, item.categoryId!!) } }
             delete.setOnClickListener {
                 it.isEnabled = false
                 item.realId?.let { id ->
