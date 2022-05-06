@@ -380,6 +380,26 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }
     }.getOrElse { OrderListResponse.Failure(it.stackTraceToString()) }
 
+    suspend fun getAdvertFullList(): AdvertListResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching AdvertListResponse.Failure("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/advert_list_common",
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        kotlin.runCatching {
+            val map = json.decodeFromString<Map<String, AdvertDTO>>(responseBody)
+            AdvertListResponse.Success(map)
+        }.getOrElse {
+            println("it alllllllll = $it")
+            json.decodeFromString<AdvertListResponse.Failure>(responseBody)
+        }
+    }.getOrElse { AdvertListResponse.Failure(it.stackTraceToString()) }
+
     suspend fun getAdvertInfo(id: String): AdvertInfoResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AdvertInfoResponse.Failure("token is null")
         val response: HttpResponse =

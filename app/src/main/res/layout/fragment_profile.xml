@@ -110,7 +110,7 @@
                     android:gravity="start|center_vertical"
                     android:hint="Номер телефона"
                     android:importantForAutofill="no"
-                    android:inputType="number"
+                    android:inputType="numberSigned|number|numberDecimal"
                     android:textColor="@color/secondary_color"
                     android:textCursorDrawable="@null"
                     android:textSize="16sp" />
@@ -200,7 +200,7 @@
                     android:backgroundTint="@color/transparent"
                     android:fontFamily="@font/montserrat"
                     android:gravity="start|center_vertical"
-                    android:hint="Город/область"
+                    android:hint="Город, область"
                     android:importantForAutofill="no"
                     android:inputType="text"
                     android:textColor="@color/secondary_color"

@@ -13,7 +13,6 @@ import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
 import com.app.transportation.core.*
-import com.app.transportation.databinding.FragmentCreatingOrderPpAndKuBinding
 import com.app.transportation.databinding.FragmentCreatingOrderRisBinding
 import com.app.transportation.ui.MainViewModel
 import com.google.android.material.datepicker.MaterialDatePicker

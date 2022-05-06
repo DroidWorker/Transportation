@@ -1,11 +1,11 @@
 package com.app.transportation.ui
 
 import android.os.Bundle
-import android.util.Log
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
@@ -18,6 +18,7 @@ import com.app.transportation.core.collect
 import com.app.transportation.core.repeatOnLifecycle
 import com.app.transportation.databinding.FragmentProfileBinding
 import com.app.transportation.ui.adapters.ProfileAdapter
+import com.google.android.material.snackbar.Snackbar
 import com.redmadrobot.inputmask.MaskedTextChangedListener
 
 class ProfileFragment : Fragment() {
@@ -34,8 +35,11 @@ class ProfileFragment : Fragment() {
 
     //private var popupWindow: PopupWindow? = null
 
+    var bview : View? = null
+
     private val id by lazy { arguments?.getLong("id") ?: 0L }
 
+    var basePhone : String? =  ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -52,7 +56,7 @@ class ProfileFragment : Fragment() {
             b.toolbars.isVisible = true
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
-
+        bview = view
         super.onViewCreated(view, savedInstanceState)
 
 
@@ -112,7 +116,13 @@ class ProfileFragment : Fragment() {
                 b.login.text = login
 
                 b.nameET.setText(name)
-                b.telNumberET.setText(telNumber)
+                if (telNumber.contains("0000000")) {
+                    val numb: String = telNumber.replace("0000000", "*******")
+                    basePhone=numb
+                    b.telNumberET.setText(numb)
+                }
+                else
+                    b.telNumberET.setText(telNumber)
                 b.emailET.setText(email)
                 b.paymentCardET.setText(paymentCard)
                 b.cityAreaET.setText(cityArea)
@@ -134,7 +144,7 @@ class ProfileFragment : Fragment() {
             it.doAfterTextChanged { checkIfProfileChanged() }
         }
 
-        telNumberListener = MaskedTextChangedListener(
+       /* telNumberListener = MaskedTextChangedListener(
             "[0] [000] [000] [00] [00]",
             true, b.telNumberET, null,
             object : MaskedTextChangedListener.ValueListener {
@@ -146,8 +156,20 @@ class ProfileFragment : Fragment() {
                     checkIfProfileChanged()
                 }
             }
-        )
-        b.telNumberET.addTextChangedListener(telNumberListener)
+        )*/
+        b.telNumberET.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {
+            }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (!b.telNumberET.text.toString().equals(basePhone) && s?.matches("^[+]?[0-9]{0,13}\$".toRegex()) == false){
+                    b.telNumberET.setText(b.telNumberET.text?.substring(0, b.telNumberET.length()-1))
+                }
+            }
+        })
         b.telNumberET.onFocusChangeListener = telNumberListener
 
         paymentCardListener = MaskedTextChangedListener(
@@ -167,14 +189,21 @@ class ProfileFragment : Fragment() {
         b.paymentCardET.onFocusChangeListener = paymentCardListener
 
         b.applyProfileChanges.setOnClickListener {
-            it.isVisible = false
-            viewModel.editProfile(
-                name = b.nameET.text.toString(),
-                telNumber = b.telNumberET.text.toString(),
-                email = b.emailET.text.toString(),
-                paymentCard = b.paymentCardET.text.toString(),
-                cityArea = b.cityAreaET.text.toString()
-            )
+            if (!b.cityAreaET.text.toString().matches("^[а-яА-Я]+[,]{1}[а-яА-Я ]+\$".toRegex())){
+                Snackbar.make(bview!!, "данные не соответствуют формату 'город, область'", Snackbar.LENGTH_LONG).show()
+            }
+            else if(b.telNumberET.text.toString().length<9)
+                Snackbar.make(bview!!, "номер телефона слишком короткий", Snackbar.LENGTH_LONG).show()
+            else {
+                it.isVisible = false
+                viewModel.editProfile(
+                    name = b.nameET.text.toString(),
+                    telNumber = b.telNumberET.text.toString(),
+                    email = b.emailET.text.toString(),
+                    paymentCard = b.paymentCardET.text.toString(),
+                    cityArea = b.cityAreaET.text.toString()
+                )
+            }
         }
     }
 
@@ -188,10 +217,8 @@ class ProfileFragment : Fragment() {
         val cityAreaChanged = b.cityAreaET.text.toString() != profile.cityArea
         /* TODO val avatarChanged = b.avatar.text.toString() != profile.avatar*/
         /* TODOval specializationChanged = b.nameET.text.toString() != profile.specialization*/
-
-        val fieldsChanged = nameChanged || telNumberChanged ||
+        var fieldsChanged = nameChanged || telNumberChanged ||
                 emailChanged || paymentCardChanged || cityAreaChanged
-
         b.applyProfileChanges.isVisible = fieldsChanged
     }
 

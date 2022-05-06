@@ -46,6 +46,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         get() = prefs.getString("authToken", null)
         set(value) = prefs.edit { putString("authToken", value) }
 
+
     val messageEvent = MutableSharedFlow<String>(extraBufferCapacity = 1)
 
     val logoutSF = MutableSharedFlow<String>(extraBufferCapacity = 1)
@@ -108,6 +109,45 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
         updateFilterThirdLevelCategories(categoryId)
     }
+    fun getAllCategoryAdverts(categoryId: Int) = viewModelScope.launch (Dispatchers.IO){
+        updateCategoryAdvertsFull(true, categoryId)
+        updateFilterThirdLevelCategories(categoryId)
+    }
+
+    private suspend fun updateCategoryAdvertsFull(
+        updateCache: Boolean = false,
+        categoryId: Int = -1
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val list = getAdvertsFull() ?: return@launch
+        println("adverts fuuuuuuuuuuul = $list")
+
+        advertsSF.tryEmit(list)
+
+        if (updateCache)
+            cachedAdvertsSF.tryEmit(list.filter {
+                categoryId == it.subcategoryId || categoryId == it.categoryId
+            })
+    }
+
+    private suspend fun getAdvertsFull() =
+        (repository.getAdvertFullList() as? AdvertListResponse.Success)?.let { response ->
+            response.advertMap.map { entry ->
+                Advert(
+                    id = entry.key.toInt(),
+                    viewType = 0,
+                    categoryId = advertCategoriesFlow.value.find {
+                        it.id == entry.value.categoryId.toInt()
+                    }?.parentId ?: 4,
+                    category = entry.value.category,
+                    subcategoryId = entry.value.categoryId.toInt(),
+                    title = entry.value.title,
+                    date = entry.value.date,
+                    time = entry.value.time,
+                    price = entry.value.price,
+                    photo = entry.value.photo
+                )
+            }
+        }
 
     private suspend fun updateAdverts(
         updateCache: Boolean = false,
@@ -407,6 +447,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         categoryId: String,
         photos: List<String>
     ) = viewModelScope.launch(Dispatchers.IO) {
+        println("photpooos + "+photos[0])
         when (val result = repository.createAdvert(title, price, description, categoryId, photos)) {
             is AdvertCreateResponse.Success -> {
                 if (result.id != null)

@@ -15,6 +15,8 @@ import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.data.login_screen_states.AuthState
 import com.app.transportation.databinding.FragmentLoginBinding
 import com.google.android.material.snackbar.Snackbar
+import com.vk.api.sdk.VK
+import com.vk.api.sdk.auth.VKScope
 
 class LoginFragment : Fragment() {
 
@@ -92,6 +94,20 @@ class LoginFragment : Fragment() {
             b.signInTitle.text = getString(R.string.sign_in)
             setPasswordFieldBoxStrokeColor(false)
             findNavController().navigate(R.id.openMainFragment);
+        }
+
+        b.signViaVK.setOnClickListener{
+            b.signInTitle.text = getString(R.string.sign_in)
+            setPasswordFieldBoxStrokeColor(false)
+            if (viewModel.VKLogin==null||viewModel.VKPassword==null)
+            {
+                VK.login(requireActivity(), arrayListOf(VKScope.PHOTOS, VKScope.PHONE, VKScope.EMAIL))
+
+            }
+            else
+            {
+                viewModel.authorize(viewModel.VKLogin!!, viewModel.VKPassword!!)
+            }
         }
     }
 

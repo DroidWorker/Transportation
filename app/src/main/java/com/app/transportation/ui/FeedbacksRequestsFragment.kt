@@ -10,7 +10,6 @@ import androidx.core.content.edit
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import com.app.transportation.MainActivity
 import com.app.transportation.R
 import com.app.transportation.core.collectWithLifecycle
@@ -18,10 +17,6 @@ import com.app.transportation.core.stringToDate
 import com.app.transportation.data.database.entities.FeedbackRequest
 import com.app.transportation.databinding.FragmentFeedbacksRequestsBinding
 import com.app.transportation.ui.adapters.FeedbacksRequestsAdapter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.forEach
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.launch
 import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
 

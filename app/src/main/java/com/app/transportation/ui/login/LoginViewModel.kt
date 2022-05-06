@@ -8,18 +8,24 @@ import androidx.lifecycle.viewModelScope
 import com.app.transportation.R
 import com.app.transportation.data.LoginRepository
 import com.app.transportation.data.Repository
+import com.app.transportation.data.api.AdvertListResponse
 import com.app.transportation.data.api.AuthResponse
 import com.app.transportation.data.api.RegisterResponse
+import com.app.transportation.data.api.VkInfoResponse
+import com.app.transportation.data.database.entities.Advert
 import com.app.transportation.data.login_screen_states.AuthState
 import com.app.transportation.data.login_screen_states.RegistrationState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 
 class LoginViewModel(val app: Application) : AndroidViewModel(app), KoinComponent {
+
+    val VkInfoSF = MutableStateFlow(emptyList<VkInfoResponse>())
 
     private val repository: LoginRepository by inject()
     private val mainRepository: Repository by inject()
@@ -30,8 +36,21 @@ class LoginViewModel(val app: Application) : AndroidViewModel(app), KoinComponen
         get() = prefs.getString("authToken", null)
         set(value) = prefs.edit { putString("authToken", value) }
 
+    var VkAuthToken: String?
+        get() = prefs.getString("VkAuthToken", null)
+        set(value) = prefs.edit {putString("VkAuthToken", value)}
+
+    var VKLogin: String?
+        get() = prefs.getString("VKLogin", null)
+        set(value) = prefs.edit{putString("VKLogin", value)}
+
+    var VKPassword: String?
+        get() = prefs.getString("VKPassword", null)
+        set(value) = prefs.edit{putString("VKPassword", value)}
+
     val authState = MutableSharedFlow<AuthState>(extraBufferCapacity = 1)
     val registrationState = MutableSharedFlow<RegistrationState>(extraBufferCapacity = 1)
+
 
 
     fun authorize(login: String, password: String) = viewModelScope.launch(Dispatchers.IO) {

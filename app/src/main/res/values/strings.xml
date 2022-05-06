@@ -19,6 +19,8 @@
     <string name="restoration_expired">Время для восстановления истекло</string>
     <string name="password_is_short">Длина пароля должна быть не менее 8 символов</string>
 
+    <integer name="com_vk_sdk_AppId">8158989</integer>
+
     <string-array name="paymentMethods">
         <item>Способ оплаты</item>
         <item>Наличные</item>

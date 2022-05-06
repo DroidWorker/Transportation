@@ -1,6 +1,5 @@
 package com.app.transportation.ui.create_order_fragments
 
-import android.R.attr.data
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -121,7 +120,6 @@ class CreatingAdvertisementFragment : Fragment() {
                     photos.add("'data:image/jpg;base64,$base64String'")
                 }
             }
-
             viewModel.createAdvert(
                 title = b.advertTitle.text.toString(),
                 price = b.price.text.toString(),

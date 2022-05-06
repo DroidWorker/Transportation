@@ -1,5 +1,6 @@
 package com.app.transportation
 
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.Gravity
@@ -12,20 +13,30 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.core.isLightTheme
+import com.app.transportation.data.login_screen_states.AuthState
 import com.app.transportation.data.upButtonSF
 import com.app.transportation.databinding.ActivityMainBinding
 import com.app.transportation.databinding.PopupMenuMainBinding
 import com.app.transportation.ui.MainViewModel
+import com.app.transportation.ui.login.LoginViewModel
 import com.google.android.material.snackbar.Snackbar
+import com.vk.api.sdk.VK
+import com.vk.api.sdk.VKApiCallback
+import com.vk.api.sdk.auth.VKAccessToken
+import com.vk.api.sdk.auth.VKAuthCallback
+import com.vk.api.sdk.exceptions.VKAuthException
+import com.vk.api.sdk.requests.VKRequest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
 import kotlin.math.roundToInt
@@ -39,6 +50,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
     val b by lazy { ActivityMainBinding.inflate(layoutInflater) }
 
     private val viewModel by viewModels<MainViewModel>()
+    private val vm by viewModels<LoginViewModel>()
 
     private val prefs: SharedPreferences by inject(named("MainSettings"))
 
@@ -212,6 +224,48 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             else
                 upButtonSF.tryEmit(listOf())
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        val callback = object: VKAuthCallback {
+            override fun onLogin(token: VKAccessToken) {
+                makeSnackbar("авторизация успешна")
+                println("success")
+                vm.VkAuthToken = token.toString()
+
+                val vkRequest: VKRequest<JSONObject> = VKRequest<JSONObject>("account.getProfileInfo")
+                    .addParam("access_key", token.toString())
+                    .addParam("v", "5.130")
+                VK.execute(vkRequest, object: VKApiCallback<JSONObject> {
+                    override fun success(result: JSONObject) {
+                        val jobj = JSONObject(result.getJSONObject("response").toString())
+                        val name = jobj.getString("first_name")
+                        val id = jobj.getString("id")
+                        val phone = jobj.getString("phone").replace("\\s".toRegex(), "").replace("*", "0")
+                        vm.register(phone, "VK_$id$phone", name)
+                        vm.VKLogin = phone
+                        vm.VKPassword = "VK_$id$phone"
+                        vm.authorize(phone, "VK_$id$phone")
+                        navController.navigate(R.id.mainFragment)
+                    }
+                    override fun fail(error: Exception) {
+                        makeSnackbar("laod profile error")
+                    }
+                })
+            }
+
+
+            override fun onLoginFailed(authException: VKAuthException) {
+                makeSnackbar("ошибка авторизации")
+            }
+        }
+        if (data == null || !VK.onActivityResult(requestCode, resultCode, data, callback)) {
+            super.onActivityResult(requestCode, resultCode, data)
+        }
+    }
+
+    private fun makeSnackbar(message: String) {
+        Snackbar.make(findViewById(R.id.title), message, Snackbar.LENGTH_SHORT).show()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {

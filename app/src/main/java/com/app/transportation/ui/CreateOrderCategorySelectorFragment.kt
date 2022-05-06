@@ -1,11 +1,9 @@
 package com.app.transportation.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast.LENGTH_LONG
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -14,7 +12,6 @@ import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
 import com.app.transportation.core.collectWithLifecycle
-import com.app.transportation.data.database.entities.SelectorCategory
 import com.app.transportation.databinding.FragmentCreateOrderCategorySelectorBinding
 import com.app.transportation.ui.adapters.AdvertisementsAdapter
 import com.app.transportation.ui.adapters.CreateOrderCategorySelectorAdapter

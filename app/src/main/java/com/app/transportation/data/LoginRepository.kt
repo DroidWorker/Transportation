@@ -2,10 +2,7 @@ package com.app.transportation.data
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import com.app.transportation.data.api.AuthResponse
-import com.app.transportation.data.api.InfoMessageResponse
-import com.app.transportation.data.api.RegisterResponse
-import com.app.transportation.data.api.SmsCodeResponse
+import com.app.transportation.data.api.*
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -27,6 +24,25 @@ class LoginRepository : KoinComponent {
     private var authToken: String?
         get() = prefs.getString("authToken", null)
         set(value) = prefs.edit(true) { putString("authToken", value) }
+
+    var VkAuthToken: String?
+        get() = prefs.getString("VkAuthToken", null)
+        set(value) = prefs.edit {putString("VkAuthToken", value)}
+
+    suspend fun getVkInfo() : VkInfoResponse = kotlin.runCatching {
+        val response: HttpResponse = client.get("https://api.vk.com/method/account.getProfileInfo?access_token=$VkAuthToken&v=3.5.2") {
+        }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+        val result = json.decodeFromString<VkInfoResponse.Success>(responseBody)
+        result
+    }.getOrElse {
+        val message = it.message
+            ?.substringAfter("{\"message\":\"")
+            ?.replace("\"}\"", "")
+            ?: "Unexpected error"
+        VkInfoResponse.Failure(message)
+    }
 
     suspend fun authorize(
         login: String,

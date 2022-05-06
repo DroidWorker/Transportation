@@ -6,8 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import android.widget.ImageView
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -16,12 +14,10 @@ import com.app.transportation.MainActivity
 import com.app.transportation.R
 import com.app.transportation.core.*
 import com.app.transportation.databinding.FragmentCreatingOrderAtBinding
-import com.app.transportation.databinding.FragmentCreatingOrderPpAndKuBinding
 import com.app.transportation.ui.MainViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
-import kotlinx.coroutines.flow.forEach
 
 class CreatingOrderAtFragment : Fragment() {
 

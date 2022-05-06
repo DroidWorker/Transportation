@@ -50,6 +50,10 @@ android {
 }
 
 dependencies {
+    //VK
+    implementation "com.vk:android-sdk-core:3.5.2"
+    implementation "com.vk:android-sdk-api:3.5.2"
+
     // Coroutines
     def coroutines_version = "1.6.0"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$coroutines_version"

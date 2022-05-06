@@ -1,7 +1,6 @@
 package com.app.transportation.ui
 
 import android.os.Bundle
-import android.util.Log
 import android.view.*
 import android.widget.PopupWindow
 import androidx.core.content.ContextCompat
@@ -12,7 +11,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
-import com.app.transportation.core.collect
 import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.core.repeatOnLifecycle
 import com.app.transportation.data.database.entities.SelectorCategory
@@ -22,7 +20,6 @@ import com.app.transportation.databinding.PopupMenuServicesFilterBinding
 import com.app.transportation.ui.adapters.AdvertisementsAdapter
 import com.app.transportation.ui.adapters.CreateOrderCategorySelectorAdapter
 import com.app.transportation.ui.adapters.PopupMenuServicesFilterAdapter
-import com.app.transportation.ui.adapters.ProfileAdapter
 import kotlin.math.roundToInt
 
 class AdvertisementsFragment : Fragment() {
@@ -39,7 +36,7 @@ class AdvertisementsFragment : Fragment() {
 
     private val categoryId by lazy { arguments?.getInt("categoryId") ?: 0 }
     private val type by lazy { arguments?.getInt("type") ?: 0 }//0-customer 1-seller
-private val orderItemShouldOpenId by lazy { arguments?.getInt("clickedItemId") ?: -1 }
+    private val orderItemShouldOpenId by lazy { arguments?.getInt("clickedItemId") ?: -1 }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -51,10 +48,11 @@ private val orderItemShouldOpenId by lazy { arguments?.getInt("clickedItemId") ?
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        if (viewModel.isCustomer.value==true) {
+        if (type==0) {
             b.city.visibility = View.GONE
             b.filter.visibility = View.GONE
         }
+
         (activity as? MainActivity)?.apply {
             /*b.title.text =
                 viewModel.advertCategoriesFlow.value.find { it.id == categoryId }?.name
@@ -69,7 +67,10 @@ private val orderItemShouldOpenId by lazy { arguments?.getInt("clickedItemId") ?
 
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel.getCategoryAdverts(categoryId)
+        if (type==2)
+            viewModel.getAllCategoryAdverts(categoryId)
+        else
+            viewModel.getCategoryAdverts(categoryId)
 
         applyRVAdapter()
 
@@ -118,16 +119,13 @@ private val orderItemShouldOpenId by lazy { arguments?.getInt("clickedItemId") ?
         if (type == 1||type==2) {
             viewModel.cachedAdvertsSF.collectWithLifecycle(viewLifecycleOwner) {
                 adapter.submitList(it)
-            }
-            if (adapter1.getItemCount() == 0) {
-                b.beSeller.visibility = View.VISIBLE
-            } else {
-                b.beSeller.visibility = View.INVISIBLE
+                /*if (adapter1.getItemCount() == 0) {
+                    b.beSeller.visibility = View.VISIBLE
+                } else {
+                    b.beSeller.visibility = View.INVISIBLE
+                }*/
             }
         } else {
-            /*viewModel.addAdvertScreenCategoriesFlow(categoryId).collectWithLifecycle(viewLifecycleOwner) {
-                adapter1.submitList(it)
-            }*/
             viewModel.addAdvertScreenCategoriesFlowAll().collectWithLifecycle(viewLifecycleOwner) {
                 var list : ArrayList<SelectorCategory> = ArrayList()
                 if (orderItemShouldOpenId!=0){
