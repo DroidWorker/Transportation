@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.app.transportation.R
 import com.app.transportation.data.database.entities.Advert
+import com.app.transportation.databinding.ItemAdvertCategoryTextItemBinding
+import com.app.transportation.databinding.ItemNoadvertsFillerBinding
 import com.app.transportation.databinding.ItemServiceFirstBinding
 import com.app.transportation.databinding.ItemServiceSecondBinding
 
@@ -28,16 +30,20 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
         val layoutInflater = LayoutInflater.from(parent.context)
         return if (viewType == 0)
             FirstViewHolder(ItemServiceFirstBinding.inflate(layoutInflater, parent, false))
-        else
+        else if(viewType == 1)
             SecondViewHolder(ItemServiceSecondBinding.inflate(layoutInflater, parent, false))
+        else
+            fillerViewHolder(ItemNoadvertsFillerBinding.inflate(layoutInflater, parent, false))
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) =
         with(getItem(position)) {
             if (viewType == 0)
                 (holder as FirstViewHolder).bind(this)
-            else
+            else if(viewType == 1)
                 (holder as SecondViewHolder).bind(this)
+            else
+                (holder as fillerViewHolder).bind(this)
         }
 
     override fun getItemViewType(position: Int) = getItem(position).viewType
@@ -91,6 +97,15 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
             price.text = item.price.toString()
         }
 
+    }
+
+    inner class fillerViewHolder (private val binding: ItemNoadvertsFillerBinding) ://call if list empty
+    RecyclerView.ViewHolder(binding.root){
+
+        fun bind(item : Advert) = with(binding){
+            titla.text = item.title
+            titlb.text = item.subtitle
+        }
     }
 
     private class DiffCallback : DiffUtil.ItemCallback<Advert>() {

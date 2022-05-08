@@ -121,8 +121,10 @@ class ProfileFragment : Fragment() {
                     basePhone=numb
                     b.telNumberET.setText(numb)
                 }
-                else
+                else {
                     b.telNumberET.setText(telNumber)
+                    basePhone = telNumber
+                }
                 b.emailET.setText(email)
                 b.paymentCardET.setText(paymentCard)
                 b.cityAreaET.setText(cityArea)
@@ -165,12 +167,12 @@ class ProfileFragment : Fragment() {
             }
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (!b.telNumberET.text.toString().equals(basePhone) && s?.matches("^[+]?[0-9]{0,13}\$".toRegex()) == false){
+                if (b.telNumberET.text.toString() != basePhone && s?.matches("^[+]?[0-9]{0,13}\$".toRegex()) == false){
                     b.telNumberET.setText(b.telNumberET.text?.substring(0, b.telNumberET.length()-1))
                 }
             }
         })
-        b.telNumberET.onFocusChangeListener = telNumberListener
+        //b.telNumberET.onFocusChangeListener = telNumberListener
 
         paymentCardListener = MaskedTextChangedListener(
             "[0000] [0000] [0000] [0000]",
@@ -211,7 +213,7 @@ class ProfileFragment : Fragment() {
         val profile = viewModel.profileFlow.value ?: return
 
         val nameChanged = b.nameET.text.toString() != profile.name
-        val telNumberChanged = b.telNumberET.text.toString() != profile.telNumber
+        val telNumberChanged = b.telNumberET.text.toString() != basePhone
         val emailChanged = b.emailET.text.toString() != profile.email
         val paymentCardChanged = b.paymentCardET.text.toString() != profile.paymentCard
         val cityAreaChanged = b.cityAreaET.text.toString() != profile.cityArea

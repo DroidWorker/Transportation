@@ -60,6 +60,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     val cachedAdvertsSF = MutableStateFlow(emptyList<Advert>())
+    val cachedOrdersSF = MutableStateFlow(emptyList<Advert>())
     val cachedFilterCategoriesSF = MutableStateFlow(emptyList<ServiceType>())
 
     val cachedAdvert = MutableStateFlow<Advert?>(null)
@@ -113,6 +114,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         updateCategoryAdvertsFull(true, categoryId)
         updateFilterThirdLevelCategories(categoryId)
     }
+    fun getAllCategoryOrders(categoryId: Int) = viewModelScope.launch (Dispatchers.IO){
+        updateCategoryOrdersFull(true, categoryId)
+        updateFilterThirdLevelCategories(categoryId)
+    }
 
     private suspend fun updateCategoryAdvertsFull(
         updateCache: Boolean = false,
@@ -127,6 +132,22 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             cachedAdvertsSF.tryEmit(list.filter {
                 categoryId == it.subcategoryId || categoryId == it.categoryId
             })
+    }
+    private suspend fun updateCategoryOrdersFull(
+        updateCache: Boolean = false,
+        categoryId: Int = -1
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        getChildrenID(categoryId).collect { ids ->
+            val list = getOrdersFull() ?: return@collect
+            println("orders fuuuuuuuuuuul = $list")
+
+            ordersSF.tryEmit(list)
+
+            if (updateCache)
+                cachedOrdersSF.tryEmit(list.filter {
+                    ids.contains(it.categoryId)||ids.contains(it.subcategoryId)//categoryId == it.subcategoryId || categoryId == it.categoryId
+                })
+        }
     }
 
     private suspend fun getAdvertsFull() =
@@ -196,6 +217,33 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 list.filter { categoryId == it.categoryId }
             )
     }
+
+    private suspend fun getOrdersFull() =
+        (repository.getOrderFullList() as? OrderListResponse.Success)?.let { response ->
+            response.orderMap.map { entry ->
+                Advert(
+                    id = entry.key.toInt(),
+                    viewType = 0,
+                    categoryId = advertCategoriesFlow.value.find {
+                        it.id == entry.value.categoryId.toInt()
+                    }?.parentId ?: 4,
+                    category = entry.value.category,
+                    subcategoryId = entry.value.categoryId.toInt(),
+                    title = entry.value.description,
+                    date = entry.value.date,
+                    time = entry.value.time,
+                    fromCity = "${entry.value.fromCity}",
+                    fromRegion = "${entry.value.fromRegion}",
+                    fromPlace = "${entry.value.fromPlace}",
+                    toCity = "${entry.value.toCity}",
+                    toRegion = "${entry.value.toRegion}",
+                    toPlace = "${entry.value.toPlace}",
+                    payment = entry.value.payment,
+                    description = entry.value.description,
+                    photo = entry.value.photo
+                )
+            }
+        }
 
     private suspend fun getOrders() =
         (repository.getOrderList() as? OrderListResponse.Success)?.let { response ->
@@ -364,6 +412,19 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     fun logout() = viewModelScope.launch(Dispatchers.IO) {
         repository.logout()
         logoutSF.tryEmit("")
+    }
+
+    suspend fun getChildrenID(categoryId : Int) = channelFlow {
+        advertCategoriesFlow.collect() {
+            var ids : ArrayList<Int> = ArrayList()
+            ids.add(categoryId)
+            it.forEach{cat ->
+                if (cat.parentId==categoryId||ids.contains(cat.parentId)){
+                    ids.add(cat.id)
+                }
+            }
+            send(ids)
+        }
     }
 
     fun addAdvertScreenCategoriesFlow(categoryId: Int) = channelFlow {

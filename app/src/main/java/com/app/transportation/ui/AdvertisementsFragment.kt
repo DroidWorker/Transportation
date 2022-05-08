@@ -13,6 +13,7 @@ import com.app.transportation.MainActivity
 import com.app.transportation.R
 import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.core.repeatOnLifecycle
+import com.app.transportation.data.database.entities.Advert
 import com.app.transportation.data.database.entities.SelectorCategory
 import com.app.transportation.data.database.entities.ServiceType
 import com.app.transportation.databinding.FragmentAdvertisementsBinding
@@ -66,8 +67,9 @@ class AdvertisementsFragment : Fragment() {
         }
 
         super.onViewCreated(view, savedInstanceState)
-
-        if (type==2)
+        if (type==1)
+            viewModel.getAllCategoryOrders(categoryId)
+        else if (type==2)
             viewModel.getAllCategoryAdverts(categoryId)
         else
             viewModel.getCategoryAdverts(categoryId)
@@ -92,9 +94,11 @@ class AdvertisementsFragment : Fragment() {
                     findNavController().navigate(R.id.orderDetailsFragment)
                 }
             }
-            if (adapter.getItemCount() == 0) {
-                b.beSeller.visibility = View.VISIBLE
-            }
+            if (adapter.itemCount == 0&&type==1)
+                    b.beSeller.visibility = View.VISIBLE
+            else if(type == 2)
+                b.createOrder.visibility = View.VISIBLE
+
         } else {//if customer
             b.servicesRV.adapter = adapter1
             adapter1.mode=4
@@ -116,9 +120,70 @@ class AdvertisementsFragment : Fragment() {
     }
 
     private fun applyObservers() = viewLifecycleOwner.repeatOnLifecycle {
-        if (type == 1||type==2) {
+        if(type==1){
+            viewModel.cachedOrdersSF.collectWithLifecycle(viewLifecycleOwner) {
+                adapter.submitList(it)
+                if (adapter.itemCount==0) {
+                    var filler: ArrayList<Advert> = ArrayList()
+                    filler.add(
+                        Advert(
+                            0,
+                            3,
+                            0,
+                            "",
+                            0,
+                            "Заказов не найдено!",
+                            "",
+                            "",
+                            "",
+                            null,
+                            "",
+                            emptyList(),
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                        )
+                    )
+                    adapter.submitList(filler.toList())
+                }
+            }
+        }
+        else if (type==2) {
             viewModel.cachedAdvertsSF.collectWithLifecycle(viewLifecycleOwner) {
                 adapter.submitList(it)
+                if (adapter.itemCount==0) {
+                    var filler: ArrayList<Advert> = ArrayList()
+                    filler.add(
+                        Advert(
+                            0,
+                            3,
+                            0,
+                            "",
+                            0,
+                            "Объявлений не найдено!",
+                            "Оформите заказ чтобы исполнитель нашел вас первым!",
+                            "",
+                            "",
+                            null,
+                            "",
+                            emptyList(),
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                        )
+                    )
+                    adapter.submitList(filler.toList())
+                }
+                if (adapter.itemCount!=0&&type==2)
+                    b.createOrder.visibility = View.GONE
                 /*if (adapter1.getItemCount() == 0) {
                     b.beSeller.visibility = View.VISIBLE
                 } else {
