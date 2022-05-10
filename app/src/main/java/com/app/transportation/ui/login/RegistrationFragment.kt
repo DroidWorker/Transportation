@@ -1,6 +1,7 @@
 package com.app.transportation.ui.login
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -15,6 +16,9 @@ import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.data.login_screen_states.AuthState
 import com.app.transportation.data.login_screen_states.RegistrationState
 import com.app.transportation.databinding.FragmentRegistrationBinding
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.snackbar.Snackbar
 import com.vk.api.sdk.VK
 import com.vk.api.sdk.auth.VKScope
@@ -33,12 +37,20 @@ class RegistrationFragment : Fragment() {
 
     var activity : Activity? = null
 
+    var mGoogleSignInClient : GoogleSignInClient? = null
+
+    val RC_SIGN_IN : Int = 103
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         activity = activity
+
+        var gso : GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build()
+        mGoogleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+
         binding = FragmentRegistrationBinding.inflate(inflater, container, false)
         return b.root
     }
@@ -109,6 +121,11 @@ class RegistrationFragment : Fragment() {
 
         b.signViaVK.setOnClickListener{
             VK.login(requireActivity(), arrayListOf(VKScope.PHOTOS, VKScope.PHONE, VKScope.EMAIL))
+        }
+
+        b.signViaGmail.setOnClickListener{
+            val signInIntent : Intent = mGoogleSignInClient!!.signInIntent
+            getActivity()?.startActivityForResult(signInIntent, RC_SIGN_IN)
         }
     }
 

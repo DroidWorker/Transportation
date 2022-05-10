@@ -13,19 +13,21 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.core.isLightTheme
-import com.app.transportation.data.login_screen_states.AuthState
 import com.app.transportation.data.upButtonSF
 import com.app.transportation.databinding.ActivityMainBinding
 import com.app.transportation.databinding.PopupMenuMainBinding
 import com.app.transportation.ui.MainViewModel
 import com.app.transportation.ui.login.LoginViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 import com.google.android.material.snackbar.Snackbar
 import com.vk.api.sdk.VK
 import com.vk.api.sdk.VKApiCallback
@@ -61,6 +63,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         get() = prefs.getString("feedbacksRequestsActiveTab", null) ?: "requests"
 
     private var popupWindow: PopupWindow? = null
+
+    val RC_SIGN_IN : Int = 103
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -226,41 +230,73 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         }
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        val callback = object: VKAuthCallback {
-            override fun onLogin(token: VKAccessToken) {
-                makeSnackbar("авторизация успешна")
-                println("success")
-                vm.VkAuthToken = token.toString()
-
-                val vkRequest: VKRequest<JSONObject> = VKRequest<JSONObject>("account.getProfileInfo")
-                    .addParam("access_key", token.toString())
-                    .addParam("v", "5.130")
-                VK.execute(vkRequest, object: VKApiCallback<JSONObject> {
-                    override fun success(result: JSONObject) {
-                        val jobj = JSONObject(result.getJSONObject("response").toString())
-                        val name = jobj.getString("first_name")
-                        val id = jobj.getString("id")
-                        val phone = jobj.getString("phone").replace("\\s".toRegex(), "").replace("*", "0")
-                        vm.register(phone, "VK_$id$phone", name)
-                        vm.VKLogin = phone
-                        vm.VKPassword = "VK_$id$phone"
-                        vm.authorize(phone, "VK_$id$phone")
-                        navController.navigate(R.id.mainFragment)
-                    }
-                    override fun fail(error: Exception) {
-                        makeSnackbar("laod profile error")
-                    }
-                })
-            }
-
-
-            override fun onLoginFailed(authException: VKAuthException) {
-                makeSnackbar("ошибка авторизации")
+    private fun handleSignInResult(task : Task<GoogleSignInAccount>){
+        try {
+            val account : GoogleSignInAccount = task.getResult(ApiException::class.java)
+            if (account.email!=null&&account.displayName!=null&&account.givenName!=null) {
+                vm.register(
+                    account.email!!,
+                    "GmailAccount" + account.givenName,
+                    account.displayName!!
+                )
+                vm.GmailLogin = account.email
+                vm.GmailPassword = "GmailAccount" + account.givenName
+                makeSnackbar(account.displayName+", вы зарегистрированы")
+                vm.authorize(account.email!!, "GmailAccount" + account.givenName)
+                navController.navigate(R.id.mainFragment)
             }
         }
-        if (data == null || !VK.onActivityResult(requestCode, resultCode, data, callback)) {
-            super.onActivityResult(requestCode, resultCode, data)
+        catch (ex : Exception){
+            makeSnackbar("Ошибка Google аторизации")
+        }
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode==RC_SIGN_IN){ //if gmailRegistration
+            val task : Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
+            handleSignInResult(task)
+        }
+        else {
+            val callback = object : VKAuthCallback {
+                override fun onLogin(token: VKAccessToken) {
+                    makeSnackbar("авторизация успешна")
+                    println("success")
+                    vm.VkAuthToken = token.toString()
+
+                    val vkRequest: VKRequest<JSONObject> =
+                        VKRequest<JSONObject>("account.getProfileInfo")
+                            .addParam("access_key", token.toString())
+                            .addParam("v", "5.130")
+                    VK.execute(vkRequest, object : VKApiCallback<JSONObject> {
+                        override fun success(result: JSONObject) {
+                            val jobj = JSONObject(result.getJSONObject("response").toString())
+                            val name = jobj.getString("first_name")
+                            val id = jobj.getString("id")
+                            val phone = jobj.getString("phone").replace("\\s".toRegex(), "")
+                                .replace("*", "0")
+                            vm.register(phone, "VK_$id$phone", name)
+                            vm.VKLogin = phone
+                            vm.VKPassword = "VK_$id$phone"
+                            vm.authorize(phone, "VK_$id$phone")
+                            navController.navigate(R.id.mainFragment)
+                        }
+
+                        override fun fail(error: Exception) {
+                            makeSnackbar("laod profile error")
+                        }
+                    })
+                }
+
+
+                override fun onLoginFailed(authException: VKAuthException) {
+                    makeSnackbar("ошибка авторизации")
+                }
+            }
+            if (data == null || !VK.onActivityResult(requestCode, resultCode, data, callback)) {
+                super.onActivityResult(requestCode, resultCode, data)
+            }
         }
     }
 

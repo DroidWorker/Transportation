@@ -1,5 +1,6 @@
 package com.app.transportation.ui.login
 
+import android.content.Intent
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -14,6 +15,9 @@ import com.app.transportation.R
 import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.data.login_screen_states.AuthState
 import com.app.transportation.databinding.FragmentLoginBinding
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.material.snackbar.Snackbar
 import com.vk.api.sdk.VK
 import com.vk.api.sdk.auth.VKScope
@@ -25,12 +29,17 @@ class LoginFragment : Fragment() {
 
     private val viewModel: LoginViewModel by navGraphViewModels(R.id.loginFragment)
 
+    var mGoogleSignInClient : GoogleSignInClient? = null
+
+    var RC_SIGN_IN : Int = 123
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        var gso : GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build()
+        mGoogleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
         binding = FragmentLoginBinding.inflate(inflater, container, false)
         return b.root
     }
@@ -107,6 +116,20 @@ class LoginFragment : Fragment() {
             else
             {
                 viewModel.authorize(viewModel.VKLogin!!, viewModel.VKPassword!!)
+            }
+        }
+
+        b.signViaGmail.setOnClickListener{
+            b.signInTitle.text = getString(R.string.sign_in)
+            setPasswordFieldBoxStrokeColor(false)
+            if (viewModel.GmailLogin==null||viewModel.GmailPassword==null)
+            {
+                val signInIntent : Intent = mGoogleSignInClient!!.signInIntent
+                activity?.startActivityForResult(signInIntent, RC_SIGN_IN)
+            }
+            else
+            {
+                viewModel.authorize(viewModel.GmailLogin!!, viewModel.GmailPassword!!)
             }
         }
     }

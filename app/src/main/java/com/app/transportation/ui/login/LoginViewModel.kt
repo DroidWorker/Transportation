@@ -48,6 +48,14 @@ class LoginViewModel(val app: Application) : AndroidViewModel(app), KoinComponen
         get() = prefs.getString("VKPassword", null)
         set(value) = prefs.edit{putString("VKPassword", value)}
 
+    var GmailLogin: String?
+        get() = prefs.getString("GmailLogin", null)
+        set(value) = prefs.edit{putString("GmailLogin", value)}
+
+    var GmailPassword: String?
+        get() = prefs.getString("GmailPassword", null)
+        set(value) = prefs.edit{putString("GmailPassword", value)}
+
     val authState = MutableSharedFlow<AuthState>(extraBufferCapacity = 1)
     val registrationState = MutableSharedFlow<RegistrationState>(extraBufferCapacity = 1)
 
