@@ -58,6 +58,8 @@ class OrderDetailsFragment : Fragment() {
                 b.orderName.text = title
                 b.fromLocation.text = fromCity+" "+fromRegion+ " "+fromPlace
                 b.toLocation.text = toCity+""+toRegion+""+toPlace
+                b.addToFavourites2.setColorFilter(0)
+                b.addToFavourites2.tag = id
                 b.date.text = date
                 b.time.text = time
                 b.comment.text = title
@@ -69,7 +71,11 @@ class OrderDetailsFragment : Fragment() {
 
     private fun applyListeners() {
         b.execute.setOnClickListener {
-
+            viewModel.addOrderPing(b.addToFavourites2.tag.toString())
+        }
+        b.addToFavourites2.setOnClickListener{
+            b.addToFavourites2.setColorFilter(1)
+            viewModel.addOrderFavorite(b.addToFavourites2.tag.toString())
         }
     }
 

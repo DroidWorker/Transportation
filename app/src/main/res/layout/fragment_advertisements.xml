@@ -58,7 +58,7 @@
         android:layout_marginBottom="8dp"
         android:backgroundTint="@color/primary_color"
         android:text="стать исполнителем"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -70,7 +70,7 @@
         android:layout_marginBottom="8dp"
         android:backgroundTint="@color/primary_color"
         android:text="Создать заказ"
-        android:visibility="invisible"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

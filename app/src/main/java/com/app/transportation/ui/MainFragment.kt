@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.os.bundleOf
@@ -24,6 +26,8 @@ import com.app.transportation.databinding.FragmentMainBinding
 import com.app.transportation.ui.adapters.JobsAdapter
 import com.app.transportation.ui.adapters.MainAdvertisementsAdapter
 import com.app.transportation.ui.adapters.ServiceTypeAdapter
+import com.google.android.material.snackbar.Snackbar
+import io.ktor.utils.io.*
 import kotlinx.coroutines.flow.filterNotNull
 import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
@@ -214,6 +218,21 @@ class MainFragment : Fragment() {
             findNavController().navigate(R.id.advertisementsFragment,
                 bundleOf("categoryId" to lastCheckedCategoryId, "type" to 1))
         }
+
+        b.search.setOnEditorActionListener(TextView.OnEditorActionListener() {v, actionId, event ->
+            if(actionId == EditorInfo.IME_ACTION_DONE){
+                if (b.search.text.length<2){
+                    Snackbar.make(b.search, "минимальная длина запроса 2 символа!", Snackbar.LENGTH_LONG).show()
+                    return@OnEditorActionListener true
+                }
+                //viewModel.getSearchResult("ер")
+                findNavController().navigate(R.id.advertisementsFragment,
+                    bundleOf("categoryId" to lastCheckedCategoryId, "type" to 3, "searchText" to b.search.text.toString()))
+                true
+            } else {
+                false
+            }
+        });
     }
 
     override fun onDestroyView() {

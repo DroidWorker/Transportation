@@ -125,7 +125,7 @@ class LoginFragment : Fragment() {
             if (viewModel.GmailLogin==null||viewModel.GmailPassword==null)
             {
                 val signInIntent : Intent = mGoogleSignInClient!!.signInIntent
-                activity?.startActivityForResult(signInIntent, RC_SIGN_IN)
+                getActivity()?.startActivityForResult(signInIntent, RC_SIGN_IN)
             }
             else
             {

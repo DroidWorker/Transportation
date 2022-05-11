@@ -7,17 +7,28 @@
     android:paddingStart="@dimen/sideMargin"
     android:paddingEnd="@dimen/sideMargin">
 
+    <ImageView
+        android:id="@+id/addToFavourites2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_favourites"
+        app:layout_constraintBottom_toBottomOf="@+id/orderName"
+        app:layout_constraintEnd_toEndOf="@+id/fromLocationIcon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/orderName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:fontFamily="@font/montserrat"
         android:textColor="@color/title_color"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toStartOf="@+id/orderId"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/addToFavourites2"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Название заказа" />
 

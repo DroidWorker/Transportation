@@ -125,6 +125,92 @@ class Repository(private val dao: MainDao) : KoinComponent {
         authToken = null
     }
 
+    suspend fun addOrderPing(orderId: String): AddPingResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching AddPingResponse.Failure("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/order_ping_set",
+                formParameters = Parameters.build {
+                    append("ping_user_id", orderId)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        json.decodeFromString<AddPingResponse.Success>(responseBody)
+    }.getOrElse { AddPingResponse.Failure(it.stackTraceToString()) }
+    suspend fun addAdvertPing(orderId: String): AddPingResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching AddPingResponse.Failure("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/advert_ping_set",
+                formParameters = Parameters.build {
+                    append("ping_user_id", orderId)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        json.decodeFromString<AddPingResponse.Success>(responseBody)
+    }.getOrElse { AddPingResponse.Failure(it.stackTraceToString()) }
+
+    suspend fun addAdvertToFavorite(orderId: String): AddFavoriteResponsee = kotlin.runCatching {
+        val token = authToken ?: return@runCatching AddFavoriteResponsee.Failure("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/advert_set_favorite",
+                formParameters = Parameters.build {
+                    append("order_id", orderId)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        json.decodeFromString<AddFavoriteResponsee.Success>(responseBody)
+    }.getOrElse { AddFavoriteResponsee.Failure(it.stackTraceToString()) }
+    suspend fun addOrderToFavorite(orderId: String): AddFavoriteResponsee = kotlin.runCatching {
+        val token = authToken ?: return@runCatching AddFavoriteResponsee.Failure("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/order_set_favorite",
+                formParameters = Parameters.build {
+                    append("advert_id", orderId)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        json.decodeFromString<AddFavoriteResponsee.Success>(responseBody)
+    }.getOrElse { AddFavoriteResponsee.Failure(it.stackTraceToString()) }
+
+    suspend fun search(str : String): SearchResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching SearchResponse.Failure("token is null")
+        val response: HttpResponse = client.submitForm(url = "http://api-transport.mvp-pro.top/api/v1/search",
+            formParameters = Parameters.build {
+                append("q", str)
+            }
+        ) {
+            headers { append("X-Access-Token", token) }
+        }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+        kotlin.runCatching {
+            val map = json.decodeFromString<Map<String, SResultDTO>>(responseBody)
+            SearchResponse.Success(map)
+        }.getOrElse {
+            println("searched = $it")
+            json.decodeFromString<SearchResponse.Failure>(responseBody)
+        }
+    }.getOrElse { SearchResponse.Failure(it.stackTraceToString()) }
+
     fun advertCategoriesFlow() = dao.advertCategoriesFlow().map { list -> list.sortedBy { it.id } }
 
     private suspend fun categoriesRequest(token: String, type: String, id: String = "0"): String =
@@ -388,7 +474,10 @@ class Repository(private val dao: MainDao) : KoinComponent {
             ) {
                 headers { append("X-Access-Token", token) }
             }
-        val responseBody: String = response.receive()
+        var responseBody: String = response.receive()
+        if (responseBody.contains(",\"photo\":[]")) {
+            responseBody = responseBody.replace(",\"photo\":[]", ",\"photo\":{}")
+        }
         val json = Json.Default
 
         kotlin.runCatching {

@@ -12,10 +12,7 @@ import androidx.lifecycle.viewModelScope
 import com.app.transportation.R
 import com.app.transportation.data.AuthTokenNotFoundException
 import com.app.transportation.data.Repository
-import com.app.transportation.data.api.AdvertCreateResponse
-import com.app.transportation.data.api.AdvertListResponse
-import com.app.transportation.data.api.OrderListResponse
-import com.app.transportation.data.api.UpdateProfileResponse
+import com.app.transportation.data.api.*
 import com.app.transportation.data.database.entities.Advert
 import com.app.transportation.data.database.entities.ProfileRvItem
 import com.app.transportation.data.database.entities.SelectorCategory
@@ -59,6 +56,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    val cachedSearchResult = MutableStateFlow(emptyList<Advert>())
+
     val cachedAdvertsSF = MutableStateFlow(emptyList<Advert>())
     val cachedOrdersSF = MutableStateFlow(emptyList<Advert>())
     val cachedFilterCategoriesSF = MutableStateFlow(emptyList<ServiceType>())
@@ -81,6 +80,34 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         updateMainFragmentData()
     }
 
+    private suspend fun getSearched(str : String) =
+        (repository.search(str) as? SearchResponse.Success)?.let { response ->
+            response.resMap.map { entry ->
+                Advert(
+                    id = entry.key.toInt(),
+                    viewType = 0,
+                    categoryId = 0,
+                    category = entry.value.category,
+                    subcategoryId = 0,
+                    title = entry.value.title,
+                    date = "null",
+                    time = "null",
+                    price = entry.value.price,
+                    photo = emptyList()
+                )
+            }
+        }
+
+    private suspend fun updateSearched(
+        updateCache: Boolean = false,
+        str: String = ""
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val list = getSearched(str) ?: return@launch
+        println("sresult = $list")
+
+        if (updateCache)
+            cachedSearchResult.tryEmit(list)
+    }
 
     fun updateMainFragmentData() = viewModelScope.launch(Dispatchers.IO) {
         when (val result = repository.updateAdvertCategories()) {
@@ -117,6 +144,80 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     fun getAllCategoryOrders(categoryId: Int) = viewModelScope.launch (Dispatchers.IO){
         updateCategoryOrdersFull(true, categoryId)
         updateFilterThirdLevelCategories(categoryId)
+    }
+    fun getSearchResult(str : String) = viewModelScope.launch (Dispatchers.IO){
+        updateSearched(true, str)
+    }
+
+    fun addAdvertFavorite(
+        orderId: String
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val result = repository.addAdvertToFavorite(
+            orderId = orderId
+        )
+        when (result) {
+            is AddFavoriteResponsee.Success -> {
+                if (result.message == "Success"||result.message == "Not change")
+                    messageEvent.tryEmit("добавлено в избранное!")
+            }
+            is AddFavoriteResponsee.Failure -> {
+                messageEvent.tryEmit("Ошибка! "+result.message)
+                println(result.message)
+            }
+        }
+    }
+    fun addOrderFavorite(
+        orderId: String
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val result = repository.addOrderToFavorite(
+            orderId = orderId
+        )
+        when (result) {
+            is AddFavoriteResponsee.Success -> {
+                if (result.message == "Success"||result.message == "Not change")
+                    messageEvent.tryEmit("добавлено в избранное!")
+            }
+            is AddFavoriteResponsee.Failure -> {
+                messageEvent.tryEmit("Ошибка! "+result.message)
+                println(result.message+orderId)
+            }
+        }
+    }
+
+    fun addOrderPing(
+        orderId: String
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val result = repository.addOrderPing(
+            orderId = orderId
+        )
+        when (result) {
+            is AddPingResponse.Success -> {
+                if (result.message == "Success"||result.message == "Not change")
+                    messageEvent.tryEmit("отклик оставлен!")
+            }
+            is AddPingResponse.Failure -> {
+                messageEvent.tryEmit("Ошибка! "+result.message)
+                println(result.message)
+            }
+        }
+    }
+
+    fun addAdvertPing(
+        orderId: String
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val result = repository.addAdvertPing(
+            orderId = orderId
+        )
+        when (result) {
+            is AddPingResponse.Success -> {
+                if (result.message == "Success"||result.message == "Not change")
+                    messageEvent.tryEmit("отклик оставлен!")
+            }
+            is AddPingResponse.Failure -> {
+                messageEvent.tryEmit("Ошибка! "+result.message)
+                println(result.message)
+            }
+        }
     }
 
     private suspend fun updateCategoryAdvertsFull(
@@ -165,7 +266,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     date = entry.value.date,
                     time = entry.value.time,
                     price = entry.value.price,
-                    photo = entry.value.photo
+                    photo = emptyList()//entry.value.photo
                 )
             }
         }
@@ -199,7 +300,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     date = entry.value.date,
                     time = entry.value.time,
                     price = entry.value.price,
-                    photo = entry.value.photo
+                    photo = emptyList()//entry.value.photo
                 )
             }
         }

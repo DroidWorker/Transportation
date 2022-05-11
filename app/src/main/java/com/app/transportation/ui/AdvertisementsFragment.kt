@@ -36,8 +36,9 @@ class AdvertisementsFragment : Fragment() {
     private var popupWindow: PopupWindow? = null
 
     private val categoryId by lazy { arguments?.getInt("categoryId") ?: 0 }
-    private val type by lazy { arguments?.getInt("type") ?: 0 }//0-customer 1-seller
+    private val type by lazy { arguments?.getInt("type") ?: 0 }//0-customer 1-seller 2- 3-search result
     private val orderItemShouldOpenId by lazy { arguments?.getInt("clickedItemId") ?: -1 }
+    private val searchText by lazy { arguments?.getString("searchText") ?: "" }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,7 +50,7 @@ class AdvertisementsFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        if (type==0) {
+        if (type==0||type==3) {
             b.city.visibility = View.GONE
             b.filter.visibility = View.GONE
         }
@@ -67,12 +68,16 @@ class AdvertisementsFragment : Fragment() {
         }
 
         super.onViewCreated(view, savedInstanceState)
+        println("tyyyyyyype"+type)
         if (type==1)
             viewModel.getAllCategoryOrders(categoryId)
-        else if (type==2)
+        else if (type==2) {
             viewModel.getAllCategoryAdverts(categoryId)
-        else
+        }
+        else if(type==0)
             viewModel.getCategoryAdverts(categoryId)
+        else
+            viewModel.getSearchResult(searchText)
 
         applyRVAdapter()
 
@@ -99,7 +104,20 @@ class AdvertisementsFragment : Fragment() {
             else if(type == 2)
                 b.createOrder.visibility = View.VISIBLE
 
-        } else {//if customer
+        } else if(type==3) {
+            b.servicesRV.adapter = adapter
+
+            adapter.onClick = {
+                /*if (viewModel.isCustomer.value == true) {
+                    viewModel.cachedAdvert.tryEmit(this)
+                    findNavController().navigate(R.id.advertDetailsFragment)//not use here
+                } else {
+                    viewModel.cachedOrder.tryEmit(this)
+                    findNavController().navigate(R.id.orderDetailsFragment)
+                }*/
+            }
+        }
+        else {//if customer
             b.servicesRV.adapter = adapter1
             adapter1.mode=4
 
@@ -189,6 +207,37 @@ class AdvertisementsFragment : Fragment() {
                 } else {
                     b.beSeller.visibility = View.INVISIBLE
                 }*/
+            }
+        }else if(type==3){
+            viewModel.cachedSearchResult.collectWithLifecycle(viewLifecycleOwner) {
+                adapter.submitList(it)
+                if (adapter.itemCount==0) {
+                    var filler: ArrayList<Advert> = ArrayList()
+                    filler.add(
+                        Advert(
+                            0,
+                            3,
+                            0,
+                            "",
+                            0,
+                            "Ничего не найдено!",
+                            "",
+                            "",
+                            "",
+                            null,
+                            "",
+                            emptyList(),
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            "",
+                            ""
+                        )
+                    )
+                    adapter.submitList(filler.toList())
+                }
             }
         } else {
             viewModel.addAdvertScreenCategoriesFlowAll().collectWithLifecycle(viewLifecycleOwner) {

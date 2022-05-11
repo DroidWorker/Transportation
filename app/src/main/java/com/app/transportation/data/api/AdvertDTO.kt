@@ -13,5 +13,5 @@ data class AdvertDTO(
     val title: String,
     val price: String,
     val description: String,
-    val photo: List<String>
+    val photo: Map<String, String>
 )

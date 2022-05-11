@@ -57,6 +57,7 @@ class AdvertDetailsFragment : Fragment() {
             advert?.apply {
                 b.title.text = title
                 b.addToFavourites.setColorFilter(0)
+                b.addToFavourites.tag = id
                 b.name.text = "Какое-то имя"
                 b.telNumber.text = "Какой-то номер"
                 b.location.text = "Какое-то местоположение"
@@ -103,10 +104,11 @@ class AdvertDetailsFragment : Fragment() {
             }
         }
         b.addToFavourites.setOnClickListener {
-
+            b.addToFavourites.setColorFilter(1)
+            viewModel.addAdvertFavorite(b.addToFavourites.tag.toString())
         }
         b.acceptService.setOnClickListener {
-
+            viewModel.addAdvertPing(b.addToFavourites.tag.toString())
         }
         b.prevPhoto.setOnClickListener {
             viewModel.adfPrevPhoto()
