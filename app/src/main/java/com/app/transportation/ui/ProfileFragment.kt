@@ -146,19 +146,6 @@ class ProfileFragment : Fragment() {
             it.doAfterTextChanged { checkIfProfileChanged() }
         }
 
-       /* telNumberListener = MaskedTextChangedListener(
-            "[0] [000] [000] [00] [00]",
-            true, b.telNumberET, null,
-            object : MaskedTextChangedListener.ValueListener {
-                override fun onTextChanged(
-                    maskFilled: Boolean,
-                    extractedValue: String,
-                    formattedValue: String
-                ) {
-                    checkIfProfileChanged()
-                }
-            }
-        )*/
         b.telNumberET.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
             }
@@ -170,6 +157,7 @@ class ProfileFragment : Fragment() {
                 if (b.telNumberET.text.toString() != basePhone && s?.matches("^[+]?[0-9]{0,13}\$".toRegex()) == false){
                     b.telNumberET.setText(b.telNumberET.text?.substring(0, b.telNumberET.length()-1))
                 }
+                checkIfProfileChanged()
             }
         })
         //b.telNumberET.onFocusChangeListener = telNumberListener

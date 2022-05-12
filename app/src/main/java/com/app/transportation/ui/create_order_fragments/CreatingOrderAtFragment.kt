@@ -1,11 +1,13 @@
 package com.app.transportation.ui.create_order_fragments
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -16,6 +18,7 @@ import com.app.transportation.core.*
 import com.app.transportation.databinding.FragmentCreatingOrderAtBinding
 import com.app.transportation.ui.MainViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 
@@ -30,6 +33,11 @@ class CreatingOrderAtFragment : Fragment() {
 
     private val categoryId by lazy { arguments?.getInt("id", 1) ?: 1 }
     private val isEdit by lazy {arguments?.getInt("isEdit", 0) ?: 0}
+
+    private val obtainPhotoUriLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            result.data?.data?.let { uri -> viewModel.cafApplyPhotoByUri(uri) }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -81,6 +89,20 @@ class CreatingOrderAtFragment : Fragment() {
     private fun applyListeners() {
         b.selectDateTime.setOnClickListener{
             showDatePicker()
+        }
+
+        b.photo.setOnClickListener{
+            val position = viewModel.cafTempPhotoUris.value.first
+            val currentValue = viewModel.cafTempPhotoUris.value.second.getOrNull(position)
+            currentValue?.let {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Удалить фото?")
+                    .setPositiveButton("Да") { _, _ ->
+                        viewModel.cafRemoveCurrentPhoto()
+                    }
+                    .setNegativeButton("Нет") { _, _ -> }
+                    .show()
+            } ?: importViaSystemFE()
         }
 
         b.order.setOnClickListener {
@@ -156,6 +178,7 @@ class CreatingOrderAtFragment : Fragment() {
         val isToPlacePresent = b.toPlace.text.isNotBlank()
         val isToNamePresent = b.toName.text.isNotBlank()
         val isToTelNumberPresent = b.toTelNumber.text.isNotBlank()
+        val isPhotoSet =  b.photo.tag==1
 
         return isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
                 isToNamePresent && isToTelNumberPresent
@@ -183,6 +206,13 @@ class CreatingOrderAtFragment : Fragment() {
             .build()
             .apply { addOnPositiveButtonClickListener { onTimeSelected(hour, minute) } }
             .show(parentFragmentManager, MaterialTimePicker::class.java.canonicalName)
+    }
+
+    private fun importViaSystemFE() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .setType("*/*")
+        runCatching { obtainPhotoUriLauncher.launch(intent) }
     }
 
     private fun onTimeSelected(hour: Int, minute: Int) {

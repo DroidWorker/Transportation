@@ -254,6 +254,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     private suspend fun getAdvertsFull() =
         (repository.getAdvertFullList() as? AdvertListResponse.Success)?.let { response ->
             response.advertMap.map { entry ->
+                val photoList : ArrayList<String> = ArrayList()
+                entry.value.photo.forEach{photoitem->
+                    photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                }
                 Advert(
                     id = entry.key.toInt(),
                     viewType = 0,
@@ -266,7 +270,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     date = entry.value.date,
                     time = entry.value.time,
                     price = entry.value.price,
-                    photo = emptyList()//entry.value.photo
+                    photo = photoList.toList()
                 )
             }
         }
@@ -288,6 +292,11 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     private suspend fun getAdverts() =
         (repository.getAdvertList() as? AdvertListResponse.Success)?.let { response ->
             response.advertMap.map { entry ->
+                val photoList : ArrayList<String> = ArrayList()
+                entry.value.photo.forEach{photoitem->
+                    photoList.add(photoitem.value)
+                }
+
                 Advert(
                     id = entry.key.toInt(),
                     viewType = 0,
@@ -300,7 +309,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     date = entry.value.date,
                     time = entry.value.time,
                     price = entry.value.price,
-                    photo = emptyList()//entry.value.photo
+                    photo = photoList.toList()
                 )
             }
         }
@@ -322,6 +331,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     private suspend fun getOrdersFull() =
         (repository.getOrderFullList() as? OrderListResponse.Success)?.let { response ->
             response.orderMap.map { entry ->
+                val photoList : ArrayList<String> = ArrayList()
+                entry.value.photo.forEach{photoitem->
+                    photoList.add(photoitem.value)
+                }
                 Advert(
                     id = entry.key.toInt(),
                     viewType = 0,
@@ -341,7 +354,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     toPlace = "${entry.value.toPlace}",
                     payment = entry.value.payment,
                     description = entry.value.description,
-                    photo = entry.value.photo
+                    photo = photoList.toList()
                 )
             }
         }
@@ -349,6 +362,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     private suspend fun getOrders() =
         (repository.getOrderList() as? OrderListResponse.Success)?.let { response ->
             response.orderMap.map { entry ->
+                val photoList : ArrayList<String> = ArrayList()
+                entry.value.photo.forEach{photoitem->
+                    photoList.add(photoitem.value)
+                }
                 Advert(
                     id = entry.key.toInt(),
                     viewType = 0,
@@ -368,7 +385,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     toPlace = "${entry.value.toPlace}",
                     payment = entry.value.payment,
                     description = entry.value.description,
-                    photo = entry.value.photo
+                    photo = photoList.toList()
                 )
             }
         }
@@ -609,7 +626,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         categoryId: String,
         photos: List<String>
     ) = viewModelScope.launch(Dispatchers.IO) {
-        println("photpooos + "+photos[0])
         when (val result = repository.createAdvert(title, price, description, categoryId, photos)) {
             is AdvertCreateResponse.Success -> {
                 if (result.id != null)

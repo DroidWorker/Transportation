@@ -1,6 +1,7 @@
 package com.app.transportation.ui.adapters
 
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.util.Base64
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -16,6 +17,7 @@ import com.app.transportation.databinding.ItemAdvertCategoryTextItemBinding
 import com.app.transportation.databinding.ItemNoadvertsFillerBinding
 import com.app.transportation.databinding.ItemServiceFirstBinding
 import com.app.transportation.databinding.ItemServiceSecondBinding
+import com.google.android.material.snackbar.Snackbar
 
 class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffCallback()) {
 
@@ -71,9 +73,15 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
                 }
                 price.text = item.price.toString()
                 item.photo.firstOrNull()?.let { base64String ->
-                    val byteArray = Base64.decode(base64String, Base64.DEFAULT)
-                    val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-                    photo.setImageBitmap(bitmap)
+                    try {
+                        val byteArray = Base64.decode(base64String, Base64.DEFAULT)
+                        val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                        photo.setImageBitmap(bitmap)
+                        photo.setBackgroundDrawable(BitmapDrawable(bitmap))
+                    }
+                    catch (ex : Exception){
+                        println("Error: "+ex.message.toString())
+                    }
                 }
                 Unit
             }

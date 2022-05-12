@@ -104,6 +104,10 @@ class CreatingAdvertisementFragment : Fragment() {
                     viewModel.messageEvent.tryEmit("Не заполнено поле с ценой")
                     return@setOnClickListener
                 }
+                b.photo.tag!=1 -> {
+                    viewModel.messageEvent.tryEmit("Фото не добавлено")
+                    return@setOnClickListener
+                }
             }
             val photos = mutableListOf<String>()
             viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
@@ -172,6 +176,7 @@ class CreatingAdvertisementFragment : Fragment() {
             it.second.getOrNull(it.first)?.let { uri ->
                 b.photo.scaleType = ImageView.ScaleType.FIT_XY
                 b.photo.setImageURI(uri)
+                b.photo.tag = 1
             } ?: kotlin.run {
                 b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
                 b.photo.setImageResource(R.drawable.ic_photo)

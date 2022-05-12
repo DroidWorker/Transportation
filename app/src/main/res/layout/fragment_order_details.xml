@@ -19,10 +19,11 @@
 
     <TextView
         android:id="@+id/orderName"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:fontFamily="@font/montserrat"
+        android:singleLine="false"
         android:textColor="@color/title_color"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -256,14 +257,14 @@
         android:backgroundTint="@color/primary_color"
         android:paddingHorizontal="30dp"
         android:paddingVertical="17dp"
-        android:text="Заказать"
+        android:text="Взять в работу"
         android:textAllCaps="false"
         android:textColor="@color/white"
+        app:cornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/paymentMethod"
-        app:layout_constraintWidth_percent="0.5"
-        app:cornerRadius="10dp" />
+        app:layout_constraintWidth_percent="0.5" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

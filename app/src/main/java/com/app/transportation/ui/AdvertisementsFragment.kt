@@ -68,10 +68,12 @@ class AdvertisementsFragment : Fragment() {
         }
 
         super.onViewCreated(view, savedInstanceState)
-        println("tyyyyyyype"+type)
-        if (type==1)
+        if (type==1){
+            viewModel.cachedOrdersSF.tryEmit(emptyList())
             viewModel.getAllCategoryOrders(categoryId)
+        }
         else if (type==2) {
+            viewModel.cachedAdvertsSF.tryEmit(emptyList())
             viewModel.getAllCategoryAdverts(categoryId)
         }
         else if(type==0)

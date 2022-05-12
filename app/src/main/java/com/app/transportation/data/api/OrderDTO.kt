@@ -22,5 +22,5 @@ data class OrderDTO(
     val name: String,
     val phone: String,
     val payment: String,
-    val photo: List<String>
+    val photo: Map<String, String>
 )
