@@ -7,18 +7,31 @@
     android:layout_height="wrap_content"
     android:padding="@dimen/sideMargin">
 
-    <TextView
-        android:id="@+id/title"
+    <ImageView
+        android:id="@+id/addToFavourites4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp"
+        android:src="@drawable/ic_favourites"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/cardView"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="@+id/cardView"
+        app:layout_constraintTop_toTopOf="@+id/cardView" />
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
         android:fontFamily="@font/montserrat"
         android:textColor="@color/secondary_color"
         android:textSize="24sp"
         android:textStyle="bold"
         app:layout_constrainedWidth="true"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/addToFavourites4"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Выровнять территорию 10 соток" />
 

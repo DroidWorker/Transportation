@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingHorizontal="25dp">
@@ -12,7 +13,7 @@
         android:layout_height="wrap_content"
         android:fontFamily="@font/montserrat"
         android:text="Регистрация"
-        android:textColor="@color/title_color"
+        android:textColor="@color/primary_color"
         android:textSize="22sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
@@ -210,13 +211,13 @@
         app:layout_constraintWidth_percent="0.8" />
 
     <TextView
-        android:id="@+id/terms"
+        android:id="@+id/termsText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
-        android:gravity="center_horizontal"
         android:fontFamily="@font/montserrat"
-        android:text="Регистрируясь, вы принимаете следующие документы \nУсловия использования и Политика конфиденциальности."
+        android:gravity="center_horizontal"
+        android:text="Регистрируясь, вы принимаете следующие документы"
         android:textColor="@color/text_color"
         android:textSize="12sp"
         app:layout_constraintBottom_toTopOf="@+id/alreadyRegisteredQuestion"
@@ -269,5 +270,34 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.94" />
+
+    <TextView
+        android:id="@+id/termsofuse"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat"
+        android:gravity="center_horizontal"
+        android:text="Условия использования"
+        android:textColor="@color/primary_color"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/alreadyRegisteredQuestion"
+        app:layout_constraintEnd_toStartOf="@+id/privacy_policy"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/termsText" />
+
+    <TextView
+        android:id="@+id/privacy_policy"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="21dp"
+        android:fontFamily="@font/montserrat"
+        android:gravity="center_horizontal"
+        android:text="Политика конфиденциальности"
+        android:textColor="@color/primary_color"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@+id/alreadyRegisteredQuestion"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/termsofuse"
+        app:layout_constraintTop_toBottomOf="@+id/termsText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

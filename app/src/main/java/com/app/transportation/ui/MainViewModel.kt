@@ -13,10 +13,7 @@ import com.app.transportation.R
 import com.app.transportation.data.AuthTokenNotFoundException
 import com.app.transportation.data.Repository
 import com.app.transportation.data.api.*
-import com.app.transportation.data.database.entities.Advert
-import com.app.transportation.data.database.entities.ProfileRvItem
-import com.app.transportation.data.database.entities.SelectorCategory
-import com.app.transportation.data.database.entities.ServiceType
+import com.app.transportation.data.database.entities.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -61,6 +58,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     val cachedAdvertsSF = MutableStateFlow(emptyList<Advert>())
     val cachedOrdersSF = MutableStateFlow(emptyList<Advert>())
     val cachedFilterCategoriesSF = MutableStateFlow(emptyList<ServiceType>())
+    val cachedStatic = MutableStateFlow<String>("loading...")
+
+    val cachedAdvertFavorite = MutableStateFlow(emptyList<Advert>())
+    val cachedOrderFavorite = MutableStateFlow(emptyList<Advert>())
 
     val cachedAdvert = MutableStateFlow<Advert?>(null)
     val cachedOrder = MutableStateFlow<Advert?>(null)
@@ -80,7 +81,19 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         updateMainFragmentData()
     }
 
-    private suspend fun getSearched(str : String) =
+    private suspend fun updateStatic(type: String) = viewModelScope.launch(Dispatchers.IO) {
+        println("steeep01")
+        val result: String = getStaticDatas(type) ?: return@launch
+        cachedStatic.tryEmit(result)
+    }
+
+    private suspend fun getStaticDatas(type: String) =
+        (repository.getStaticData(type) as? StaticDateResponse.Success)?.let { response ->
+            println("steeep03")
+            response.text
+        }
+
+    private suspend fun getSearched(str: String) =
         (repository.search(str) as? SearchResponse.Success)?.let { response ->
             response.resMap.map { entry ->
                 Advert(
@@ -132,21 +145,37 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
         updateFilterThirdLevelCategories(categoryId)
     }
+
     fun getCategoryOrders(categoryId: Int) = viewModelScope.launch(Dispatchers.IO) {
-            updateOrders(true, categoryId)
+        updateOrders(true, categoryId)
 
         updateFilterThirdLevelCategories(categoryId)
     }
-    fun getAllCategoryAdverts(categoryId: Int) = viewModelScope.launch (Dispatchers.IO){
+
+    fun getAllCategoryAdverts(categoryId: Int) = viewModelScope.launch(Dispatchers.IO) {
         updateCategoryAdvertsFull(true, categoryId)
         updateFilterThirdLevelCategories(categoryId)
     }
-    fun getAllCategoryOrders(categoryId: Int) = viewModelScope.launch (Dispatchers.IO){
+
+    fun getAllCategoryOrders(categoryId: Int) = viewModelScope.launch(Dispatchers.IO) {
         updateCategoryOrdersFull(true, categoryId)
         updateFilterThirdLevelCategories(categoryId)
     }
-    fun getSearchResult(str : String) = viewModelScope.launch (Dispatchers.IO){
+
+    fun getSearchResult(str: String) = viewModelScope.launch(Dispatchers.IO) {
         updateSearched(true, str)
+    }
+
+    fun getStaticData(type: String) = viewModelScope.launch(Dispatchers.IO) {
+        updateStatic(type)
+    }
+
+    fun getOrdersFavorite() = viewModelScope.launch(Dispatchers.IO) {
+        updateFavoriteOrdersFull()
+    }
+
+    fun getAdvertsFavorite() = viewModelScope.launch(Dispatchers.IO) {
+        updateFavoriteAdvertsFull()
     }
 
     fun addAdvertFavorite(
@@ -157,15 +186,16 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         )
         when (result) {
             is AddFavoriteResponsee.Success -> {
-                if (result.message == "Success"||result.message == "Not change")
+                if (result.message == "Success" || result.message == "Not change")
                     messageEvent.tryEmit("добавлено в избранное!")
             }
             is AddFavoriteResponsee.Failure -> {
-                messageEvent.tryEmit("Ошибка! "+result.message)
+                messageEvent.tryEmit("Ошибка! " + result.message)
                 println(result.message)
             }
         }
     }
+
     fun addOrderFavorite(
         orderId: String
     ) = viewModelScope.launch(Dispatchers.IO) {
@@ -174,14 +204,126 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         )
         when (result) {
             is AddFavoriteResponsee.Success -> {
-                if (result.message == "Success"||result.message == "Not change")
+                if (result.message == "Success" || result.message == "Not change")
                     messageEvent.tryEmit("добавлено в избранное!")
             }
             is AddFavoriteResponsee.Failure -> {
-                messageEvent.tryEmit("Ошибка! "+result.message)
-                println(result.message+orderId)
+                messageEvent.tryEmit("Ошибка! " + result.message)
+                println(result.message + orderId)
             }
         }
+    }
+
+    private suspend fun getOrdersFavoriteFull() =
+        (repository.getOrderFullList() as? OrderListResponse.Success)?.let { response ->
+            response.orderMap.map { entry ->
+                if (entry.key!="empty") {
+                    val photoList: ArrayList<String> = ArrayList()
+                    entry.value.photo.forEach { photoitem ->
+                        photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                    }
+                    Advert(
+                        id = entry.key.toInt(),
+                        viewType = 0,
+                        categoryId = advertCategoriesFlow.value.find {
+                            it.id == entry.value.categoryId.toInt()
+                        }?.parentId ?: 4,
+                        category = entry.value.category,
+                        subcategoryId = entry.value.categoryId.toInt(),
+                        title = entry.value.description,
+                        date = entry.value.date,
+                        time = entry.value.time,
+                        fromCity = "${entry.value.fromCity}",
+                        fromRegion = "${entry.value.fromRegion}",
+                        fromPlace = "${entry.value.fromPlace}",
+                        toCity = "${entry.value.toCity}",
+                        toRegion = "${entry.value.toRegion}",
+                        toPlace = "${entry.value.toPlace}",
+                        payment = entry.value.payment,
+                        description = entry.value.description,
+                        photo = photoList.toList()
+                    )
+                }
+                else
+                {
+                    Advert(
+                        id = 0,
+                        viewType = 2,
+                        categoryId = 0,
+                        category = "",
+                        subcategoryId = 0,
+                        title = "Избранного не найдено",
+                        date = "",
+                        time = "",
+                        fromCity = "",
+                        fromRegion = "",
+                        fromPlace = "",
+                        toCity = "",
+                        toRegion = "",
+                        toPlace = "",
+                        payment = "",
+                        description = "",
+                        photo = emptyList())
+                }
+            }
+        }
+    private suspend fun getAdvertsFavoriteFull() =
+        (repository.getAdvertFullList() as? AdvertListResponse.Success)?.let { response ->
+            response.advertMap.map { entry ->
+                if (entry.key != "empty") {
+                    val photoList: ArrayList<String> = ArrayList()
+                    entry.value.photo.forEach { photoitem ->
+                        photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                    }
+                    Advert(
+                        id = entry.key.toInt(),
+                        viewType = 0,
+                        categoryId = advertCategoriesFlow.value.find {
+                            it.id == entry.value.categoryId.toInt()
+                        }?.parentId ?: 4,
+                        category = entry.value.category,
+                        subcategoryId = entry.value.categoryId.toInt(),
+                        title = entry.value.title,
+                        date = entry.value.date,
+                        time = entry.value.time,
+                        price = entry.value.price,
+                        photo = photoList.toList()
+                    )
+                }
+                else{
+                    Advert(
+                        id = 0,
+                        viewType = 2,
+                        categoryId = 0,
+                        category = "",
+                        subcategoryId = 0,
+                        title = "Избранного не найдено",
+                        date = "",
+                        time = "",
+                        fromCity = "",
+                        fromRegion = "",
+                        fromPlace = "",
+                        toCity = "",
+                        toRegion = "",
+                        toPlace = "",
+                        payment = "",
+                        description = "",
+                        photo = emptyList())
+                }
+            }
+        }
+
+    private suspend fun updateFavoriteAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
+        val list = getAdvertsFavoriteFull() ?: return@launch
+        println("adverts Favorite fuuuuuuuuuuul = $list")
+
+        cachedAdvertFavorite.tryEmit(list)
+    }
+    private suspend fun updateFavoriteOrdersFull() = viewModelScope.launch(Dispatchers.IO) {
+        val list = getOrdersFavoriteFull() ?: return@launch
+        println("orders Favorite fuuuuuuuuuuul = $list")
+
+        cachedOrderFavorite.tryEmit(list)
     }
 
     fun addOrderPing(
@@ -294,7 +436,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             response.advertMap.map { entry ->
                 val photoList : ArrayList<String> = ArrayList()
                 entry.value.photo.forEach{photoitem->
-                    photoList.add(photoitem.value)
+                    photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
                 }
 
                 Advert(
@@ -333,7 +475,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             response.orderMap.map { entry ->
                 val photoList : ArrayList<String> = ArrayList()
                 entry.value.photo.forEach{photoitem->
-                    photoList.add(photoitem.value)
+                    photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
                 }
                 Advert(
                     id = entry.key.toInt(),
@@ -364,7 +506,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             response.orderMap.map { entry ->
                 val photoList : ArrayList<String> = ArrayList()
                 entry.value.photo.forEach{photoitem->
-                    photoList.add(photoitem.value)
+                    photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
                 }
                 Advert(
                     id = entry.key.toInt(),

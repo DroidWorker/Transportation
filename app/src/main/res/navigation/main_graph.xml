@@ -73,5 +73,13 @@
         android:id="@+id/creatingOrderRisFragment"
         android:name="com.app.transportation.ui.create_order_fragments.CreatingOrderRisFragment"
         android:label="CreatingOrderRisFragment" />
+    <fragment
+        android:id="@+id/termsFragment"
+        android:name="com.app.transportation.ui.TermsFragment"
+        android:label="TermsFragment" />
+    <fragment
+        android:id="@+id/favouritesFragment"
+        android:name="com.app.transportation.ui.favouritesFragment"
+        android:label="favouritesFragment" />
 
 </navigation>

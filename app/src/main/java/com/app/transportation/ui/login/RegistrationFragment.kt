@@ -127,6 +127,16 @@ class RegistrationFragment : Fragment() {
             val signInIntent : Intent = mGoogleSignInClient!!.signInIntent
             getActivity()?.startActivityForResult(signInIntent, RC_SIGN_IN)
         }
+
+        b.termsofuse.setOnClickListener{
+            findNavController().navigate(R.id.termsFragment,
+                bundleOf("title" to "условия использования"))
+        }
+
+        b.privacyPolicy.setOnClickListener{
+            findNavController().navigate(R.id.termsFragment,
+                bundleOf("title" to "политика конфиденциальности"))
+        }
     }
 
 

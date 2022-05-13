@@ -2,6 +2,7 @@ package com.app.transportation.data
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import androidx.room.Index
 import com.app.transportation.data.api.*
 import com.app.transportation.data.database.MainDao
 import com.app.transportation.data.database.entities.AdvertisementCategory
@@ -191,6 +192,51 @@ class Repository(private val dao: MainDao) : KoinComponent {
         json.decodeFromString<AddFavoriteResponsee.Success>(responseBody)
     }.getOrElse { AddFavoriteResponsee.Failure(it.stackTraceToString()) }
 
+    suspend fun getAdvertFavoriteList(): AdvertListResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching AdvertListResponse.Failure("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/advert_get_favorite",
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        var responseBody: String = response.receive()
+        if (responseBody.contains(",\"photo\":[]")) {
+            responseBody = responseBody.replace(",\"photo\":[]", ",\"photo\":{}")
+        }
+        val json = Json.Default
+
+        kotlin.runCatching {
+            val map = json.decodeFromString<Map<String, AdvertDTO>>(responseBody)
+            AdvertListResponse.Success(map)
+        }.getOrElse {
+            println("it fav alllllllll = $it")
+            json.decodeFromString<AdvertListResponse.Failure>(responseBody)
+        }
+    }.getOrElse { AdvertListResponse.Failure(it.stackTraceToString()) }
+    suspend fun getOrderFavoriteList(): OrderListResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching OrderListResponse.Failure("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/advert_get_favorite",
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        var responseBody: String = response.receive()
+        if (responseBody.contains(",\"photo\":[]")) {
+            responseBody = responseBody.replace(",\"photo\":[]", ",\"photo\":{}")
+        }
+        val json = Json.Default
+
+        kotlin.runCatching {
+            val map = json.decodeFromString<Map<String, OrderDTO>>(responseBody)
+            OrderListResponse.Success(map)
+        }.getOrElse {
+            println("it fav alllllllll = $it")
+            json.decodeFromString<OrderListResponse.Failure>(responseBody)
+        }
+    }.getOrElse { OrderListResponse.Failure(it.stackTraceToString()) }
+
     suspend fun search(str : String): SearchResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching SearchResponse.Failure("token is null")
         val response: HttpResponse = client.submitForm(url = "http://api-transport.mvp-pro.top/api/v1/search",
@@ -210,6 +256,27 @@ class Repository(private val dao: MainDao) : KoinComponent {
             json.decodeFromString<SearchResponse.Failure>(responseBody)
         }
     }.getOrElse { SearchResponse.Failure(it.stackTraceToString()) }
+
+    suspend fun getStaticData(type : String): StaticDateResponse = kotlin.runCatching {
+        val token = authToken ?: ""
+        val response: HttpResponse = client.submitForm(url = "http://api-transport.mvp-pro.top/api/v1/datas_text",
+            formParameters = Parameters.build {
+                append("type", type)
+            }
+        ) {
+            headers { append("X-Access-Token", token) }
+        }
+        val responseBody: String = response.receive()
+        println("steeep05"+responseBody)
+        val json = Json.Default
+        kotlin.runCatching {
+            val map = json.decodeFromString<String>(responseBody)
+            StaticDateResponse.Success(map)
+        }.getOrElse {
+            println("Static data = $it")
+            json.decodeFromString<StaticDateResponse.Failure>(responseBody)
+        }
+    }.getOrElse { StaticDateResponse.Failure(it.stackTraceToString()) }
 
     fun advertCategoriesFlow() = dao.advertCategoriesFlow().map { list -> list.sortedBy { it.id } }
 
@@ -426,7 +493,10 @@ class Repository(private val dao: MainDao) : KoinComponent {
             ) {
                 headers { append("X-Access-Token", token) }
             }
-        val responseBody: String = response.receive()
+        var responseBody: String = response.receive()
+        if (responseBody.contains(",\"photo\":[]")) {
+            responseBody = responseBody.replace(",\"photo\":[]", ",\"photo\":{}")
+        }
         val json = Json.Default
 
         println("rb = $responseBody")
@@ -454,7 +524,10 @@ class Repository(private val dao: MainDao) : KoinComponent {
             ) {
                 headers { append("X-Access-Token", token) }
             }
-        val responseBody: String = response.receive()
+        var responseBody: String = response.receive()
+        if (responseBody.contains(",\"photo\":[]")) {
+            responseBody = responseBody.replace(",\"photo\":[]", ",\"photo\":{}")
+        }
         val json = Json.Default
 
         kotlin.runCatching {
@@ -485,6 +558,10 @@ class Repository(private val dao: MainDao) : KoinComponent {
             AdvertListResponse.Success(map)
         }.getOrElse {
             println("it alllllllll = $it")
+            if (responseBody.contains("Object not found")){
+                var emty : Map<String, AdvertDTO> = mutableMapOf("empty" to AdvertDTO("","","","","","","", "", emptyMap()))
+                AdvertListResponse.Success(emty)
+            }
             json.decodeFromString<AdvertListResponse.Failure>(responseBody)
         }
     }.getOrElse { AdvertListResponse.Failure(it.stackTraceToString()) }
@@ -505,6 +582,10 @@ class Repository(private val dao: MainDao) : KoinComponent {
             OrderListResponse.Success(map)
         }.getOrElse {
             println("it alllllllll = $it")
+            if (responseBody.contains("Object not found")){
+                var emty : Map<String, OrderDTO> = mutableMapOf("empty" to OrderDTO("","","","","","","","","","","","","","","","","", emptyMap()))
+                OrderListResponse.Success(emty)
+            }
             json.decodeFromString<OrderListResponse.Failure>(responseBody)
         }
     }.getOrElse { OrderListResponse.Failure(it.stackTraceToString()) }

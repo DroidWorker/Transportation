@@ -2,11 +2,15 @@ package com.app.transportation.ui.create_order_fragments
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.opengl.Visibility
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
@@ -40,6 +44,8 @@ class CreatingAdvertisementFragment : Fragment() {
 
     private val categoryId by lazy { arguments?.getInt("id", 1) ?: 1 }
     private val mode by lazy { arguments?.getInt("mode", 1) ?: 0 }//if mode 1 category has 4level item show spinner
+    private  val isEdit by lazy { arguments?.getInt("isEdit", 0) ?: 0}
+    private var EditCatId : Int? = 0
 
     private val obtainPhotoUriLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -59,7 +65,10 @@ class CreatingAdvertisementFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         (activity as? MainActivity)?.apply {
-            b.title.text = "Профиль"
+            if (isEdit==0)
+                b.title.text = "Профиль"
+            else
+                b.title.text = "Редактирование"
             b.toolbars.isVisible = true
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
@@ -68,6 +77,34 @@ class CreatingAdvertisementFragment : Fragment() {
 
         b.name.text = viewModel.profileFlow.value?.name
         b.telNumber.text = viewModel.profileFlow.value?.telNumber
+        if (isEdit==1) {
+            b.addAdvert.text = "Применить"
+            b.addToFavourites.visibility = View.GONE
+
+            viewModel.userOrdersAdvertsFlow.collectWithLifecycle(this) {
+                it.forEach { item ->
+                    if (item.id==categoryId) {
+                        EditCatId = item.categoryId
+                        b.advertTitle.setText(item.title)
+                        b.price.setText(item.price)
+                        b.location.text = viewModel.profileFlow.value?.cityArea
+                        b.description.text = item.description
+                        item.photo.firstOrNull()?.let { base64String ->
+                            try {
+                                println("baaase"+base64String)
+                                val byteArray = Base64.decode(base64String, Base64.DEFAULT)
+                                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                                b.photo.setImageBitmap(bitmap)
+                                b.photo.setBackgroundDrawable(BitmapDrawable(bitmap))
+                            }
+                            catch (ex : Exception){
+                                println("Error: "+ex.message.toString())
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
         applyListeners()
 
@@ -79,60 +116,116 @@ class CreatingAdvertisementFragment : Fragment() {
             runDescriptionEditor()
         }
         b.addAdvert.setOnClickListener {
-            when {
-                b.name.text.isBlank() && b.telNumber.text.isBlank() -> {
-                    viewModel.messageEvent.tryEmit("В профиле отсутствуют имя и телефон")
-                    return@setOnClickListener
+            if (isEdit==0) {
+                when {
+                    b.name.text.isBlank() && b.telNumber.text.isBlank() -> {
+                        viewModel.messageEvent.tryEmit("В профиле отсутствуют имя и телефон")
+                        return@setOnClickListener
+                    }
+                    b.name.text.isBlank() -> {
+                        viewModel.messageEvent.tryEmit("В профиле отсутствует имя")
+                        return@setOnClickListener
+                    }
+                    b.telNumber.text.isBlank() -> {
+                        viewModel.messageEvent.tryEmit("В профиле отсутствует телефон")
+                        return@setOnClickListener
+                    }
+                    b.advertTitle.text.isBlank() && b.price.text.isBlank() -> {
+                        viewModel.messageEvent.tryEmit("Не заполнены поля с названием и ценой")
+                        return@setOnClickListener
+                    }
+                    b.advertTitle.text.isBlank() -> {
+                        viewModel.messageEvent.tryEmit("Не заполнено поле с названием")
+                        return@setOnClickListener
+                    }
+                    b.price.text.isBlank() -> {
+                        viewModel.messageEvent.tryEmit("Не заполнено поле с ценой")
+                        return@setOnClickListener
+                    }
+                    b.photo.tag != 1 -> {
+                        viewModel.messageEvent.tryEmit("Фото не добавлено")
+                        return@setOnClickListener
+                    }
                 }
-                b.name.text.isBlank() -> {
-                    viewModel.messageEvent.tryEmit("В профиле отсутствует имя")
-                    return@setOnClickListener
+                val photos = mutableListOf<String>()
+                viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
+                    val contentResolver = requireContext().applicationContext.contentResolver
+                    contentResolver.openInputStream(it)?.use {
+                        val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
+                        File(requireContext().cacheDir.path + "/ttt.txt").writeText(base64String)
+                    }
                 }
-                b.telNumber.text.isBlank() -> {
-                    viewModel.messageEvent.tryEmit("В профиле отсутствует телефон")
-                    return@setOnClickListener
+                viewModel.cafTempPhotoUris.value.second.forEach { uri ->
+                    val contentResolver = requireContext().applicationContext.contentResolver
+                    contentResolver.openInputStream(uri)?.use {
+                        val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
+                        photos.add("'data:image/jpg;base64,$base64String'")
+                    }
                 }
-                b.advertTitle.text.isBlank() && b.price.text.isBlank() -> {
-                    viewModel.messageEvent.tryEmit("Не заполнены поля с названием и ценой")
-                    return@setOnClickListener
-                }
-                b.advertTitle.text.isBlank() -> {
-                    viewModel.messageEvent.tryEmit("Не заполнено поле с названием")
-                    return@setOnClickListener
-                }
-                b.price.text.isBlank() -> {
-                    viewModel.messageEvent.tryEmit("Не заполнено поле с ценой")
-                    return@setOnClickListener
-                }
-                b.photo.tag!=1 -> {
-                    viewModel.messageEvent.tryEmit("Фото не добавлено")
-                    return@setOnClickListener
-                }
-            }
-            val photos = mutableListOf<String>()
-            viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
-                val contentResolver = requireContext().applicationContext.contentResolver
-                contentResolver.openInputStream(it)?.use {
-                    val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
-                    File(requireContext().cacheDir.path + "/ttt.txt").writeText(base64String)
-                }
-            }
-            viewModel.cafTempPhotoUris.value.second.forEach { uri ->
-                val contentResolver = requireContext().applicationContext.contentResolver
-                contentResolver.openInputStream(uri)?.use {
-                    val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
-                    photos.add("'data:image/jpg;base64,$base64String'")
-                }
-            }
-            viewModel.createAdvert(
-                title = b.advertTitle.text.toString(),
-                price = b.price.text.toString(),
-                description = b.description.text.toString(),
-                categoryId = categoryId.toString(),
-                photos = photos
-            )
+                viewModel.createAdvert(
+                    title = b.advertTitle.text.toString(),
+                    price = b.price.text.toString(),
+                    description = b.description.text.toString(),
+                    categoryId = categoryId.toString(),
+                    photos = photos
+                )
 
-            findNavController().navigateUp()
+                findNavController().navigateUp()
+            }
+            else{
+                when {
+                    b.name.text.isBlank() && b.telNumber.text.isBlank() -> {
+                        viewModel.messageEvent.tryEmit("В профиле отсутствуют имя и телефон")
+                        return@setOnClickListener
+                    }
+                    b.name.text.isBlank() -> {
+                        viewModel.messageEvent.tryEmit("В профиле отсутствует имя")
+                        return@setOnClickListener
+                    }
+                    b.telNumber.text.isBlank() -> {
+                        viewModel.messageEvent.tryEmit("В профиле отсутствует телефон")
+                        return@setOnClickListener
+                    }
+                    b.advertTitle.text.isBlank() && b.price.text.isBlank() -> {
+                        viewModel.messageEvent.tryEmit("Не заполнены поля с названием и ценой")
+                        return@setOnClickListener
+                    }
+                    b.advertTitle.text.isBlank() -> {
+                        viewModel.messageEvent.tryEmit("Не заполнено поле с названием")
+                        return@setOnClickListener
+                    }
+                    b.price.text.isBlank() -> {
+                        viewModel.messageEvent.tryEmit("Не заполнено поле с ценой")
+                        return@setOnClickListener
+                    }
+                    b.photo.tag != 1 -> {
+                        viewModel.messageEvent.tryEmit("Фото не добавлено")
+                        return@setOnClickListener
+                    }
+                }
+                val photos = mutableListOf<String>()
+                viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
+                    val contentResolver = requireContext().applicationContext.contentResolver
+                    contentResolver.openInputStream(it)?.use {
+                        val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
+                        File(requireContext().cacheDir.path + "/ttt.txt").writeText(base64String)
+                    }
+                }
+                viewModel.cafTempPhotoUris.value.second.forEach { uri ->
+                    val contentResolver = requireContext().applicationContext.contentResolver
+                    contentResolver.openInputStream(uri)?.use {
+                        val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
+                        photos.add("'data:image/jpg;base64,$base64String'")
+                    }
+                }
+                viewModel.editAdvert(
+                    title = b.advertTitle.text.toString(),
+                    price = b.price.text.toString(),
+                    description = b.description.text.toString(),
+                    categoryId = EditCatId!!.toString(),
+                    photos = photos
+                )
+            }
         }
         b.description.setOnClickListener {
             runDescriptionEditor()

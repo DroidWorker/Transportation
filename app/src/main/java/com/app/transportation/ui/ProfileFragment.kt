@@ -131,6 +131,7 @@ class ProfileFragment : Fragment() {
             }
         }
         viewModel.profileAdvertsFlow.collect(this) {
+            println("liiiiist"+it.size)
             profileAdapter.submitList(it)
         }
         viewModel.deletedAdvertPosition.collect(this) { position ->

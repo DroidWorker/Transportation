@@ -115,7 +115,6 @@ class LoginFragment : Fragment() {
             }
             else
             {
-                println("looooogin"+viewModel.VKLogin+"|||"+viewModel.VKPassword)
                 viewModel.authorize(viewModel.VKLogin!!, viewModel.VKPassword!!)
             }
         }

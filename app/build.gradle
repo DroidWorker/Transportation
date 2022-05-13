@@ -58,6 +58,7 @@ dependencies {
     implementation "com.vk:android-sdk-api:3.5.2"
     implementation 'com.google.android.gms:play-services-base:18.0.1'
     implementation 'com.google.android.gms:play-services-auth:20.2.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
 
     // Coroutines
     def coroutines_version = "1.6.0"

@@ -277,7 +277,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                             val phone = jobj.getString("phone").replace("\\s".toRegex(), "")
                                 .replace("*", "0")
                             vm.register(phone, "VK_$id$phone", name)
-                            println("looooogin"+phone+"|||"+"VK_$id$phone")
                             vm.VKLogin = phone
                             vm.VKPassword = "VK_$id$phone"
                             vm.authorize(phone, "VK_$id$phone")
