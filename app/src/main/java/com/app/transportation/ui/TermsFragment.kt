@@ -48,16 +48,16 @@ class TermsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         (activity as? MainActivity)?.apply {
             b.title.text = "Профиль"
-            b.toolbars.isVisible = true
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
 
+        println("getStatic")
         viewModel.getStaticData("privacy_policy")
 
         bview = view
         super.onViewCreated(view, savedInstanceState)
 
-        b.imageButton.setColorFilter(1)
+        b.imageButton.setColorFilter(R.color.secondary_color)
 
         applyObservers()
 

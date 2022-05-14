@@ -23,6 +23,7 @@ import com.app.transportation.data.upButtonSF
 import com.app.transportation.databinding.ActivityMainBinding
 import com.app.transportation.databinding.PopupMenuMainBinding
 import com.app.transportation.ui.MainViewModel
+import com.app.transportation.ui.TermsFragment
 import com.app.transportation.ui.login.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -127,7 +128,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
     private fun applyListeners() {
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.loginFragment) {
+            if (destination.id == R.id.loginFragment||destination.id==R.id.termsFragment) {
                 b.toolbars.isVisible = false
                 window.navigationBarColor = getColor(R.color.nav_bar_color)
             }

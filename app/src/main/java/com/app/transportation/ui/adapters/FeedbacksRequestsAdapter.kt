@@ -64,7 +64,7 @@ class FeedbacksRequestsAdapter :
 
         fun bind(item: FeedbackRequest) = with(binding) {
             title.text = item.title
-            subtitle.text = item.subtitle
+            subtitle.text = "Запрос на исполнение вашей заявки в категории "+item.subtitle
             price.text = item.price.toString()
         }
 

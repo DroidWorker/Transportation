@@ -22,7 +22,7 @@
         android:layout_height="0dp"
         android:layout_alignTop="@+id/imageButton"
         android:text="blank_fragment"
-        android:textColor="#292929"
+        android:textColor="@color/secondary_color"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imageButton"
         tools:layout_editor_absoluteX="16dp" />

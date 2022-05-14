@@ -63,6 +63,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     val cachedAdvertFavorite = MutableStateFlow(emptyList<Advert>())
     val cachedOrderFavorite = MutableStateFlow(emptyList<Advert>())
 
+    val cachedAdvertPing = MutableStateFlow(emptyList<Advert>())
+    val cachedOrderPing = MutableStateFlow(emptyList<Advert>())
+
     val cachedAdvert = MutableStateFlow<Advert?>(null)
     val cachedOrder = MutableStateFlow<Advert?>(null)
 
@@ -81,16 +84,16 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         updateMainFragmentData()
     }
 
-    private suspend fun updateStatic(type: String) = viewModelScope.launch(Dispatchers.IO) {
-        println("steeep01")
-        val result: String = getStaticDatas(type) ?: return@launch
+    private suspend fun updateStatic(type: String ="") = viewModelScope.launch(Dispatchers.IO) {
+        println("steeep01 "+type)
+        val result = getStaticDatas(type) ?: return@launch
         cachedStatic.tryEmit(result)
     }
 
     private suspend fun getStaticDatas(type: String) =
         (repository.getStaticData(type) as? StaticDateResponse.Success)?.let { response ->
             println("steeep03")
-            response.text
+            response.id.text
         }
 
     private suspend fun getSearched(str: String) =
@@ -214,8 +217,52 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
     }
 
+    fun addOrderPing(
+        orderId: String
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val result = repository.addOrderPing(
+            orderId = orderId
+        )
+        when (result) {
+            is AddPingResponse.Success -> {
+                if (result.message == "Success"||result.message == "Not change")
+                    messageEvent.tryEmit("отклик оставлен!")
+            }
+            is AddPingResponse.Failure -> {
+                messageEvent.tryEmit("Ошибка! "+result.message)
+                println(result.message)
+            }
+        }
+    }
+
+    fun addAdvertPing(
+        orderId: String
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val result = repository.addAdvertPing(
+            orderId = orderId
+        )
+        when (result) {
+            is AddPingResponse.Success -> {
+                if (result.message == "Success"||result.message == "Not change")
+                    messageEvent.tryEmit("отклик оставлен!")
+            }
+            is AddPingResponse.Failure -> {
+                messageEvent.tryEmit("Ошибка! "+result.message)
+                println(result.message)
+            }
+        }
+    }
+
+    fun getOrdersPing() = viewModelScope.launch(Dispatchers.IO) {
+        updatePingOrdersFull()
+    }
+
+    fun getAdvertsPing() = viewModelScope.launch(Dispatchers.IO) {
+        updatePingAdvertsFull()
+    }
+
     private suspend fun getOrdersFavoriteFull() =
-        (repository.getOrderFullList() as? OrderListResponse.Success)?.let { response ->
+        (repository.getOrderFavoriteList() as? OrderFavResponse.Success)?.let { response ->
             response.orderMap.map { entry ->
                 if (entry.key!="empty") {
                     val photoList: ArrayList<String> = ArrayList()
@@ -239,7 +286,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         toCity = "${entry.value.toCity}",
                         toRegion = "${entry.value.toRegion}",
                         toPlace = "${entry.value.toPlace}",
-                        payment = entry.value.payment,
+                        payment = entry.value.payment!!,
                         description = entry.value.description,
                         photo = photoList.toList()
                     )
@@ -268,8 +315,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
         }
     private suspend fun getAdvertsFavoriteFull() =
-        (repository.getAdvertFullList() as? AdvertListResponse.Success)?.let { response ->
+        (repository.getAdvertFavoriteList() as? AdvertFavResponse.Success)?.let { response ->
             response.advertMap.map { entry ->
+                println("steeep02")
                 if (entry.key != "empty") {
                     val photoList: ArrayList<String> = ArrayList()
                     entry.value.photo.forEach { photoitem ->
@@ -313,7 +361,107 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
         }
 
+    private suspend fun getOrdersPingFull() =
+        (repository.getOrderPingList() as? OrderFavResponse.Success)?.let { response ->
+            response.orderMap.map { entry ->
+                if (entry.key!="empty") {
+                    val photoList: ArrayList<String> = ArrayList()
+                    entry.value.photo.forEach { photoitem ->
+                        photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                    }
+                    Advert(
+                        id = entry.key.toInt(),
+                        viewType = 0,
+                        categoryId = advertCategoriesFlow.value.find {
+                            it.id == entry.value.categoryId.toInt()
+                        }?.parentId ?: 4,
+                        category = entry.value.category,
+                        subcategoryId = entry.value.categoryId.toInt(),
+                        title = entry.value.description,
+                        date = entry.value.date,
+                        time = entry.value.time,
+                        fromCity = "${entry.value.fromCity}",
+                        fromRegion = "${entry.value.fromRegion}",
+                        fromPlace = "${entry.value.fromPlace}",
+                        toCity = "${entry.value.toCity}",
+                        toRegion = "${entry.value.toRegion}",
+                        toPlace = "${entry.value.toPlace}",
+                        payment = entry.value.payment!!,
+                        description = entry.value.description,
+                        photo = photoList.toList()
+                    )
+                }
+                else
+                {
+                    Advert(
+                        id = 0,
+                        viewType = 2,
+                        categoryId = 0,
+                        category = "",
+                        subcategoryId = 0,
+                        title = "Откликов не найдено",
+                        date = "",
+                        time = "",
+                        fromCity = "",
+                        fromRegion = "",
+                        fromPlace = "",
+                        toCity = "",
+                        toRegion = "",
+                        toPlace = "",
+                        payment = "",
+                        description = "",
+                        photo = emptyList())
+                }
+            }
+        }
+    private suspend fun getAdvertsPingFull() =
+        (repository.getAdvertPingList() as? AdvertFavResponse.Success)?.let { response ->
+            response.advertMap.map { entry ->
+                if (entry.key != "empty") {
+                    val photoList: ArrayList<String> = ArrayList()
+                    entry.value.photo.forEach { photoitem ->
+                        photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                    }
+                    Advert(
+                        id = entry.key.toInt(),
+                        viewType = 0,
+                        categoryId = advertCategoriesFlow.value.find {
+                            it.id == entry.value.categoryId.toInt()
+                        }?.parentId ?: 4,
+                        category = entry.value.category,
+                        subcategoryId = entry.value.categoryId.toInt(),
+                        title = entry.value.title,
+                        date = entry.value.date,
+                        time = entry.value.time,
+                        price = entry.value.price,
+                        photo = photoList.toList()
+                    )
+                }
+                else{
+                    Advert(
+                        id = 0,
+                        viewType = 2,
+                        categoryId = 0,
+                        category = "",
+                        subcategoryId = 0,
+                        title = "Откликов не найдено",
+                        date = "",
+                        time = "",
+                        fromCity = "",
+                        fromRegion = "",
+                        fromPlace = "",
+                        toCity = "",
+                        toRegion = "",
+                        toPlace = "",
+                        payment = "",
+                        description = "",
+                        photo = emptyList())
+                }
+            }
+        }
+
     private suspend fun updateFavoriteAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
+        println("steeep01")
         val list = getAdvertsFavoriteFull() ?: return@launch
         println("adverts Favorite fuuuuuuuuuuul = $list")
 
@@ -326,40 +474,17 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         cachedOrderFavorite.tryEmit(list)
     }
 
-    fun addOrderPing(
-        orderId: String
-    ) = viewModelScope.launch(Dispatchers.IO) {
-        val result = repository.addOrderPing(
-            orderId = orderId
-        )
-        when (result) {
-            is AddPingResponse.Success -> {
-                if (result.message == "Success"||result.message == "Not change")
-                    messageEvent.tryEmit("отклик оставлен!")
-            }
-            is AddPingResponse.Failure -> {
-                messageEvent.tryEmit("Ошибка! "+result.message)
-                println(result.message)
-            }
-        }
-    }
+    private suspend fun updatePingAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
+        val list = getAdvertsPingFull() ?: return@launch
+        println("adverts ping fuuuuuuuuuuul = $list")
 
-    fun addAdvertPing(
-        orderId: String
-    ) = viewModelScope.launch(Dispatchers.IO) {
-        val result = repository.addAdvertPing(
-            orderId = orderId
-        )
-        when (result) {
-            is AddPingResponse.Success -> {
-                if (result.message == "Success"||result.message == "Not change")
-                    messageEvent.tryEmit("отклик оставлен!")
-            }
-            is AddPingResponse.Failure -> {
-                messageEvent.tryEmit("Ошибка! "+result.message)
-                println(result.message)
-            }
-        }
+        cachedAdvertPing.tryEmit(list)
+    }
+    private suspend fun updatePingOrdersFull() = viewModelScope.launch(Dispatchers.IO) {
+        val list = getOrdersPingFull() ?: return@launch
+        println("orders ping fuuuuuuuuuuul = $list")
+
+        cachedOrderPing.tryEmit(list)
     }
 
     private suspend fun updateCategoryAdvertsFull(

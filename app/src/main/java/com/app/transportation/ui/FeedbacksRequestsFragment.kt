@@ -90,7 +90,9 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
 
     private fun applyAdapters() {
         b.feedbacksRequestsRV.adapter = adapter
-        viewModel.getCategoryOrders(0)
+        viewModel.getAdvertsPing()
+        viewModel.getOrdersPing()
+        b.progressBar2.visibility = View.VISIBLE
         applyList()
     }
 
@@ -98,7 +100,7 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
         var list : List<FeedbackRequest>? = listOf()
                 if (feedbacksRequestsActiveTab == "requests") {
                         var arrlist : ArrayList<FeedbackRequest> = ArrayList()
-                        viewModel.ordersSF.collectWithLifecycle(viewLifecycleOwner){
+                        viewModel.cachedOrderPing.collectWithLifecycle(viewLifecycleOwner){
                             it.toList().forEach{ order ->
                                 arrlist.add(FeedbackRequest((order.id).toLong(), 0, order.title, order.toCity+" "+order.toRegion+" "+order.toPlace, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), 0))
                             }
@@ -107,18 +109,16 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
                         }
                 }
                 else{
-                    list = listOf(
-                        FeedbackRequest(0, 1, "Здесь заголовок объявления",
-                            "Николай оставил запрос на исполнение вашей заявки в" +
-                                    "категории грузовые перевозки. Нажмите, чтобы узнать подробнее"),
-                        FeedbackRequest(1, 1, "Здесь заголовок объявления",
-                            "Николай оставил запрос на исполнение вашей заявки в" +
-                                    "категории грузовые перевозки. Нажмите, чтобы узнать подробнее"),
-                        FeedbackRequest(2, 1, "Здесь заголовок объявления",
-                            "Николай оставил запрос на исполнение вашей заявки в" +
-                                    "категории грузовые перевозки. Нажмите, чтобы узнать подробнее")
-                    )
+                    var arrlist : ArrayList<FeedbackRequest> = ArrayList()
+                    viewModel.cachedAdvertPing.collectWithLifecycle(viewLifecycleOwner){
+                        it.toList().forEach{ order ->
+                            arrlist.add(FeedbackRequest((order.id).toLong(), 0, order.title, order.category, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
+                        }
+                        list =arrlist.toList()
+                        adapter.submitList(list)
+                    }
         }
+        b.progressBar2.visibility = View.GONE
         adapter.submitList(list)
     }
 
