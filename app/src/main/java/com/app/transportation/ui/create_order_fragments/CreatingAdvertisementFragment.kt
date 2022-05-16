@@ -2,15 +2,14 @@ package com.app.transportation.ui.create_order_fragments
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
-import android.opengl.Visibility
 import android.os.Bundle
 import android.text.TextUtils
 import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.GONE
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ImageView
@@ -24,12 +23,11 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
-import com.app.transportation.core.collect
-import com.app.transportation.core.collectWithLifecycle
-import com.app.transportation.core.repeatOnLifecycle
+import com.app.transportation.core.*
 import com.app.transportation.databinding.FragmentCreatingAdvertisementBinding
 import com.app.transportation.ui.MainViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 
@@ -91,11 +89,11 @@ class CreatingAdvertisementFragment : Fragment() {
                         b.description.text = item.description
                         item.photo.firstOrNull()?.let { base64String ->
                             try {
-                                println("baaase"+base64String)
                                 val byteArray = Base64.decode(base64String, Base64.DEFAULT)
                                 val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
                                 b.photo.setImageBitmap(bitmap)
-                                b.photo.setBackgroundDrawable(BitmapDrawable(bitmap))
+                                val blurred: Bitmap? = blurRenderScript(ctx, bitmap, 25)//second parametre is radius//second parametre is radius
+                                b.photo.setBackgroundDrawable(BitmapDrawable(blurred))
                             }
                             catch (ex : Exception){
                                 println("Error: "+ex.message.toString())
@@ -158,7 +156,11 @@ class CreatingAdvertisementFragment : Fragment() {
                 viewModel.cafTempPhotoUris.value.second.forEach { uri ->
                     val contentResolver = requireContext().applicationContext.contentResolver
                     contentResolver.openInputStream(uri)?.use {
-                        val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
+                        var resultBitmap : Bitmap? = decodeSampledBitmapFromResource(it.readBytes(), 400, 250)
+                        val byteArrayOutputStream = ByteArrayOutputStream()
+                        resultBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+                        val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
+                        val base64String = Base64.encodeToString(byteArray, Base64.DEFAULT)
                         photos.add("'data:image/jpg;base64,$base64String'")
                     }
                 }

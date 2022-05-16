@@ -787,9 +787,11 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         telNumber: String = "",
         email: String = "",
         cityArea: String = "",
-        paymentCard: String = ""
+        paymentCard: String = "",
+        avatar: List<String>
     ) = viewModelScope.launch(Dispatchers.IO) {
-        repository.editProfile(name, telNumber, email, cityArea, paymentCard)
+        println("steeeep002")
+        repository.editProfile(name, telNumber, email, cityArea, paymentCard, avatar)
         delay(1000)
         updateProfile()
     }

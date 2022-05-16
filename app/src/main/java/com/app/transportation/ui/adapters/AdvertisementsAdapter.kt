@@ -1,5 +1,7 @@
 package com.app.transportation.ui.adapters
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.util.Base64
@@ -12,6 +14,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.app.transportation.R
+import com.app.transportation.core.blurRenderScript
 import com.app.transportation.data.database.entities.Advert
 import com.app.transportation.databinding.ItemAdvertCategoryTextItemBinding
 import com.app.transportation.databinding.ItemNoadvertsFillerBinding
@@ -22,6 +25,7 @@ import com.google.android.material.snackbar.Snackbar
 class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffCallback()) {
 
     var onClick: (Advert.() -> Unit)? = null
+    lateinit var ctx : Context
 
     init {
         setHasStableIds(true)
@@ -29,6 +33,7 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        ctx = parent.context
         val layoutInflater = LayoutInflater.from(parent.context)
         return if (viewType == 0)
             FirstViewHolder(ItemServiceFirstBinding.inflate(layoutInflater, parent, false))
@@ -77,7 +82,8 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
                         val byteArray = Base64.decode(base64String, Base64.DEFAULT)
                         val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
                         photo.setImageBitmap(bitmap)
-                        photo.setBackgroundDrawable(BitmapDrawable(bitmap))
+                        val blurred: Bitmap? = blurRenderScript(ctx, bitmap, 25)//second parametre is radius//second parametre is radius
+                        photo.setBackgroundDrawable(BitmapDrawable(blurred))
                     }
                     catch (ex : Exception){
                         println("Error: "+ex.message.toString())
