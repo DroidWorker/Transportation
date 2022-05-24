@@ -156,9 +156,9 @@ class CreatingAdvertisementFragment : Fragment() {
                 viewModel.cafTempPhotoUris.value.second.forEach { uri ->
                     val contentResolver = requireContext().applicationContext.contentResolver
                     contentResolver.openInputStream(uri)?.use {
-                        var resultBitmap : Bitmap? = decodeSampledBitmapFromResource(it.readBytes(), 400, 250)
+                        var resultBitmap : Bitmap? = decodeSampledBitmapFromResource(it.readBytes(), 300, 200)
                         val byteArrayOutputStream = ByteArrayOutputStream()
-                        resultBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+                        resultBitmap?.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream)
                         val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
                         val base64String = Base64.encodeToString(byteArray, Base64.DEFAULT)
                         photos.add("'data:image/jpg;base64,$base64String'")

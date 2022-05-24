@@ -109,7 +109,8 @@ class CreatingOrderPpAndKuFragment : Fragment() {
                     toPlace = b.toPlace.text.toString(),
                     name = b.toName.text.toString(),
                     phone = b.toTelNumber.text.toString(),
-                    payment = "cash"
+                    payment = "cash",
+                    photos = emptyList()
                 )
             }
             else{

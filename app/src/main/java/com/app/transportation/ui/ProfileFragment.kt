@@ -15,14 +15,13 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
-import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
+import com.app.transportation.PaymentActivity
 import com.app.transportation.R
 import com.app.transportation.core.*
 import com.app.transportation.databinding.FragmentProfileBinding
@@ -281,6 +280,10 @@ class ProfileFragment : Fragment() {
                     .setNegativeButton("Нет") { _, _ -> }
                     .show()
             } ?: importViaSystemFE()
+        }
+
+        b.payment.setOnClickListener{
+            startActivity(Intent(activity, PaymentActivity::class.java))
         }
     }
 

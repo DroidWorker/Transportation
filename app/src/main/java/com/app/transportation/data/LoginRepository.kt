@@ -38,7 +38,7 @@ class LoginRepository : KoinComponent {
         result
     }.getOrElse {
         val message = it.message
-            ?.substringAfter("{\"message\":\"")
+            ?.substringAfter("{'message\":\"")
             ?.replace("\"}\"", "")
             ?: "Unexpected error"
         VkInfoResponse.Failure(message)

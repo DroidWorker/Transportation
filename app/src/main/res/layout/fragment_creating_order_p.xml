@@ -96,7 +96,7 @@
             app:layout_constraintTop_toBottomOf="@+id/toCity" />
 
         <EditText
-            android:id="@+id/toDateTime"
+            android:id="@+id/selectDateTime"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
@@ -123,7 +123,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHeight_min="85dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toDateTime" />
+            app:layout_constraintTop_toBottomOf="@+id/selectDateTime" />
 
         <EditText
             android:id="@+id/toName"

@@ -47,6 +47,7 @@ class FeedbacksRequestsAdapter :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: FeedbackRequest) = with(binding) {
+            println("aaaaaaaaaa"+item)
             title.text = item.title
             location.text = item.subtitle
             date.text = item.dateTime.dateToString("dd/MM/yyyy")

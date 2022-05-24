@@ -507,7 +507,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     ) = viewModelScope.launch(Dispatchers.IO) {
         getChildrenID(categoryId).collect { ids ->
             val list = getOrdersFull() ?: return@collect
-            println("orders fuuuuuuuuuuul = $list")
 
             ordersSF.tryEmit(list)
 
@@ -604,7 +603,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 }
                 Advert(
                     id = entry.key.toInt(),
-                    viewType = 0,
+                    viewType = if(entry.value.photo.isNotEmpty()) 0 else 1,
                     categoryId = advertCategoriesFlow.value.find {
                         it.id == entry.value.categoryId.toInt()
                     }?.parentId ?: 4,
@@ -935,7 +934,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         description: String,
         name: String,
         phone: String,
-        payment: String
+        payment: String,
+        photos: List<String>
     ) = viewModelScope.launch(Dispatchers.IO) {
         val result = repository.createOrder(
             category = category,
@@ -949,7 +949,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             description = description,
             name = name,
             phone = phone,
-            payment = payment
+            payment = payment,
+            photos = photos
         )
         when (result) {
             is AdvertCreateResponse.Success -> {

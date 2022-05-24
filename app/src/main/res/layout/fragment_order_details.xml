@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<androidx.constraintlayout.widget.ConstraintLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingStart="@dimen/sideMargin"
@@ -174,7 +177,7 @@
         app:autoSizeTextType="uniform"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintStart_toEndOf="@+id/photo"
+        app:layout_constraintStart_toEndOf="@+id/photoholder"
         app:layout_constraintTop_toBottomOf="@+id/comment"
         tools:text="Виктор" />
 
@@ -195,12 +198,12 @@
         app:drawableStartCompat="@drawable/ic_call_order_details"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0"
-        app:layout_constraintStart_toEndOf="@+id/photo"
+        app:layout_constraintStart_toEndOf="@+id/photoholder"
         app:layout_constraintTop_toBottomOf="@+id/name"
         tools:text="8 964 854 6332" />
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/photo"
+        android:id="@+id/photoholder"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="15dp"
@@ -234,7 +237,7 @@
         app:layout_constraintEnd_toStartOf="@+id/paymentMethod"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/photo" />
+        app:layout_constraintTop_toBottomOf="@+id/photoholder" />
 
     <TextView
         android:id="@+id/paymentMethod"
@@ -247,7 +250,7 @@
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/paymentMethodTitle"
-        app:layout_constraintTop_toBottomOf="@+id/photo" />
+        app:layout_constraintTop_toBottomOf="@+id/photoholder" />
 
     <Button
         android:id="@+id/execute"
@@ -268,3 +271,4 @@
         app:layout_constraintWidth_percent="0.5" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

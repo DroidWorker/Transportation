@@ -2,12 +2,18 @@ package com.app.transportation.ui.create_order_fragments
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -21,6 +27,8 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
+import java.io.ByteArrayOutputStream
+import java.io.File
 
 class CreatingOrderAtFragment : Fragment() {
 
@@ -70,6 +78,18 @@ class CreatingOrderAtFragment : Fragment() {
                         b.toArea.setText(item.toRegion)
                         b.toPlace.setText(item.toPlace)
                         b.comment.setText(item.description)
+                        item.photo.firstOrNull()?.let { base64String ->
+                            try {
+                                val byteArray = Base64.decode(base64String, Base64.DEFAULT)
+                                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                                b.photo.setImageBitmap(bitmap)
+                                val blurred: Bitmap? = blurRenderScript(ctx, bitmap, 25)//second parametre is radius//second parametre is radius
+                                b.photo.setBackgroundDrawable(BitmapDrawable(blurred))
+                            }
+                            catch (ex : Exception){
+                                println("Error: "+ex.message.toString())
+                            }
+                        }
                     }
                 }
             }
@@ -117,6 +137,25 @@ class CreatingOrderAtFragment : Fragment() {
                     1 as Long -> paymentMethod = "cash"
                     2 as Long -> paymentMethod = "card"
                 }
+                val photos = mutableListOf<String>()
+                viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
+                    val contentResolver = requireContext().applicationContext.contentResolver
+                    contentResolver.openInputStream(it)?.use {
+                        val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
+                        File(requireContext().cacheDir.path + "/ttt.txt").writeText(base64String)
+                    }
+                }
+                viewModel.cafTempPhotoUris.value.second.forEach { uri ->
+                    val contentResolver = requireContext().applicationContext.contentResolver
+                    contentResolver.openInputStream(uri)?.use {
+                        var resultBitmap : Bitmap? = decodeSampledBitmapFromResource(it.readBytes(), 300, 200)
+                        val byteArrayOutputStream = ByteArrayOutputStream()
+                        resultBitmap?.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream)
+                        val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
+                        val base64String = Base64.encodeToString(byteArray, Base64.DEFAULT)
+                        photos.add("'data:image/jpg;base64,$base64String'")
+                    }
+                }
 
                 viewModel.createOrder(
                     category = categoryId.toString(),
@@ -130,7 +169,8 @@ class CreatingOrderAtFragment : Fragment() {
                     toPlace = b.toPlace.text.toString(),
                     name = b.toName.text.toString(),
                     phone = b.toTelNumber.text.toString(),
-                    payment = paymentMethod
+                    payment = paymentMethod,
+                    photos = photos
                 )
             }
             else{//if edit clicked
@@ -155,6 +195,16 @@ class CreatingOrderAtFragment : Fragment() {
     }
 
     private fun applyCollectors() = viewLifecycleOwner.repeatOnLifecycle {
+        viewModel.cafTempPhotoUris.collect(this) {
+            it.second.getOrNull(it.first)?.let { uri ->
+                b.photo.scaleType = ImageView.ScaleType.FIT_XY
+                b.photo.setImageURI(uri)
+                b.photo.tag = 1
+            } ?: kotlin.run {
+                b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
+                b.photo.setImageResource(R.drawable.ic_photo)
+            }
+        }
         if (1==1)
             viewModel.addAdvertScreenCategoriesFlowFourthLevel(categoryId).collectWithLifecycle(viewLifecycleOwner) {
                 var data : ArrayList<String> = ArrayList()
@@ -181,7 +231,7 @@ class CreatingOrderAtFragment : Fragment() {
         val isPhotoSet =  b.photo.tag==1
 
         return isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
-                isToNamePresent && isToTelNumberPresent
+                isToNamePresent && isToTelNumberPresent && isPhotoSet
     }
 
     private fun showDatePicker() {

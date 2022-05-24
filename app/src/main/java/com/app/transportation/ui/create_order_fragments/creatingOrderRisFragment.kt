@@ -1,11 +1,17 @@
 package com.app.transportation.ui.create_order_fragments
 
 import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -16,8 +22,11 @@ import com.app.transportation.core.*
 import com.app.transportation.databinding.FragmentCreatingOrderRisBinding
 import com.app.transportation.ui.MainViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
+import java.io.ByteArrayOutputStream
+import java.io.File
 
 class CreatingOrderRisFragment : Fragment() {
 
@@ -30,6 +39,11 @@ class CreatingOrderRisFragment : Fragment() {
 
     private val categoryId by lazy { arguments?.getInt("id", 1) ?: 1 }
     private val isEdit by lazy {arguments?.getInt("isEdit", 0) ?: 0}
+
+    private val obtainPhotoUriLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            result.data?.data?.let { uri -> viewModel.cafApplyPhotoByUri(uri) }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -61,7 +75,19 @@ class CreatingOrderRisFragment : Fragment() {
                         b.toArea.setText(item.toRegion)
                         b.toPlace.setText(item.toPlace)
                         b.comment.setText(item.description)
-                        b.toDateTime.setText(item.time)
+                        b.selectDateTime.setText(item.time)
+                        item.photo.firstOrNull()?.let { base64String ->
+                            try {
+                                val byteArray = Base64.decode(base64String, Base64.DEFAULT)
+                                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                                b.photo.setImageBitmap(bitmap)
+                                val blurred: Bitmap? = blurRenderScript(ctx, bitmap, 25)//second parametre is radius//second parametre is radius
+                                b.photo.setBackgroundDrawable(BitmapDrawable(blurred))
+                            }
+                            catch (ex : Exception){
+                                println("Error: "+ex.message.toString())
+                            }
+                        }
                     }
                 }
             }
@@ -79,11 +105,34 @@ class CreatingOrderRisFragment : Fragment() {
     }
 
     private fun applyListeners() {
+        b.selectDateTime.setOnClickListener{
+            showDatePicker()
+        }
         b.order.setOnClickListener {
             if (isEdit==0) {
                 if (!allFieldsFilled()) {
                     viewModel.messageEvent.tryEmit("Заполнены не все поля!")
                     return@setOnClickListener
+                }
+
+                val photos = mutableListOf<String>()
+                viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
+                    val contentResolver = requireContext().applicationContext.contentResolver
+                    contentResolver.openInputStream(it)?.use {
+                        val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
+                        File(requireContext().cacheDir.path + "/ttt.txt").writeText(base64String)
+                    }
+                }
+                viewModel.cafTempPhotoUris.value.second.forEach { uri ->
+                    val contentResolver = requireContext().applicationContext.contentResolver
+                    contentResolver.openInputStream(uri)?.use {
+                        var resultBitmap : Bitmap? = decodeSampledBitmapFromResource(it.readBytes(), 300, 200)
+                        val byteArrayOutputStream = ByteArrayOutputStream()
+                        resultBitmap?.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream)
+                        val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
+                        val base64String = Base64.encodeToString(byteArray, Base64.DEFAULT)
+                        photos.add("'data:image/jpg;base64,$base64String'")
+                    }
                 }
 
                 viewModel.createOrder(
@@ -98,7 +147,8 @@ class CreatingOrderRisFragment : Fragment() {
                     toPlace = b.toPlace.text.toString(),
                     name = b.toName.text.toString(),
                     phone = b.toTelNumber.text.toString(),
-                    payment = "cash"
+                    payment = "cash",
+                    photos = photos
                 )
             }
             else{
@@ -119,6 +169,19 @@ class CreatingOrderRisFragment : Fragment() {
             }
 
             findNavController().navigateUp()
+        }
+        b.photo.setOnClickListener{
+            val position = viewModel.cafTempPhotoUris.value.first
+            val currentValue = viewModel.cafTempPhotoUris.value.second.getOrNull(position)
+            currentValue?.let {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Удалить фото?")
+                    .setPositiveButton("Да") { _, _ ->
+                        viewModel.cafRemoveCurrentPhoto()
+                    }
+                    .setNegativeButton("Нет") { _, _ -> }
+                    .show()
+            } ?: importViaSystemFE()
         }
     }
 
@@ -147,9 +210,10 @@ class CreatingOrderRisFragment : Fragment() {
         val isToPlacePresent = b.toPlace.text.isNotBlank()
         val isToNamePresent = b.toName.text.isNotBlank()
         val isToTelNumberPresent = b.toTelNumber.text.isNotBlank()
+        val isPhotoSet =  b.photo.tag==1
 
         return isCommentPresent && isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
-                isToNamePresent && isToTelNumberPresent
+                isToNamePresent && isToTelNumberPresent && isPhotoSet
     }
 
     private fun showDatePicker() {
@@ -174,6 +238,13 @@ class CreatingOrderRisFragment : Fragment() {
             .build()
             .apply { addOnPositiveButtonClickListener { onTimeSelected(hour, minute) } }
             .show(parentFragmentManager, MaterialTimePicker::class.java.canonicalName)
+    }
+
+    private fun importViaSystemFE() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .setType("*/*")
+        runCatching { obtainPhotoUriLauncher.launch(intent) }
     }
 
     private fun onTimeSelected(hour: Int, minute: Int) {

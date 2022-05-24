@@ -109,7 +109,8 @@ class CreatingOrderPFragment : Fragment() {
                     toPlace = b.toPlace.text.toString(),
                     name = b.toName.text.toString(),
                     phone = b.toTelNumber.text.toString(),
-                    payment = paymentMethod
+                    payment = paymentMethod,
+                    photos = emptyList()
                 )
             }
             else{

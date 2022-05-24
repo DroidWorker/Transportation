@@ -62,18 +62,11 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
 
         super.onViewCreated(view, savedInstanceState)
 
-        applyInitialData()
-
         applyTabColors()
 
         applyAdapters()
 
         applyListeners()
-    }
-
-    private fun applyInitialData() {
-        //b.name.text = "Николай"
-        //b.telNumber.text = "+7 (495) 510-55-55"
     }
 
     private fun applyTabColors() {
@@ -112,7 +105,7 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
                     var arrlist : ArrayList<FeedbackRequest> = ArrayList()
                     viewModel.cachedAdvertPing.collectWithLifecycle(viewLifecycleOwner){
                         it.toList().forEach{ order ->
-                            arrlist.add(FeedbackRequest((order.id).toLong(), 0, order.title, order.category, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
+                            arrlist.add(FeedbackRequest((order.id).toLong(), 1, order.title, order.category, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
                         }
                         list =arrlist.toList()
                         adapter.submitList(list)

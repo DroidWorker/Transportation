@@ -133,22 +133,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching AddPingResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_ping_set",
-                formParameters = Parameters.build {
-                    append("ping_user_id", orderId)
-                }
-            ) {
-                headers { append("X-Access-Token", token) }
-            }
-        val responseBody: String = response.receive()
-        val json = Json.Default
-
-        json.decodeFromString<AddPingResponse.Success>(responseBody)
-    }.getOrElse { AddPingResponse.Failure(it.stackTraceToString()) }
-    suspend fun addAdvertPing(orderId: String): AddPingResponse = kotlin.runCatching {
-        val token = authToken ?: return@runCatching AddPingResponse.Failure("token is null")
-        val response: HttpResponse =
-            client.submitForm(
                 url = "http://api-transport.mvp-pro.top/api/v1/advert_ping_set",
                 formParameters = Parameters.build {
                     append("ping_user_id", orderId)
@@ -160,7 +144,27 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val json = Json.Default
 
         json.decodeFromString<AddPingResponse.Success>(responseBody)
-    }.getOrElse { AddPingResponse.Failure(it.stackTraceToString()) }
+    }.getOrElse {
+        println("pingErrror"+it.stackTraceToString())
+        AddPingResponse.Failure(it.stackTraceToString()) }
+    suspend fun addAdvertPing(orderId: String): AddPingResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching AddPingResponse.Failure("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/order_ping_set",
+                formParameters = Parameters.build {
+                    append("ping_user_id", orderId)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        json.decodeFromString<AddPingResponse.Success>(responseBody)
+    }.getOrElse {
+        println("pingErrror"+it.stackTraceToString())
+        AddPingResponse.Failure(it.stackTraceToString()) }
 
     suspend fun getAdvertPingList(): AdvertFavResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AdvertFavResponse.Failure("token is null")
@@ -647,7 +651,10 @@ class Repository(private val dao: MainDao) : KoinComponent {
             ) {
                 headers { append("X-Access-Token", token) }
             }
-        val responseBody: String = response.receive()
+        var responseBody: String = response.receive()
+        if (responseBody.contains(",\"photo\":[]")) {
+            responseBody = responseBody.replace(",\"photo\":[]", ",\"photo\":{}")
+        }
         val json = Json.Default
 
         kotlin.runCatching {
@@ -740,7 +747,8 @@ class Repository(private val dao: MainDao) : KoinComponent {
         description: String,
         name: String,
         phone: String,
-        payment: String
+        payment: String,
+        photos: List<String>
     ): AdvertCreateResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
         val response: HttpResponse =
@@ -759,6 +767,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                     append("name", name)
                     append("phone", phone)
                     append("payment", payment)
+                    append("image", "[${photos.joinToString()}]")
                 }
             ) {
                 headers { append("X-Access-Token", token) }
