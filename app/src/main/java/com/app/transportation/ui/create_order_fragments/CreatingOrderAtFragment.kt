@@ -134,8 +134,8 @@ class CreatingOrderAtFragment : Fragment() {
 
                 var paymentMethod = "cash"
                 when (b.paymentMethod.selectedItemId) {
-                    1 as Long -> paymentMethod = "cash"
-                    2 as Long -> paymentMethod = "card"
+                    1.toLong() -> paymentMethod = "cash"
+                    2.toLong() -> paymentMethod = "card"
                 }
                 val photos = mutableListOf<String>()
                 viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
@@ -272,7 +272,7 @@ class CreatingOrderAtFragment : Fragment() {
         viewModel.dateTime += " $hourAsText:$minuteAsText"
 
         val dateTime = requireContext().formatDate(viewModel.dateTime, "yyyy/MM/dd HH:mm", true)
-       // b.fromTime.text = dateTime
+        b.selectDateTime.setText(dateTime)
     }
 
     override fun onDestroyView() {

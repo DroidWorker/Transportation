@@ -13,6 +13,7 @@ import com.app.transportation.databinding.ItemRequestBinding
 
 class FeedbacksRequestsAdapter :
     ListAdapter<FeedbackRequest, RecyclerView.ViewHolder>(DiffCallback()) {
+    var onClick: ((Int) -> Unit)? = null
 
     init {
         setHasStableIds(true)
@@ -47,7 +48,7 @@ class FeedbacksRequestsAdapter :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: FeedbackRequest) = with(binding) {
-            println("aaaaaaaaaa"+item)
+            root.setOnClickListener { onClick?.invoke(item.id.toInt()) }
             title.text = item.title
             location.text = item.subtitle
             date.text = item.dateTime.dateToString("dd/MM/yyyy")

@@ -260,7 +260,7 @@
         android:backgroundTint="@color/primary_color"
         android:paddingHorizontal="30dp"
         android:paddingVertical="17dp"
-        android:text="Взять в работу"
+        android:text="Оставить отклик"
         android:textAllCaps="false"
         android:textColor="@color/white"
         app:cornerRadius="10dp"

@@ -153,13 +153,9 @@ class ProfileFragment : Fragment() {
                             val base64String = photoitem.replace("data:image/jpg;base64,", "")
                             val byteArray = Base64.decode(base64String, Base64.DEFAULT)
                             val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                            b.avatar.scaleType = ImageView.ScaleType.CENTER_CROP
                             b.avatar.setImageBitmap(bitmap)
-                            val blurred: Bitmap? = blurRenderScript(
-                                ctx,
-                                bitmap,
-                                25
-                            )//second parametre is radius//second parametre is radius
-                            b.avatar.setBackgroundDrawable(BitmapDrawable(blurred))
+                            b.avatar.setBackgroundDrawable(BitmapDrawable(bitmap))
                             b.avatar.tag=0
                         } catch (ex: Exception) {
                             println("Error: " + ex.message.toString())
@@ -169,7 +165,6 @@ class ProfileFragment : Fragment() {
             }
         }
         viewModel.profileAdvertsFlow.collect(this) {
-            println("liiiiist"+it.size)
             profileAdapter.submitList(it)
         }
         viewModel.deletedAdvertPosition.collect(this) { position ->
@@ -186,9 +181,6 @@ class ProfileFragment : Fragment() {
                 b.avatar.scaleType = ImageView.ScaleType.CENTER_CROP
                 b.avatar.setImageURI(uri)
                 b.avatar.tag = 1
-            } ?: kotlin.run {
-                b.avatar.scaleType = ImageView.ScaleType.CENTER_INSIDE
-                b.avatar.setImageResource(R.drawable.ic_avatar)
             }
             checkIfProfileChanged()
         }
@@ -248,15 +240,14 @@ class ProfileFragment : Fragment() {
                 viewModel.cafTempPhotoUris.value.second.forEach { uri ->
                     val contentResolver = requireContext().applicationContext.contentResolver
                     contentResolver.openInputStream(uri)?.use {
-                        var resultBitmap : Bitmap? = decodeSampledBitmapFromResource(it.readBytes(), 400, 250)
+                        var resultBitmap : Bitmap? = decodeSampledBitmapFromResource(it.readBytes(), 200, 200)
                         val byteArrayOutputStream = ByteArrayOutputStream()
-                        resultBitmap?.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+                        resultBitmap?.compress(Bitmap.CompressFormat.JPEG, 50, byteArrayOutputStream)
                         val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
                         val base64String = Base64.encodeToString(byteArray, Base64.DEFAULT)
                         photos.add("'data:image/jpg;base64,$base64String'")
                     }
                 }
-                println("steeeep003"+photos.size)
                 viewModel.editProfile(
                     name = b.nameET.text.toString(),
                     telNumber = b.telNumberET.text.toString(),

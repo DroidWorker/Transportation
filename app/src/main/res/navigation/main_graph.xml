@@ -81,5 +81,9 @@
         android:id="@+id/favouritesFragment"
         android:name="com.app.transportation.ui.favouritesFragment"
         android:label="favouritesFragment" />
+    <fragment
+        android:id="@+id/pingInfoRequestsFragment"
+        android:name="com.app.transportation.ui.pingInfoRequestsFragment"
+        android:label="pingInfoRequestsFragment" />
 
 </navigation>

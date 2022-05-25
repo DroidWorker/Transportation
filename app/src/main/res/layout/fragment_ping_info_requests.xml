@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+<androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:paddingStart="@dimen/sideMargin"
+    android:paddingEnd="@dimen/sideMargin">
+
+    <TextView
+        android:id="@+id/orderName3"
+        tools:text="Название заказа"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:fontFamily="@font/montserrat"
+        android:singleLine="false"
+        android:textColor="@color/title_color"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/orderId3"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/orderId3"
+        tools:text="Заказ №834"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat"
+        android:textColor="@color/primary_color"
+        android:textSize="12sp"
+        app:layout_constraintBottom_toBottomOf="@+id/orderName3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/orderName3"
+        app:layout_constraintTop_toTopOf="@+id/orderName3" />
+
+    <ImageView
+        android:id="@+id/fromLocationIcon3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_location_order_details"
+        app:layout_constraintBottom_toBottomOf="@+id/fromLocation3"
+        app:layout_constraintEnd_toStartOf="@+id/fromLocation3"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/fromLocation3" />
+
+    <TextView
+        android:id="@+id/fromLocation3"
+        tools:text="Россия, Тюмень, Тюменская обл., ул.Мельникайте, 55"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/sideMargin"
+        android:layout_marginTop="30dp"
+        android:drawablePadding="5dp"
+        android:fontFamily="@font/montserrat"
+        android:maxLines="8"
+        android:textColor="@color/secondary_color"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/fromLocationIcon3"
+        app:layout_constraintTop_toBottomOf="@+id/orderName3"
+        app:layout_constraintWidth_percent="0.65" />
+
+    <ImageView
+        android:id="@+id/locationArrow3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/ic_location_arrow_down"
+        app:layout_constraintEnd_toEndOf="@+id/fromLocationIcon3"
+        app:layout_constraintStart_toStartOf="@+id/fromLocationIcon3"
+        app:layout_constraintTop_toBottomOf="@+id/fromLocationIcon3" />
+
+    <ImageView
+        android:id="@+id/toLocationIcon3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/ic_location_order_details"
+        app:layout_constraintEnd_toStartOf="@+id/toLocation3"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/locationArrow3" />
+
+    <TextView
+        android:id="@+id/toLocation3"
+        tools:text="Россия, Тюмень, Тюменская обл., ул.Мельникайте, 55"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/sideMargin"
+        android:drawablePadding="5dp"
+        android:fontFamily="@font/montserrat"
+        android:maxLines="8"
+        android:textColor="@color/secondary_color"
+        app:layout_constraintBottom_toBottomOf="@+id/toLocationIcon3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/toLocationIcon3"
+        app:layout_constraintTop_toTopOf="@+id/toLocationIcon3"
+        app:layout_constraintWidth_percent="0.65" />
+
+    <TextView
+        android:id="@+id/date3"
+        tools:text="01/12/2022"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:drawablePadding="8dp"
+        android:fontFamily="@font/montserrat"
+        android:gravity="center"
+        android:textColor="@color/secondary_color"
+        android:textSize="15sp"
+        app:drawableStartCompat="@drawable/ic_calendar"
+        app:layout_constraintEnd_toStartOf="@+id/time3"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toLocation3" />
+
+    <TextView
+        android:id="@+id/time3"
+        tools:text="12:30"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:drawablePadding="8dp"
+        android:fontFamily="@font/montserrat"
+        android:gravity="center"
+        android:textColor="@color/secondary_color"
+        android:textSize="15sp"
+        app:drawableStartCompat="@drawable/ic_time_18"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toLocation3" />
+
+    <TextView
+        android:id="@+id/comment3"
+        tools:text="Требуется положить плитку 10м2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:background="@color/edittext_field_color"
+        android:fontFamily="@font/montserrat"
+        android:paddingHorizontal="@dimen/sideMargin"
+        android:paddingVertical="12dp"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/date3" />
+
+    <TextView
+        android:id="@+id/name3"
+        tools:text="Виктор"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="35dp"
+        android:fontFamily="@font/montserrat"
+        android:textColor="@color/secondary_color"
+        android:textStyle="bold"
+        app:autoSizeMaxTextSize="22sp"
+        app:autoSizeMinTextSize="16sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@+id/photoholder"
+        app:layout_constraintTop_toBottomOf="@+id/comment3" />
+
+    <TextView
+        android:id="@+id/telNumber3"
+        tools:text="8 964 854 6332"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="10dp"
+        android:drawablePadding="5dp"
+        android:fontFamily="@font/montserrat"
+        android:gravity="center_vertical"
+        android:textColor="@color/secondary_color"
+        android:textStyle="bold"
+        app:autoSizeMaxTextSize="22sp"
+        app:autoSizeMinTextSize="8sp"
+        app:autoSizeTextType="uniform"
+        app:drawableStartCompat="@drawable/ic_call_order_details"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toEndOf="@+id/photoholder"
+        app:layout_constraintTop_toBottomOf="@+id/name3" />
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/photoholder"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginEnd="8dp"
+        app:cardBackgroundColor="@color/edittext_field_color"
+        app:cardCornerRadius="15dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/comment3"
+        app:layout_constraintWidth_percent="0.5">
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_photo" />
+
+    </androidx.cardview.widget.CardView>
+
+    <TextView
+        android:id="@+id/paymentMethodTitle3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/montserrat"
+        android:text="Способ оплаты"
+        android:textColor="@color/secondary_color"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/paymentMethod3"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/photoholder" />
+
+    <TextView
+        android:id="@+id/paymentMethod3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/montserrat"
+        android:text="Наличными"
+        android:textColor="@color/primary_color"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/paymentMethodTitle3"
+        app:layout_constraintTop_toBottomOf="@+id/photoholder" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="20dp"
+        android:fontFamily="@font/montserrat"
+        android:text="1000 p"
+        android:textColor="@color/secondary_color"
+        android:textStyle="bold"
+        app:autoSizeMaxTextSize="22sp"
+        app:autoSizeMinTextSize="16sp"
+        app:autoSizeTextType="uniform"
+        app:layout_constraintBottom_toBottomOf="@+id/photoholder"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/photoholder" />
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/montserrat"
+        android:text="Статус заявки"
+        android:textColor="@color/secondary_color"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/textView4"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/paymentMethodTitle3" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/montserrat"
+        android:textColor="@color/secondary_color"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:text="в работе"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread_inside"
+        app:layout_constraintStart_toEndOf="@+id/textView3"
+        app:layout_constraintTop_toBottomOf="@+id/paymentMethod3" />
+
+    <View
+        android:id="@+id/divider2"
+        android:layout_width="409dp"
+        android:layout_height="1dp"
+        android:background="?android:attr/listDivider"
+        app:layout_constraintBottom_toTopOf="@+id/textView3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/paymentMethodTitle3" />
+
+    <Button
+        android:id="@+id/cancel"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:backgroundTint="@color/primary_color"
+        android:paddingHorizontal="30dp"
+        android:paddingVertical="17dp"
+        android:text="отменить"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        app:cornerRadius="10dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView3" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

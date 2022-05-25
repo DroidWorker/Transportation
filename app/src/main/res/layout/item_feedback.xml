@@ -26,14 +26,15 @@
         android:id="@+id/priceCardView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:cardBackgroundColor="#676767"
         app:cardCornerRadius="20dp"
         app:contentPaddingBottom="15dp"
         app:contentPaddingLeft="20dp"
         app:contentPaddingRight="20dp"
-        app:contentPaddingTop="15dp">
+        app:contentPaddingTop="15dp"
+        app:layout_constraintBottom_toBottomOf="@+id/title"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <TextView
             android:id="@+id/price"

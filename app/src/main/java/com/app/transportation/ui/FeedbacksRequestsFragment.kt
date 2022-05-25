@@ -7,9 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
 import com.app.transportation.core.collectWithLifecycle
@@ -83,6 +85,9 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
 
     private fun applyAdapters() {
         b.feedbacksRequestsRV.adapter = adapter
+        adapter.onClick = {
+            findNavController().navigate(R.id.pingInfoRequestsFragment, bundleOf("id" to it))
+        }
         viewModel.getAdvertsPing()
         viewModel.getOrdersPing()
         b.progressBar2.visibility = View.VISIBLE
