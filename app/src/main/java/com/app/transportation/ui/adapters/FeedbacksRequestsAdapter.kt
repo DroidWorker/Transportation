@@ -14,6 +14,7 @@ import com.app.transportation.databinding.ItemRequestBinding
 class FeedbacksRequestsAdapter :
     ListAdapter<FeedbackRequest, RecyclerView.ViewHolder>(DiffCallback()) {
     var onClick: ((Int) -> Unit)? = null
+    var onFeedbackClick: ((Int) -> Unit)? = null
 
     init {
         setHasStableIds(true)
@@ -65,9 +66,13 @@ class FeedbacksRequestsAdapter :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: FeedbackRequest) = with(binding) {
+            root.setOnClickListener { onFeedbackClick?.invoke(item.id.toInt()) }
             title.text = item.title
-            subtitle.text = "Запрос на исполнение вашей заявки в категории "+item.subtitle
-            price.text = item.price.toString()
+            subtitle.text = item.subtitle
+            if (item.price!=0)
+                price.text = item.price.toString() + " руб"
+            else
+                priceCardView.visibility= View.GONE
         }
 
     }

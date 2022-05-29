@@ -85,5 +85,9 @@
         android:id="@+id/pingInfoRequestsFragment"
         android:name="com.app.transportation.ui.pingInfoRequestsFragment"
         android:label="pingInfoRequestsFragment" />
+    <fragment
+        android:id="@+id/pingInfoFeedbackFragment"
+        android:name="com.app.transportation.ui.pingInfoFeedbackFragment"
+        android:label="pingInfoFeedbackFragment" />
 
 </navigation>

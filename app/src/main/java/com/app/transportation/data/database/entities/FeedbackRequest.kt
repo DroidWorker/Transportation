@@ -12,5 +12,5 @@ data class FeedbackRequest(
     var title: String = "",
     var subtitle: String = "",
     var dateTime: Date = currentDateTime,
-    var price: Int = 1000
+    var price: Int = 0
 )

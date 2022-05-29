@@ -61,13 +61,31 @@ class pingInfoRequestsFragment : Fragment() {
                 if (advert.id==id) {
                     advert?.apply {
                         b.orderName3.text = advert.title
-
+                        b.fromLocation3.text = advert.fromCity+", "+advert.fromRegion+", "+advert.fromPlace
+                        b.toLocation3.text = advert.toCity+", "+advert.toRegion+", "+advert.toPlace
                         b.date3.text = advert.date
                         b.time3.text = advert.time
                         b.comment3.text = advert.description
                         b.name3.text = "имя не получено"
                         b.telNumber3.text = "номер не получен"
                     }
+                    return@collectWithLifecycle
+                }
+            }
+        }
+        viewModel.cachedAdvertPing.collectWithLifecycle(viewLifecycleOwner) { adverts ->
+            adverts.forEach{ advert->
+                if (advert.id==id) {
+                    advert?.apply {
+                        b.orderName3.text = advert.title
+                        b.priceView.text=advert.price
+                        b.date3.text = advert.date
+                        b.time3.text = advert.time
+                        b.comment3.text = advert.description
+                        b.name3.text = "имя не получено"
+                        b.telNumber3.text = "номер не получен"
+                    }
+                    return@collectWithLifecycle
                 }
             }
         }

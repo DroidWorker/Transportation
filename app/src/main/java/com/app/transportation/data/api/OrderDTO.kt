@@ -22,5 +22,6 @@ data class OrderDTO(
     val name: String,
     val phone: String,
     val payment: String,
-    val photo: Map<String, String>
+    val photo: Map<String, String>,
+    @SerialName("ping") val ping: Map<String, String>
 )

@@ -88,36 +88,50 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
         adapter.onClick = {
             findNavController().navigate(R.id.pingInfoRequestsFragment, bundleOf("id" to it))
         }
+        adapter.onFeedbackClick = {
+            findNavController().navigate(R.id.pingInfoFeedbackFragment, bundleOf("id" to  it))
+        }
         viewModel.getAdvertsPing()
         viewModel.getOrdersPing()
+        viewModel.getFeedbackOrdersAdverts()
         b.progressBar2.visibility = View.VISIBLE
         applyList()
     }
 
     private fun applyList() {
-        var list : List<FeedbackRequest>? = listOf()
+        //var list : List<FeedbackRequest>? = listOf()
                 if (feedbacksRequestsActiveTab == "requests") {
                         var arrlist : ArrayList<FeedbackRequest> = ArrayList()
                         viewModel.cachedOrderPing.collectWithLifecycle(viewLifecycleOwner){
                             it.toList().forEach{ order ->
                                 arrlist.add(FeedbackRequest((order.id).toLong(), 0, order.title, order.toCity+" "+order.toRegion+" "+order.toPlace, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), 0))
                             }
-                            list =arrlist.toList()
-                            adapter.submitList(list)
+                            adapter.submitList(arrlist.toList())
                         }
+                    viewModel.cachedAdvertPing.collectWithLifecycle(viewLifecycleOwner){
+                        it.toList().forEach{ order ->
+                            arrlist.add(FeedbackRequest((order.id).toLong(), 0, order.title, order.category, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
+                        }
+                        adapter.submitList(arrlist.toList())
+                    }
                 }
                 else{
                     var arrlist : ArrayList<FeedbackRequest> = ArrayList()
-                    viewModel.cachedAdvertPing.collectWithLifecycle(viewLifecycleOwner){
+                    viewModel.cachedAdvertFeedbackPing.collectWithLifecycle(viewLifecycleOwner){
                         it.toList().forEach{ order ->
-                            arrlist.add(FeedbackRequest((order.id).toLong(), 1, order.title, order.category, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
+                            arrlist.add(FeedbackRequest((order.id).toLong(), 1, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
                         }
-                        list =arrlist.toList()
-                        adapter.submitList(list)
+                        adapter.submitList(arrlist.toList())
+                    }
+                    viewModel.cachedOrderFeedbackPing.collectWithLifecycle(viewLifecycleOwner){
+                        it.toList().forEach{ order ->
+                            arrlist.add(FeedbackRequest((order.id).toLong(), 1, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
+                        }
+                        adapter.submitList(arrlist.toList())
                     }
         }
         b.progressBar2.visibility = View.GONE
-        adapter.submitList(list)
+        //adapter.submitList(list)
     }
 
     private fun applyListeners() {

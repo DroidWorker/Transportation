@@ -65,6 +65,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     val cachedAdvertPing = MutableStateFlow(emptyList<Advert>())
     val cachedOrderPing = MutableStateFlow(emptyList<Advert>())
+    val cachedAdvertFeedbackPing = MutableStateFlow(emptyList<Advert>())
+    val cachedOrderFeedbackPing = MutableStateFlow(emptyList<Advert>())
 
     val cachedAdvert = MutableStateFlow<Advert?>(null)
     val cachedOrder = MutableStateFlow<Advert?>(null)
@@ -147,6 +149,11 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             updateOrders(true, categoryId)
 
         updateFilterThirdLevelCategories(categoryId)
+    }
+
+    fun getFeedbackOrdersAdverts() = viewModelScope.launch(Dispatchers.IO){
+        updateFeedbackOrders()
+        updateFeedbackAdverts()
     }
 
     fun getCategoryOrders(categoryId: Int) = viewModelScope.launch(Dispatchers.IO) {
@@ -461,7 +468,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
 
     private suspend fun updateFavoriteAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
-        println("steeep01")
         val list = getAdvertsFavoriteFull() ?: return@launch
         println("adverts Favorite fuuuuuuuuuuul = $list")
 
@@ -476,13 +482,13 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     private suspend fun updatePingAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
         val list = getAdvertsPingFull() ?: return@launch
-        println("adverts ping fuuuuuuuuuuul = $list")
+        //println("adverts ping fuuuuuuuuuuul = $list")
 
         cachedAdvertPing.tryEmit(list)
     }
     private suspend fun updatePingOrdersFull() = viewModelScope.launch(Dispatchers.IO) {
         val list = getOrdersPingFull() ?: return@launch
-        println("orders ping fuuuuuuuuuuul = $list")
+        //println("orders ping fuuuuuuuuuuul = $list")
 
         cachedOrderPing.tryEmit(list)
     }
@@ -554,6 +560,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 list.filter { categoryId == it.categoryId }
             )
     }
+    private suspend fun updateFeedbackAdverts() = viewModelScope.launch(Dispatchers.IO) {
+        val list = getFeedbackAdverts() ?: return@launch
+        cachedAdvertFeedbackPing.tryEmit(list)
+    }
 
     private suspend fun getAdverts() =
         (repository.getAdvertList() as? AdvertListResponse.Success)?.let { response ->
@@ -579,6 +589,38 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 )
             }
         }
+    private suspend fun getFeedbackAdverts() =
+        (repository.getAdvertList() as? AdvertListResponse.Success)?.let { response ->
+            var list : ArrayList<Advert> = ArrayList()
+            response.advertMap.forEach { entry ->
+                val photoList : ArrayList<String> = ArrayList()
+                entry.value.photo.forEach{photoitem->
+                    photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                }
+
+                if (entry.value.ping.isNotEmpty()) {
+                    list.add(
+                        Advert(
+                            id = entry.key.toInt(),
+                            viewType = 0,
+                            categoryId = advertCategoriesFlow.value.find {
+                                it.id == entry.value.categoryId.toInt()
+                            }?.parentId ?: 4,
+                            category = entry.value.category,
+                            subcategoryId = entry.value.categoryId.toInt(),
+                            title = entry.value.title,
+                            date = entry.value.date,
+                            time = entry.value.time,
+                            price = entry.value.price,
+                            description = "Отклик на ваше объявление в категории " + entry.value.category,
+                            photo = photoList.toList(),
+                            ping = entry.value.ping
+                        )
+                    )
+                }
+            }
+            list.toList()
+        }
 
     private suspend fun updateOrders(
         updateCache: Boolean = false,
@@ -592,6 +634,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             cachedAdvertsSF.tryEmit(
                 list.filter { categoryId == it.categoryId }
             )
+    }
+    private suspend fun updateFeedbackOrders() = viewModelScope.launch(Dispatchers.IO) {
+        val list = getFeedbackOrders() ?: return@launch
+        cachedOrderFeedbackPing.tryEmit(list)
     }
 
     private suspend fun getOrdersFull() =
@@ -654,6 +700,41 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     photo = photoList.toList()
                 )
             }
+        }
+    private suspend fun getFeedbackOrders() =
+        (repository.getOrderList() as? OrderListResponse.Success)?.let { response ->
+            var list : ArrayList<Advert> = ArrayList()
+            response.orderMap.forEach { entry ->
+                val photoList: ArrayList<String> = ArrayList()
+                entry.value.photo.forEach { photoitem ->
+                    photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                }
+                if (entry.value.ping.isNotEmpty()) {
+                    list.add(Advert(
+                        id = entry.key.toInt(),
+                        viewType = 0,
+                        categoryId = advertCategoriesFlow.value.find {
+                            it.id == entry.value.categoryId.toInt()
+                        }?.parentId ?: 4,
+                        category = entry.value.category,
+                        subcategoryId = entry.value.categoryId.toInt(),
+                        title = entry.value.description,
+                        date = entry.value.date,
+                        time = entry.value.time,
+                        fromCity = "${entry.value.fromCity}",
+                        fromRegion = "${entry.value.fromRegion}",
+                        fromPlace = "${entry.value.fromPlace}",
+                        toCity = "${entry.value.toCity}",
+                        toRegion = "${entry.value.toRegion}",
+                        toPlace = "${entry.value.toPlace}",
+                        payment = entry.value.payment,
+                        description = "Запрс на исполнение вашей заявки в категории " + entry.value.category,
+                        photo = emptyList(),//photoList.toList()
+                        ping = entry.value.ping
+                    ))
+                }
+            }
+            list.toList()
         }
 
     private fun updateFilterThirdLevelCategories(categoryId: Int) =
@@ -737,7 +818,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             //val thirdLevelCatsDeferred = advertCats.filter { it.level == 3 }
 
             val list = mutableListOf<Advert>()
-            var index = 0L
             firstLevelCatsDeferred.await().forEach {
                 getOrders()?.filter { order ->
                     secondLevelCategoriesFlow.value
@@ -802,7 +882,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     suspend fun getChildrenID(categoryId : Int) = channelFlow {
         advertCategoriesFlow.collect() {
-            var ids : ArrayList<Int> = ArrayList()
+            val ids : ArrayList<Int> = ArrayList()
             ids.add(categoryId)
             it.forEach{cat ->
                 if (cat.parentId==categoryId||ids.contains(cat.parentId)){
@@ -881,10 +961,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
             send(list)
         }
-    }
-
-    fun updateCategories(id: Int) = viewModelScope.launch(Dispatchers.IO) {
-
     }
 
     fun createAdvert(

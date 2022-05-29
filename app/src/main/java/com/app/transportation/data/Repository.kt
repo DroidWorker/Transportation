@@ -576,6 +576,9 @@ class Repository(private val dao: MainDao) : KoinComponent {
         if (responseBody.contains(",\"photo\":[]")) {
             responseBody = responseBody.replace(",\"photo\":[]", ",\"photo\":{}")
         }
+        if (responseBody.contains(",\"ping\":[]")) {
+            responseBody = responseBody.replace(",\"ping\":[]", ",\"ping\":{}")
+        }
         val json = Json.Default
 
         kotlin.runCatching {
@@ -604,6 +607,9 @@ class Repository(private val dao: MainDao) : KoinComponent {
         var responseBody: String = response.receive()
         if (responseBody.contains(",\"photo\":[]")) {
             responseBody = responseBody.replace(",\"photo\":[]", ",\"photo\":{}")
+        }
+        if (responseBody.contains(",\"ping\":[]")) {
+            responseBody = responseBody.replace(",\"ping\":[]", ",\"ping\":{}")
         }
         val json = Json.Default
 
@@ -636,7 +642,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, AdvertDTO> = mutableMapOf("empty" to AdvertDTO("","","","","","","", "", emptyMap()))
+                var emty : Map<String, AdvertDTO> = mutableMapOf("empty" to AdvertDTO("","","","","","","", "", emptyMap(), emptyMap()))
                 AdvertListResponse.Success(emty)
             }
             json.decodeFromString<AdvertListResponse.Failure>(responseBody)
@@ -663,7 +669,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, OrderDTO> = mutableMapOf("empty" to OrderDTO("","","","","","","","","","","","","","","","","", emptyMap()))
+                var emty : Map<String, OrderDTO> = mutableMapOf("empty" to OrderDTO("","","","","","","","","","","","","","","","","", emptyMap(), emptyMap()))
                 OrderListResponse.Success(emty)
             }
             json.decodeFromString<OrderListResponse.Failure>(responseBody)
