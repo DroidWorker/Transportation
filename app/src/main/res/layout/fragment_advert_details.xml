@@ -270,6 +270,7 @@
         android:text="Заказать"
         android:textAllCaps="false"
         android:textColor="@color/white"
+        android:visibility="gone"
         app:cornerRadius="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

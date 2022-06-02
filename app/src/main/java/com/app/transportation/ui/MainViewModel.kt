@@ -260,6 +260,28 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
     }
 
+    fun deleteAdvertPing(id: Int) =
+        viewModelScope.launch(Dispatchers.IO) {
+            when (repository.deleteAdvertPing(id.toString()).message) {
+                "Success deleted." -> {
+                    messageEvent.tryEmit("Объявление успешно удалено!")
+                    getAdvertsPing()
+                }
+                else -> messageEvent.tryEmit("Ошибка при удалении объявления!")
+            }
+        }
+
+    fun deleteOrderPing(id: Int) =
+        viewModelScope.launch(Dispatchers.IO) {
+            when (repository.deleteOrderPing(id.toString()).message) {
+                "Success deleted." -> {
+                    messageEvent.tryEmit("Объявление успешно удалено!")
+                    getOrdersPing()
+                }
+                else -> messageEvent.tryEmit("Ошибка при удалении объявления!")
+            }
+        }
+
     fun getOrdersPing() = viewModelScope.launch(Dispatchers.IO) {
         updatePingOrdersFull()
     }
@@ -501,10 +523,12 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         println("adverts fuuuuuuuuuuul = $list")
 
         advertsSF.tryEmit(list)
-
         if (updateCache)
             cachedAdvertsSF.tryEmit(list.filter {
-                categoryId == it.subcategoryId || categoryId == it.categoryId
+                categoryId == it.subcategoryId || categoryId == it.categoryId ||
+                        advertCategoriesFlow.value.find { acf->
+                            acf.id == categoryId
+                        }?.parentId ?: 0 == it.subcategoryId
             })
     }
     private suspend fun updateCategoryOrdersFull(
@@ -524,7 +548,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     }
 
     private suspend fun getAdvertsFull() =
-        (repository.getAdvertFullList() as? AdvertListResponse.Success)?.let { response ->
+        (repository.getAdvertFullList() as? AdvertFullListResponse.Success)?.let { response ->
             response.advertMap.map { entry ->
                 val photoList : ArrayList<String> = ArrayList()
                 entry.value.photo.forEach{photoitem->
@@ -538,6 +562,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     }?.parentId ?: 4,
                     category = entry.value.category,
                     subcategoryId = entry.value.categoryId.toInt(),
+                    fourthLevelCategory = advertCategoriesFlow.value.find {
+                        it.id == entry.value.categoryId.toInt()
+                    }?.childId ?: 0,
                     title = entry.value.title,
                     date = entry.value.date,
                     time = entry.value.time,
@@ -581,6 +608,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     }?.parentId ?: 4,
                     category = entry.value.category,
                     subcategoryId = entry.value.categoryId.toInt(),
+                    description = entry.value.description,
                     title = entry.value.title,
                     date = entry.value.date,
                     time = entry.value.time,
@@ -641,7 +669,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     }
 
     private suspend fun getOrdersFull() =
-        (repository.getOrderFullList() as? OrderListResponse.Success)?.let { response ->
+        (repository.getOrderFullList() as? OrderFullListResponse.Success)?.let { response ->
             response.orderMap.map { entry ->
                 val photoList : ArrayList<String> = ArrayList()
                 entry.value.photo.forEach{photoitem->
@@ -984,10 +1012,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     fun editAdvert(title: String,
                    price: String,
                    description: String,
-                   categoryId: String,
                    photos: List<String>)=
         viewModelScope.launch(Dispatchers.IO) {
-            when (val result = repository.editAdvert(title, price, description, categoryId, photos)) {
+            when (val result = repository.editAdvert(title, price, description, photos)) {
                 is AdvertCreateResponse.Success -> {
                     if (result.id != null)
                         messageEvent.tryEmit("Объявление добавлено!")

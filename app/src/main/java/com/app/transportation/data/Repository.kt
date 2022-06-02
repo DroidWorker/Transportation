@@ -166,6 +166,39 @@ class Repository(private val dao: MainDao) : KoinComponent {
         println("pingErrror"+it.stackTraceToString())
         AddPingResponse.Failure(it.stackTraceToString()) }
 
+    suspend fun deleteAdvertPing(id: String): InfoMessageResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/advert_ping_delete",
+                formParameters = Parameters.build {
+                    append("ping_user_id", id)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        json.decodeFromString(responseBody)
+    }.getOrElse { InfoMessageResponse(it.stackTraceToString()) }
+    suspend fun deleteOrderPing(id: String): InfoMessageResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/order_ping_delete",
+                formParameters = Parameters.build {
+                    append("ping_user_id", id)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        json.decodeFromString(responseBody)
+    }.getOrElse { InfoMessageResponse(it.stackTraceToString()) }
+
     suspend fun getAdvertPingList(): AdvertFavResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AdvertFavResponse.Failure("token is null")
         val response: HttpResponse =
@@ -443,7 +476,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                             id = it.key.toInt(),
                             level = 3,
                             name = it.value.name,
-                            parentId = it.value.parentId.toInt()
+                            parentId = it.value.parentId.toInt(),
                         )
                     )
                 }
@@ -460,6 +493,9 @@ class Repository(private val dao: MainDao) : KoinComponent {
                             parentId = it.value.parentId.toInt()
                         )
                     )
+                    thirdLevelCategories.find { tlc->
+                        tlc.id.toString() == it.value.parentId
+                    }?.childId=it.key.toInt() ?: 0
                 }
             }
             val unsortedAllCategories = cats.map {
@@ -534,7 +570,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
         title: String,
         price: String,
         description: String,
-        categoryId: String,
         photos: List<String>
     ): AdvertCreateResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
@@ -545,7 +580,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
                     if (title!=null)append("title", title)
                     if (price!=null)append("price", price)
                     if (description!=null)append("description", description)
-                    if (categoryId!=null)append("category", categoryId)
                     if (photos!=null)append("image", "[${photos.joinToString()}]")
                 }
             ) {
@@ -622,8 +656,8 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }
     }.getOrElse { OrderListResponse.Failure(it.stackTraceToString()) }
 
-    suspend fun getAdvertFullList(): AdvertListResponse = kotlin.runCatching {
-        val token = authToken ?: return@runCatching AdvertListResponse.Failure("token is null")
+    suspend fun getAdvertFullList(): AdvertFullListResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching AdvertFullListResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
                 url = "http://api-transport.mvp-pro.top/api/v1/advert_list_common",
@@ -637,20 +671,20 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val json = Json.Default
 
         kotlin.runCatching {
-            val map = json.decodeFromString<Map<String, AdvertDTO>>(responseBody)
-            AdvertListResponse.Success(map)
+            val map = json.decodeFromString<Map<String, AdvertFullDTO>>(responseBody)
+            AdvertFullListResponse.Success(map)
         }.getOrElse {
             println("it alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, AdvertDTO> = mutableMapOf("empty" to AdvertDTO("","","","","","","", "", emptyMap(), emptyMap()))
-                AdvertListResponse.Success(emty)
+                var emty : Map<String, AdvertFullDTO> = mutableMapOf("empty" to AdvertFullDTO("","","","","","","", "", emptyMap()))
+                AdvertFullListResponse.Success(emty)
             }
-            json.decodeFromString<AdvertListResponse.Failure>(responseBody)
+            json.decodeFromString<AdvertFullListResponse.Failure>(responseBody)
         }
-    }.getOrElse { AdvertListResponse.Failure(it.stackTraceToString()) }
+    }.getOrElse { AdvertFullListResponse.Failure(it.stackTraceToString()) }
 
-    suspend fun getOrderFullList(): OrderListResponse = kotlin.runCatching {
-        val token = authToken ?: return@runCatching OrderListResponse.Failure("token is null")
+    suspend fun getOrderFullList(): OrderFullListResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching OrderFullListResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
                 url = "http://api-transport.mvp-pro.top/api/v1/order_list_common",
@@ -664,17 +698,17 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val json = Json.Default
 
         kotlin.runCatching {
-            val map = json.decodeFromString<Map<String, OrderDTO>>(responseBody)
-            OrderListResponse.Success(map)
+            val map = json.decodeFromString<Map<String, OrderFullDTO>>(responseBody)
+            OrderFullListResponse.Success(map)
         }.getOrElse {
             println("it alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, OrderDTO> = mutableMapOf("empty" to OrderDTO("","","","","","","","","","","","","","","","","", emptyMap(), emptyMap()))
-                OrderListResponse.Success(emty)
+                var emty : Map<String, OrderFullDTO> = mutableMapOf("empty" to OrderFullDTO("","","","","","","","","","","","","","","","","", emptyMap()))
+                OrderFullListResponse.Success(emty)
             }
-            json.decodeFromString<OrderListResponse.Failure>(responseBody)
+            json.decodeFromString<OrderFullListResponse.Failure>(responseBody)
         }
-    }.getOrElse { OrderListResponse.Failure(it.stackTraceToString()) }
+    }.getOrElse { OrderFullListResponse.Failure(it.stackTraceToString()) }
 
     suspend fun getAdvertInfo(id: String): AdvertInfoResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AdvertInfoResponse.Failure("token is null")

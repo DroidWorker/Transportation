@@ -6,6 +6,7 @@ data class Advert(
     val categoryId: Int,
     val category: String,
     val subcategoryId: Int,
+    val fourthLevelCategory: Int = 0,
     var title: String,
     var subtitle: String = "",
     var date: String,

@@ -8,5 +8,6 @@ data class AdvertisementCategory(
     @PrimaryKey val id: Int = 0,
     var level: Int = 0,
     var name: String = "",
-    val parentId: Int
+    val parentId: Int,
+    var childId: Int = 0
 )

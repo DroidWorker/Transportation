@@ -199,6 +199,7 @@
                 android:layout_gravity="center"
                 android:fontFamily="@font/montserrat"
                 android:hint="Цена"
+                android:inputType="number"
                 android:textColor="@color/primary_color"
                 android:textColorHint="@color/primary_color"
                 android:textSize="14sp"

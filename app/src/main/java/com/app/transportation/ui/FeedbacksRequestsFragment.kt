@@ -63,6 +63,11 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
         }
 
         super.onViewCreated(view, savedInstanceState)
+        viewModel.cachedOrderPing.tryEmit(emptyList())
+        viewModel.cachedAdvertPing.tryEmit(emptyList())
+        viewModel.cachedAdvertFeedbackPing.tryEmit(emptyList())
+        viewModel.cachedOrderFeedbackPing.tryEmit(emptyList())
+        println("cleeeeeeeeeear")
 
         applyTabColors()
 
@@ -113,6 +118,7 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
                             arrlist.add(FeedbackRequest((order.id).toLong(), 0, order.title, order.category, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
                         }
                         adapter.submitList(arrlist.toList())
+                        arrlist.clear()
                     }
                 }
                 else{
@@ -128,6 +134,7 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
                             arrlist.add(FeedbackRequest((order.id).toLong(), 1, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
                         }
                         adapter.submitList(arrlist.toList())
+                        arrlist.clear()
                     }
         }
         b.progressBar2.visibility = View.GONE

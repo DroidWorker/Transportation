@@ -72,7 +72,7 @@ class CreatingOrderPpAndKuFragment : Fragment() {
 
         b.toName.setText(viewModel.profileFlow.value?.name)
         b.toTelNumber.setText(viewModel.profileFlow.value?.telNumber)
-        var strings = viewModel.profileFlow.value?.cityArea?.split("[","/","*","-","+"," ","&","$","#","@","!","^","&","\\","|","]")
+        var strings = viewModel.profileFlow.value?.cityArea?.split("[","/","*","-","+",",","&","$","#","@","!","^","&","\\","|","]")
         b.fromCity.setText(strings?.get(0))
         b.toCity.setText(strings?.get(0))
         if(strings?.size!! >1) {

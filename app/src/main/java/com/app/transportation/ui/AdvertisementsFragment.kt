@@ -68,6 +68,7 @@ class AdvertisementsFragment : Fragment() {
         }
 
         super.onViewCreated(view, savedInstanceState)
+        println("viewcreaaaated"+categoryId+"||"+type)
         if (type==1){
             viewModel.cachedOrdersSF.tryEmit(emptyList())
             viewModel.getAllCategoryOrders(categoryId)
@@ -143,7 +144,7 @@ class AdvertisementsFragment : Fragment() {
         if(type==1){
             viewModel.cachedOrdersSF.collectWithLifecycle(viewLifecycleOwner) {
                 adapter.submitList(it)
-                if (adapter.itemCount==0) {
+                if (it.isEmpty()) {
                     var filler: ArrayList<Advert> = ArrayList()
                     filler.add(
                         Advert(
@@ -151,6 +152,7 @@ class AdvertisementsFragment : Fragment() {
                             3,
                             0,
                             "",
+                            0,
                             0,
                             "Заказов не найдено!",
                             "",
@@ -175,7 +177,7 @@ class AdvertisementsFragment : Fragment() {
         else if (type==2) {
             viewModel.cachedAdvertsSF.collectWithLifecycle(viewLifecycleOwner) {
                 adapter.submitList(it)
-                if (adapter.itemCount==0) {
+                if (it.isEmpty()) {
                     var filler: ArrayList<Advert> = ArrayList()
                     filler.add(
                         Advert(
@@ -183,6 +185,7 @@ class AdvertisementsFragment : Fragment() {
                             3,
                             0,
                             "",
+                            0,
                             0,
                             "Объявлений не найдено!",
                             "Оформите заказ чтобы исполнитель нашел вас первым!",
@@ -221,6 +224,7 @@ class AdvertisementsFragment : Fragment() {
                             3,
                             0,
                             "",
+                            0,
                             0,
                             "Ничего не найдено!",
                             "",

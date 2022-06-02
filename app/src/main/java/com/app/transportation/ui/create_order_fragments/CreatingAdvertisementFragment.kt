@@ -11,10 +11,12 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
+import androidx.core.view.get
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -44,6 +46,9 @@ class CreatingAdvertisementFragment : Fragment() {
     private val mode by lazy { arguments?.getInt("mode", 1) ?: 0 }//if mode 1 category has 4level item show spinner
     private  val isEdit by lazy { arguments?.getInt("isEdit", 0) ?: 0}
     private var EditCatId : Int? = 0
+
+    private var catsID : HashMap<String, String> = HashMap<String, String>()
+    private var selectedCat : String = ""
 
     private val obtainPhotoUriLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -86,7 +91,11 @@ class CreatingAdvertisementFragment : Fragment() {
                         b.advertTitle.setText(item.title)
                         b.price.setText(item.price)
                         b.location.text = viewModel.profileFlow.value?.cityArea
-                        b.description.text = item.description
+                        if (b.description.text.isEmpty()) {
+                            b.descriptionGroup.isVisible = item.description.isNotBlank()
+                            b.addDescription.isVisible = item.description.isBlank()
+                            b.description.text = item.description
+                        }
                         item.photo.firstOrNull()?.let { base64String ->
                             try {
                                 val byteArray = Base64.decode(base64String, Base64.DEFAULT)
@@ -116,6 +125,10 @@ class CreatingAdvertisementFragment : Fragment() {
         b.addAdvert.setOnClickListener {
             if (isEdit==0) {
                 when {
+                    b.spinnerSelectCategory.isVisible&&selectedCat.isBlank() ->{
+                        viewModel.messageEvent.tryEmit("Не выбрана категория")
+                        return@setOnClickListener
+                    }
                     b.name.text.isBlank() && b.telNumber.text.isBlank() -> {
                         viewModel.messageEvent.tryEmit("В профиле отсутствуют имя и телефон")
                         return@setOnClickListener
@@ -138,10 +151,6 @@ class CreatingAdvertisementFragment : Fragment() {
                     }
                     b.price.text.isBlank() -> {
                         viewModel.messageEvent.tryEmit("Не заполнено поле с ценой")
-                        return@setOnClickListener
-                    }
-                    b.photo.tag != 1 -> {
-                        viewModel.messageEvent.tryEmit("Фото не добавлено")
                         return@setOnClickListener
                     }
                 }
@@ -168,7 +177,10 @@ class CreatingAdvertisementFragment : Fragment() {
                     title = b.advertTitle.text.toString(),
                     price = b.price.text.toString(),
                     description = b.description.text.toString(),
-                    categoryId = categoryId.toString(),
+                    categoryId = if (b.spinnerSelectCategory.isVisible)
+                        catsID.getValue(selectedCat!!)
+                    else
+                        categoryId.toString(),
                     photos = photos
                 )
 
@@ -224,7 +236,6 @@ class CreatingAdvertisementFragment : Fragment() {
                     title = b.advertTitle.text.toString(),
                     price = b.price.text.toString(),
                     description = b.description.text.toString(),
-                    categoryId = EditCatId!!.toString(),
                     photos = photos
                 )
             }
@@ -294,13 +305,26 @@ class CreatingAdvertisementFragment : Fragment() {
                 data.add("выбрать из списка")
                 it.forEach{item ->
                     data.add(item.name)
+                    catsID[item.name] = item.realId.toString()
                 }
                 val adapter: ArrayAdapter<String> = ArrayAdapter<String>(ctx!!, android.R.layout.simple_spinner_item, data)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 b.spinnerSelectCategory.adapter = adapter
 
-                if (data.size>1)
+                if (data.size>1) {
                     b.spinnerSelectCategory.visibility = View.VISIBLE
+                    b.spinnerSelectCategory.onItemSelectedListener = object : AdapterView.OnItemSelectedListener{
+                        override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                        }
+
+                        override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                            if (position!=0)
+                                selectedCat = b.spinnerSelectCategory.getItemAtPosition(position).toString()
+                        }
+
+                    }
+                }
             }
     }
 
