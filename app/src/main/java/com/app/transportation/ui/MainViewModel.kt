@@ -391,7 +391,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
 
     private suspend fun getOrdersPingFull() =
-        (repository.getOrderPingList() as? OrderFavResponse.Success)?.let { response ->
+        (repository.getOrderPingList() as? OrderPingResponse.Success)?.let { response ->
             response.orderMap.map { entry ->
                 if (entry.key!="empty") {
                     val photoList: ArrayList<String> = ArrayList()
@@ -417,7 +417,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         toPlace = "${entry.value.toPlace}",
                         payment = entry.value.payment!!,
                         description = entry.value.description,
-                        photo = photoList.toList()
+                        photo = photoList.toList(),
+                        profile = entry.value.ping
                     )
                 }
                 else
@@ -444,7 +445,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
         }
     private suspend fun getAdvertsPingFull() =
-        (repository.getAdvertPingList() as? AdvertFavResponse.Success)?.let { response ->
+        (repository.getAdvertPingList() as? AdvertPingResponse.Success)?.let { response ->
             response.advertMap.map { entry ->
                 if (entry.key != "empty") {
                     val photoList: ArrayList<String> = ArrayList()
@@ -463,7 +464,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         date = entry.value.date,
                         time = entry.value.time,
                         price = entry.value.price,
-                        photo = photoList.toList()
+                        photo = photoList.toList(),
+                        profile = entry.value.ping
                     )
                 }
                 else{
@@ -504,15 +506,43 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     private suspend fun updatePingAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
         val list = getAdvertsPingFull() ?: return@launch
+        var reslist : ArrayList<Advert> = ArrayList()
+        list.forEach{item->
+            if (item.profile.size>1){
+                for (i in 0 until item.profile.size){
+                    var advert: Advert = item.copy()
+                    advert.profile = emptyList()
+                    advert.profile= listOf(item.profile[i])
+                    advert.id = (item.id.toString()+""+i.toString()).toInt()
+                    reslist.add(advert)
+                }
+            }
+            else
+                reslist.add(item)
+        }
         //println("adverts ping fuuuuuuuuuuul = $list")
 
-        cachedAdvertPing.tryEmit(list)
+        cachedAdvertPing.tryEmit(reslist)
     }
     private suspend fun updatePingOrdersFull() = viewModelScope.launch(Dispatchers.IO) {
         val list = getOrdersPingFull() ?: return@launch
+        var reslist : ArrayList<Advert> = ArrayList()
+        list.forEach{item->
+            if (item.profile.size>1){
+                for (i in 0..item.profile.size-1){
+                    var advert: Advert = item.copy()
+                    advert.profile = emptyList()
+                    advert.profile= listOf(item.profile[i])
+                    advert.id = (item.id.toString()+""+i.toString()).toInt()
+                    reslist.add(advert)
+                }
+            }
+            else
+                reslist.add(item)
+        }
         //println("orders ping fuuuuuuuuuuul = $list")
 
-        cachedOrderPing.tryEmit(list)
+        cachedOrderPing.tryEmit(reslist)
     }
 
     private suspend fun updateCategoryAdvertsFull(

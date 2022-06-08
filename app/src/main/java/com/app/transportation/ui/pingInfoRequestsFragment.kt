@@ -66,8 +66,9 @@ class pingInfoRequestsFragment : Fragment() {
                         b.date3.text = advert.date
                         b.time3.text = advert.time
                         b.comment3.text = advert.description
-                        b.name3.text = "имя не получено"
-                        b.telNumber3.text = "номер не получен"
+                        b.name3.text = advert.profile[0].firstName+" "+advert.profile[0].lastName
+                        b.telNumber3.text = advert.profile[0].phone
+                        b.pingStatus.text = advert.profile[0].status
                     }
                     return@collectWithLifecycle
                 }
@@ -82,8 +83,9 @@ class pingInfoRequestsFragment : Fragment() {
                         b.date3.text = advert.date
                         b.time3.text = advert.time
                         b.comment3.text = advert.description
-                        b.name3.text = "имя не получено"
-                        b.telNumber3.text = "номер не получен"
+                        b.name3.text = advert.profile[0].firstName+" "+advert.profile[0].lastName
+                        b.telNumber3.text = advert.profile[0].phone
+                        b.pingStatus.text = advert.profile[0].status
                     }
                     return@collectWithLifecycle
                 }

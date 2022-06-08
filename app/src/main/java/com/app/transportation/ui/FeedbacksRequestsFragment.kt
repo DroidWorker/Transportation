@@ -67,7 +67,6 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
         viewModel.cachedAdvertPing.tryEmit(emptyList())
         viewModel.cachedAdvertFeedbackPing.tryEmit(emptyList())
         viewModel.cachedOrderFeedbackPing.tryEmit(emptyList())
-        println("cleeeeeeeeeear")
 
         applyTabColors()
 

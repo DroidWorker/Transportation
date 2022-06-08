@@ -1,5 +1,7 @@
 package com.app.transportation.data.database.entities
 
+import com.app.transportation.data.api.PingDTO
+
 data class Advert(
     var id: Int,
     val viewType: Int,
@@ -21,5 +23,6 @@ data class Advert(
     var toRegion: String = "",
     var toPlace: String = "",
     var payment: String = "",
-    var ping: Map<String, String> = emptyMap()
+    var ping: Map<String, String> = emptyMap(),
+    var profile: List<PingDTO> = emptyList()
 )
