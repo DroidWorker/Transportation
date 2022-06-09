@@ -90,7 +90,16 @@ class favouritesFragment : Fragment() {
     }
 
     private fun applyListeners() {
-
+        adapter.onClick = {
+            if (this.description.isNotBlank())
+                viewModel.deleteAdvertFavorite(this.id)
+            else
+                viewModel.deleteOrderFavorite(this.id)
+            viewModel.cachedAdvertFavorite.tryEmit(emptyList())
+            viewModel.cachedOrderFavorite.tryEmit(emptyList())
+            viewModel.getAdvertsFavorite()
+            viewModel.getOrdersFavorite()
+        }
     }
 
     override fun onDestroyView() {

@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 sealed class UpdateProfileResponse {
     @Serializable
     data class Success(
+        @SerialName("id") val id: String,
         @SerialName("first_name") val firstName: String,
         @SerialName("last_name") val lastName: String,
         val phone: String,
@@ -14,7 +15,8 @@ sealed class UpdateProfileResponse {
         val card: String,
         val location: String,
         val avatar: String,
-        val status: String
+        val status: String,
+        @SerialName("bussiness") val bussiness: String
     ) : UpdateProfileResponse()
 
     @Serializable

@@ -63,7 +63,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
         paymentCard: String = "",
         avatar: List<String>
     ) = kotlin.runCatching {
-        println("steeep 001"+avatar.size)
         val token = authToken ?: return@runCatching
         client.submitForm(
             url = "http://api-transport.mvp-pro.top/api/v1/profile",
@@ -111,7 +110,8 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             json.decodeFromString<UpdateProfileResponse.Failure>(responseBody)
         }
-    }.getOrElse { UpdateProfileResponse.Failure(it.stackTraceToString()) }
+    }.getOrElse {
+        UpdateProfileResponse.Failure(it.stackTraceToString()) }
 
     suspend fun logout() = coroutineScope {
         val clearProfileJob = launch { dao.clearProfile() }
@@ -355,6 +355,39 @@ class Repository(private val dao: MainDao) : KoinComponent {
         else
             OrderFavResponse.Failure(it.stackTraceToString())
     }
+
+    suspend fun deleteAdvertFavorite(id: String): InfoMessageResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/advert_delete_favorite",
+                formParameters = Parameters.build {
+                    append("order_id", id)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        json.decodeFromString(responseBody)
+    }.getOrElse { InfoMessageResponse(it.stackTraceToString()) }
+    suspend fun deleteOrderFavorite(id: String): InfoMessageResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/order_delete_favorite",
+                formParameters = Parameters.build {
+                    append("advert_id", id)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        json.decodeFromString(responseBody)
+    }.getOrElse { InfoMessageResponse(it.stackTraceToString()) }
 
     suspend fun search(str : String): SearchResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching SearchResponse.Failure("token is null")
@@ -614,15 +647,16 @@ class Repository(private val dao: MainDao) : KoinComponent {
             responseBody = responseBody.replace(",\"ping\":[]", ",\"ping\":{}")
         }
         val json = Json.Default
-
         kotlin.runCatching {
             val map = json.decodeFromString<Map<String, AdvertDTO>>(responseBody)
             println("map = $map")
             AdvertListResponse.Success(map)
         }.getOrElse {
+            println("eeeeeeeeeeeeerrrrrr")
             json.decodeFromString<AdvertListResponse.Failure>(responseBody)
         }
     }.getOrElse {
+        println("eeeeeeeeeeeeerrrrrr1"+it.stackTraceToString())
         AdvertListResponse.Failure(it.stackTraceToString())
     }
 
@@ -646,7 +680,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
             responseBody = responseBody.replace(",\"ping\":[]", ",\"ping\":{}")
         }
         val json = Json.Default
-
         kotlin.runCatching {
             val map = json.decodeFromString<Map<String, OrderDTO>>(responseBody)
             OrderListResponse.Success(map)

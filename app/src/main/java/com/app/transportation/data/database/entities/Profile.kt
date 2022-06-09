@@ -13,5 +13,6 @@ data class Profile(
     var paymentCard: String = "",
     var cityArea: String = "",
     var specialization: String = "",
-    var avatar: String = ""
+    var avatar: String = "",
+    var bussiness: String = "NO_ACTIVE"
 )

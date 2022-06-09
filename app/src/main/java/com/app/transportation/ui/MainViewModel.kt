@@ -87,14 +87,12 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     }
 
     private suspend fun updateStatic(type: String ="") = viewModelScope.launch(Dispatchers.IO) {
-        println("steeep01 "+type)
         val result = getStaticDatas(type) ?: return@launch
         cachedStatic.tryEmit(result)
     }
 
     private suspend fun getStaticDatas(type: String) =
         (repository.getStaticData(type) as? StaticDateResponse.Success)?.let { response ->
-            println("steeep03")
             response.id.text
         }
 
@@ -224,6 +222,28 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
     }
 
+    fun deleteAdvertFavorite(id: Int) =
+        viewModelScope.launch(Dispatchers.IO) {
+            when (val s = repository.deleteAdvertFavorite(id.toString()).message) {
+                "Success" -> {
+                    messageEvent.tryEmit("успешно удалено!")
+                    getAdvertsPing()
+                }
+                else -> messageEvent.tryEmit("Ошибка при удалении!"+s+"|||"+id)
+            }
+        }
+
+    fun deleteOrderFavorite(id: Int) =
+        viewModelScope.launch(Dispatchers.IO) {
+            when (val s = repository.deleteOrderFavorite(id.toString()).message) {
+                "Success" -> {
+                    messageEvent.tryEmit("успешно удалено!")
+                    getOrdersPing()
+                }
+                else -> messageEvent.tryEmit("Ошибка при удалении!"+s+"|||"+id)
+            }
+        }
+
     fun addOrderPing(
         orderId: String
     ) = viewModelScope.launch(Dispatchers.IO) {
@@ -299,7 +319,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
                     }
                     Advert(
-                        id = entry.key.toInt(),
+                        id = entry.value.order_id.toInt(),
                         viewType = 0,
                         categoryId = advertCategoriesFlow.value.find {
                             it.id == entry.value.categoryId.toInt()
@@ -346,14 +366,13 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     private suspend fun getAdvertsFavoriteFull() =
         (repository.getAdvertFavoriteList() as? AdvertFavResponse.Success)?.let { response ->
             response.advertMap.map { entry ->
-                println("steeep02")
                 if (entry.key != "empty") {
                     val photoList: ArrayList<String> = ArrayList()
                     entry.value.photo.forEach { photoitem ->
                         photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
                     }
                     Advert(
-                        id = entry.key.toInt(),
+                        id = entry.value.advert_id.toInt(),
                         viewType = 0,
                         categoryId = advertCategoriesFlow.value.find {
                             it.id == entry.value.categoryId.toInt()
@@ -830,23 +849,31 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         categoryId = it.parentId
                     )
                 )
-                getOrders()?.filter { order ->
-                    secondLevelCategoriesFlow.value
-                        .find { cat -> cat.id == order.categoryId }?.parentId == it.id
-                }?.forEach { advert ->
-                    list.add(
-                        ProfileRvItem(
-                            id = index++,
-                            viewType = 2,
-                            title = advert.title + " (заказ)",
-                            realId = advert.id,
-                            categoryId = advert.subcategoryId//advert.categoryId
-                        )
-                    )
+                val oders = getOrders()/*?.filter { order ->
+                    /*secondLevelCategoriesFlow.value
+                        .find { cat -> cat.id == order.categoryId }?.parentId == it.id*/
+                    getFirstLevelParentID(order.categoryId) == it.id
+                }*/
+                if (oders?.isNotEmpty() == true) {
+                    oders.forEach { order ->
+                        if (getFirstLevelParentID(order.categoryId) == it.id) {
+                            println(order.categoryId.toString()+":"+getFirstLevelParentID(order.categoryId).toString() +"=="+ it.id)
+                            list.add(
+                                ProfileRvItem(
+                                    id = index++,
+                                    viewType = 2,
+                                    title = order.title + " (заказ)",
+                                    realId = order.id,
+                                    categoryId = order.subcategoryId//advert.categoryId
+                                )
+                            )
+                        }
+                    }
                 }
                 getAdverts()?.filter { order ->
-                    secondLevelCategoriesFlow.value
-                        .find { cat -> cat.id == order.categoryId }?.parentId == it.id
+                    /*secondLevelCategoriesFlow.value
+                        .find { cat -> cat.id == order.categoryId }?.parentId == it.id*/
+                    getFirstLevelParentID(order.categoryId) == it.id
                 }?.forEach { advert ->
                     list.add(
                         ProfileRvItem(
@@ -950,6 +977,27 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             send(ids)
         }
     }
+    suspend fun getFirstLevelParentID(categoryId: Int) : Int {
+        var id: Int = 0
+            val list = advertCategoriesFlow.value
+        list.forEach { cat ->
+            if (categoryId == cat.id) {
+                id=cat.id
+                list.forEach { cat2 ->
+                    if (cat.parentId == cat2.id) {
+                        id=cat2.id
+                        list.forEach { cat3 ->
+                            if (cat2.parentId == cat3.id) {
+                                return cat3.id
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return id
+    }
+
 
     fun addAdvertScreenCategoriesFlow(categoryId: Int) = channelFlow {
         advertCategoriesFlow.collectLatest { advertCats ->

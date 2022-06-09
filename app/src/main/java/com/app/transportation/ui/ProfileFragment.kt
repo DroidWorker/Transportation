@@ -74,12 +74,11 @@ class ProfileFragment : Fragment() {
             b.toolbars.isVisible = true
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
+        viewModel.updateMainFragmentData()
+        viewModel.updateProfile()
         ctx = requireActivity()
         bview = view
         super.onViewCreated(view, savedInstanceState)
-
-
-        viewModel.updateProfile()
 
         setupAdapters()
 

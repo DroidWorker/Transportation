@@ -13,7 +13,7 @@ import com.app.transportation.data.database.entities.*
         FeedbackRequest::class,
         AdvertisementCategory::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 @TypeConverters(TypeConverter::class)
