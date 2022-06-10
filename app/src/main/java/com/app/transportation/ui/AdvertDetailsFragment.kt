@@ -61,7 +61,7 @@ class AdvertDetailsFragment : Fragment() {
                 b.name.text = "Какое-то имя"
                 b.telNumber.text = "Какой-то номер"
                 b.location.text = "Какое-то местоположение"
-                b.imageNumber.text = "1/5"
+                b.imageNumber.text = ""
                 b.price.text = price
                 b.description.text = description
                 viewModel.applyAdfPhotos(photo)

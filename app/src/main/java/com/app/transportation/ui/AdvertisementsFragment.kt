@@ -68,7 +68,6 @@ class AdvertisementsFragment : Fragment() {
         }
 
         super.onViewCreated(view, savedInstanceState)
-        println("viewcreaaaated"+categoryId+"||"+type)
         if (type==1){
             viewModel.cachedOrdersSF.tryEmit(emptyList())
             viewModel.getAllCategoryOrders(categoryId)

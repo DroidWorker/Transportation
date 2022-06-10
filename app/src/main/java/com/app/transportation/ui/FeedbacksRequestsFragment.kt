@@ -95,6 +95,9 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
         adapter.onFeedbackClick = {
             findNavController().navigate(R.id.pingInfoFeedbackFragment, bundleOf("id" to  it))
         }
+        adapter.onDeleteClick = {
+            viewModel.deleteAdvertPing(it)
+        }
         viewModel.getAdvertsPing()
         viewModel.getOrdersPing()
         viewModel.getFeedbackOrdersAdverts()

@@ -30,7 +30,6 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="20dp"
-        android:foreground="@drawable/suggestion_gradient_drawable"
         app:layout_constraintDimensionRatio="h,1.5:1"
         app:layout_constraintBottom_toTopOf="@+id/priceCardView"
         app:layout_constraintEnd_toEndOf="parent"

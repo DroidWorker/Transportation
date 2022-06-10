@@ -618,7 +618,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     date = entry.value.date,
                     time = entry.value.time,
                     price = entry.value.price,
-                    photo = photoList.toList()
+                    photo = photoList.toList(),
+                    description = entry.value.description
                 )
             }
         }
