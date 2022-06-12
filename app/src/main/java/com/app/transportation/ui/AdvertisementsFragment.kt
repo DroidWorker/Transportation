@@ -148,6 +148,7 @@ class AdvertisementsFragment : Fragment() {
                     filler.add(
                         Advert(
                             0,
+                            "",
                             3,
                             0,
                             "",
@@ -181,6 +182,7 @@ class AdvertisementsFragment : Fragment() {
                     filler.add(
                         Advert(
                             0,
+                            "",
                             3,
                             0,
                             "",
@@ -220,6 +222,7 @@ class AdvertisementsFragment : Fragment() {
                     filler.add(
                         Advert(
                             0,
+                            "",
                             3,
                             0,
                             "",

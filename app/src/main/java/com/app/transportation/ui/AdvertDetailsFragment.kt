@@ -54,6 +54,7 @@ class AdvertDetailsFragment : Fragment() {
 
     private fun applyObservers() = viewLifecycleOwner.repeatOnLifecycle {
         viewModel.cachedAdvert.collect(this) { advert ->
+            viewModel.getProfile(advert?.userId ?: "")
             advert?.apply {
                 b.title.text = title
                 b.addToFavourites.setColorFilter(0)
@@ -66,6 +67,11 @@ class AdvertDetailsFragment : Fragment() {
                 b.description.text = description
                 viewModel.applyAdfPhotos(photo)
             }
+        }
+        viewModel.cachedProfile.collect(this){
+            b.name.text = it.firstName+" "+it.lastName
+            b.location.text = it.location
+            b.telNumber.text = it.phone
         }
         viewModel.adfTempPhotoUris.collect(this) {
             it.second.getOrNull(it.first)?.let { bitmap ->

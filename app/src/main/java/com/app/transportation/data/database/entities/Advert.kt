@@ -4,6 +4,7 @@ import com.app.transportation.data.api.PingDTO
 
 data class Advert(
     var id: Int,
+    var userId: String = "",
     val viewType: Int,
     val categoryId: Int,
     val category: String,

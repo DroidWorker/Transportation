@@ -113,6 +113,26 @@ class Repository(private val dao: MainDao) : KoinComponent {
     }.getOrElse {
         UpdateProfileResponse.Failure(it.stackTraceToString()) }
 
+    suspend fun getProfile(id: String): ProfileShortResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching ProfileShortResponse.Failure("token is null")
+        val response: HttpResponse =
+            client.get("http://api-transport.mvp-pro.top/api/v1/profile_short?id=$id") {
+                headers { append("X-Access-Token", token) }
+            }
+        var responseBody: String = response.receive()
+        val json = Json.Default
+
+        kotlin.runCatching {
+            val map = json.decodeFromString<ProfileShortDTO>(responseBody)
+            ProfileShortResponse.Success(map)
+        }.getOrElse {
+            println("profile = $it")
+            json.decodeFromString<ProfileShortResponse.Failure>(responseBody)
+        }
+    }.getOrElse {
+            ProfileShortResponse.Failure(it.stackTraceToString())
+    }
+
     suspend fun logout() = coroutineScope {
         val clearProfileJob = launch { dao.clearProfile() }
 
@@ -709,7 +729,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, AdvertFullDTO> = mutableMapOf("empty" to AdvertFullDTO("","","","","","","", "", emptyMap()))
+                var emty : Map<String, AdvertFullDTO> = mutableMapOf("empty" to AdvertFullDTO("", "","","","","","","", "", emptyMap()))
                 AdvertFullListResponse.Success(emty)
             }
             json.decodeFromString<AdvertFullListResponse.Failure>(responseBody)
@@ -736,7 +756,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, OrderFullDTO> = mutableMapOf("empty" to OrderFullDTO("","","","","","","","","","","","","","","","","", emptyMap()))
+                var emty : Map<String, OrderFullDTO> = mutableMapOf("empty" to OrderFullDTO("", "","","","","","","","","","","","","","","","","", emptyMap()))
                 OrderFullListResponse.Success(emty)
             }
             json.decodeFromString<OrderFullListResponse.Failure>(responseBody)

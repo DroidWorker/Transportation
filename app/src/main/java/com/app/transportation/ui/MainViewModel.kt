@@ -68,6 +68,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     val cachedAdvertFeedbackPing = MutableStateFlow(emptyList<Advert>())
     val cachedOrderFeedbackPing = MutableStateFlow(emptyList<Advert>())
 
+    val cachedProfile = MutableStateFlow(ProfileShort())
+
     val cachedAdvert = MutableStateFlow<Advert?>(null)
     val cachedOrder = MutableStateFlow<Advert?>(null)
 
@@ -605,6 +607,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 }
                 Advert(
                     id = entry.key.toInt(),
+                    userId = entry.value.userId,
                     viewType = 0,
                     categoryId = advertCategoriesFlow.value.find {
                         it.id == entry.value.categoryId.toInt()
@@ -727,6 +730,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 }
                 Advert(
                     id = entry.key.toInt(),
+                    userId = entry.value.userId,
                     viewType = if(entry.value.photo.isNotEmpty()) 0 else 1,
                     categoryId = advertCategoriesFlow.value.find {
                         it.id == entry.value.categoryId.toInt()
@@ -947,6 +951,18 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
     }
 
+    private suspend fun getProfileShort(id: String){
+        (repository.getProfile(id) as? ProfileShortResponse.Success)?.let { response ->
+            val p = ProfileShort(response.profile.firstName, response.profile.lastName, response.profile.phone, response.profile.location)
+            cachedProfile.tryEmit(p)
+            p
+        }
+    }
+
+    fun getProfile(id: String) = viewModelScope.launch(Dispatchers.IO) {
+        getProfileShort(id)
+    }
+
     fun editProfile(
         name: String = "",
         telNumber: String = "",
@@ -955,7 +971,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         paymentCard: String = "",
         avatar: List<String>
     ) = viewModelScope.launch(Dispatchers.IO) {
-        println("steeeep002")
         repository.editProfile(name, telNumber, email, cityArea, paymentCard, avatar)
         delay(1000)
         updateProfile()
