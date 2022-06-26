@@ -163,6 +163,7 @@ class ProfileFragment : Fragment() {
                 }
             }
         }
+        viewModel.ctx = context
         viewModel.profileAdvertsFlow.collect(this) {
             profileAdapter.submitList(it)
         }

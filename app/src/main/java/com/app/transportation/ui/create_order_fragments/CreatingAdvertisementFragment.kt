@@ -6,6 +6,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
+import android.provider.Settings.Global.putInt
 import android.text.TextUtils
 import android.util.Base64
 import android.view.LayoutInflater
@@ -24,6 +25,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
+import com.app.transportation.PaymentActivity
 import com.app.transportation.R
 import com.app.transportation.core.*
 import com.app.transportation.databinding.FragmentCreatingAdvertisementBinding
@@ -173,7 +175,22 @@ class CreatingAdvertisementFragment : Fragment() {
                         photos.add("'data:image/jpg;base64,$base64String'")
                     }
                 }
+                var optionList: ArrayList<String> = ArrayList()
+                var summ: Int = 0
+                if (b.photoInShowcaseCB.isChecked) {
+                    optionList.add("1")
+                    summ+=50
+                }
+                if (b.colorHighlightingCB.isChecked) {
+                    optionList.add("2")
+                    summ+=30
+                }
+                if (b.newOrderNotificationCB.isChecked) {
+                    optionList.add("3")
+                    summ+=50
+                }
                 viewModel.createAdvert(
+                    ctx=context,
                     title = b.advertTitle.text.toString(),
                     price = b.price.text.toString(),
                     description = b.description.text.toString(),
@@ -181,9 +198,14 @@ class CreatingAdvertisementFragment : Fragment() {
                         catsID.getValue(selectedCat!!)
                     else
                         categoryId.toString(),
-                    photos = photos
+                    photos = photos,
+                    options = optionList.toList()
                 )
-
+                if (summ>0) {
+                    val payIntent = Intent(activity, PaymentActivity::class.java)
+                    payIntent.putExtra("summ", summ);
+                    startActivity(payIntent)
+                }
                 findNavController().navigateUp()
             }
             else{

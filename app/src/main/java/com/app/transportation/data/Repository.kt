@@ -1,13 +1,17 @@
 package com.app.transportation.data
 
+import android.content.Context
 import android.content.SharedPreferences
+import android.widget.Toast
 import androidx.core.content.edit
+import androidx.fragment.app.activityViewModels
 import androidx.room.Index
 import com.app.transportation.data.api.*
 import com.app.transportation.data.database.MainDao
 import com.app.transportation.data.database.entities.Advert
 import com.app.transportation.data.database.entities.AdvertisementCategory
 import com.app.transportation.data.database.entities.Profile
+import com.app.transportation.ui.MainViewModel
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -589,12 +593,13 @@ class Repository(private val dao: MainDao) : KoinComponent {
             }
         }.getOrElse { AdvertDataResponse.Failure(it.stackTraceToString()) }
 
-    suspend fun createAdvert(
+    suspend fun createAdvert(ctx: Context? = null,
         title: String,
         price: String,
         description: String,
         categoryId: String,
-        photos: List<String>
+        photos: List<String>,
+        options: List<String>
     ): AdvertCreateResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
         val response: HttpResponse =
@@ -606,6 +611,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                     append("description", description)
                     append("category", categoryId)
                     append("image", "[${photos.joinToString()}]")
+                    append("options", "[${options.joinToString()}]")
                 }
             ) {
                 headers { append("X-Access-Token", token) }
@@ -672,11 +678,9 @@ class Repository(private val dao: MainDao) : KoinComponent {
             println("map = $map")
             AdvertListResponse.Success(map)
         }.getOrElse {
-            println("eeeeeeeeeeeeerrrrrr")
             json.decodeFromString<AdvertListResponse.Failure>(responseBody)
         }
     }.getOrElse {
-        println("eeeeeeeeeeeeerrrrrr1"+it.stackTraceToString())
         AdvertListResponse.Failure(it.stackTraceToString())
     }
 
@@ -704,10 +708,10 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<Map<String, OrderDTO>>(responseBody)
             OrderListResponse.Success(map)
         }.getOrElse {
-            println("it = $it")
             json.decodeFromString<OrderListResponse.Failure>(responseBody)
         }
-    }.getOrElse { OrderListResponse.Failure(it.stackTraceToString()) }
+    }.getOrElse {
+        OrderListResponse.Failure(it.stackTraceToString()) }
 
     suspend fun getAdvertFullList(): AdvertFullListResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AdvertFullListResponse.Failure("token is null")
@@ -729,7 +733,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, AdvertFullDTO> = mutableMapOf("empty" to AdvertFullDTO("", "","","","","","","", "", emptyMap()))
+                var emty : Map<String, AdvertFullDTO> = mutableMapOf("empty" to AdvertFullDTO("", "","","","","","","", "", emptyMap(), emptyList()))
                 AdvertFullListResponse.Success(emty)
             }
             json.decodeFromString<AdvertFullListResponse.Failure>(responseBody)
@@ -828,7 +832,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         json.decodeFromString(responseBody)
     }.getOrElse { InfoMessageResponse(it.stackTraceToString()) }
 
-    suspend fun createOrder(
+    suspend fun createOrder(ctx: Context? = null,
         category: String,
         fromCity: String,
         fromRegion: String,
@@ -869,7 +873,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val json = Json.Default
 
         json.decodeFromString<AdvertCreateResponse.Success>(responseBody)
-    }.getOrElse { AdvertCreateResponse.Failure(it.stackTraceToString()) }
+    }.getOrElse {        AdvertCreateResponse.Failure(it.stackTraceToString()) }
 
     suspend fun editOrder(
         orderId: String,

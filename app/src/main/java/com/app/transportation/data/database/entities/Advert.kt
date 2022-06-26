@@ -1,6 +1,7 @@
 package com.app.transportation.data.database.entities
 
 import com.app.transportation.data.api.PingDTO
+import com.app.transportation.data.api.optionDTO
 
 data class Advert(
     var id: Int,
@@ -25,5 +26,6 @@ data class Advert(
     var toPlace: String = "",
     var payment: String = "",
     var ping: Map<String, String> = emptyMap(),
-    var profile: List<PingDTO> = emptyList()
+    var profile: List<PingDTO> = emptyList(),
+    var options: List<optionDTO> = emptyList()
 )

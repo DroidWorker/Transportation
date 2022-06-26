@@ -15,4 +15,5 @@ data class AdvertFullDTO(
     val price: String,
     val description: String,
     val photo: Map<String, String>,
+    val options: List<optionDTO>
 )

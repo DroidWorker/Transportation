@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.app.transportation.MainActivity
 import com.app.transportation.R
+import com.app.transportation.core.collect
 import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.databinding.FragmentOrderDetailsBinding
 
@@ -54,6 +55,7 @@ class OrderDetailsFragment : Fragment() {
 
     private fun applyObservers() {
         viewModel.cachedOrder.collectWithLifecycle(viewLifecycleOwner) { advert ->
+            viewModel.getProfile(advert?.userId ?: "")
             advert?.apply {
                 b.orderName.text = title
                 b.fromLocation.text = fromCity+" "+fromRegion+ " "+fromPlace
@@ -66,6 +68,10 @@ class OrderDetailsFragment : Fragment() {
                 b.name.text = "Какое-то имя"
                 b.telNumber.text = "Какой-то номер"
             }
+        }
+        viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
+            b.name.text = it.firstName
+            b.telNumber.text = it.phone
         }
     }
 

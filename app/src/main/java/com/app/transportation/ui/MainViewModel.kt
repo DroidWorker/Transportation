@@ -1,6 +1,7 @@
 package com.app.transportation.ui
 
 import android.app.Application
+import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -27,6 +28,7 @@ import java.net.UnknownHostException
 class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent {
 
     private val repository: Repository by inject()
+    var ctx: Context? = null
 
     val advertCategoriesFlow = repository.advertCategoriesFlow()
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
@@ -622,7 +624,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     time = entry.value.time,
                     price = entry.value.price,
                     photo = photoList.toList(),
-                    description = entry.value.description
+                    description = entry.value.description,
+                    options = entry.value.options
                 )
             }
         }
@@ -753,9 +756,14 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
         }
 
+    private suspend fun getOrdersMessagefailure() =
+        (repository.getOrderList() as? OrderListResponse.Failure)?.let {
+            it.message
+        }
     private suspend fun getOrders() =
         (repository.getOrderList() as? OrderListResponse.Success)?.let { response ->
             response.orderMap.map { entry ->
+                messageEvent.tryEmit("AllCorrect")
                 val photoList : ArrayList<String> = ArrayList()
                 entry.value.photo.forEach{photoitem->
                     photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
@@ -854,6 +862,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         categoryId = it.parentId
                     )
                 )
+                getOrdersMessagefailure()?.let { it1 -> messageEvent.tryEmit(it1) }
                 val oders = getOrders()/*?.filter { order ->
                     /*secondLevelCategoriesFlow.value
                         .find { cat -> cat.id == order.categoryId }?.parentId == it.id*/
@@ -862,7 +871,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 if (oders?.isNotEmpty() == true) {
                     oders.forEach { order ->
                         if (getFirstLevelParentID(order.categoryId) == it.id) {
-                            println(order.categoryId.toString()+":"+getFirstLevelParentID(order.categoryId).toString() +"=="+ it.id)
                             list.add(
                                 ProfileRvItem(
                                     id = index++,
@@ -1086,19 +1094,21 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     }
 
     fun createAdvert(
+        ctx: Context?,
         title: String,
         price: String,
         description: String,
         categoryId: String,
-        photos: List<String>
+        photos: List<String>,
+        options: List<String>
     ) = viewModelScope.launch(Dispatchers.IO) {
-        when (val result = repository.createAdvert(title, price, description, categoryId, photos)) {
+        when (val result = repository.createAdvert(ctx, title, price, description, categoryId, photos, options)) {
             is AdvertCreateResponse.Success -> {
                 if (result.id != null)
                     messageEvent.tryEmit("Объявление добавлено!")
             }
             is AdvertCreateResponse.Failure -> {
-                messageEvent.tryEmit("Ошибка при создании объявления!")
+                messageEvent.tryEmit("Ошибка при создании объявления!$AdvertCreateResponse")
             }
         }
     }
@@ -1120,6 +1130,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
 
     fun createOrder(
+        ctx: Context? = null,
         category: String,
         fromCity: String,
         fromRegion: String,
@@ -1135,6 +1146,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         photos: List<String>
     ) = viewModelScope.launch(Dispatchers.IO) {
         val result = repository.createOrder(
+            ctx = ctx,
             category = category,
             fromCity = fromCity,
             fromRegion = fromRegion,
@@ -1155,7 +1167,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     messageEvent.tryEmit("Объявление добавлено!")
             }
             is AdvertCreateResponse.Failure -> {
-                messageEvent.tryEmit("Ошибка при создании объявления!")
+                messageEvent.tryEmit("Ошибка при создании объявления!"+AdvertCreateResponse.Failure.toString())
             }
         }
     }

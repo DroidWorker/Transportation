@@ -157,7 +157,7 @@ class CreatingOrderAtFragment : Fragment() {
                     }
                 }
 
-                viewModel.createOrder(
+                viewModel.createOrder(ctx=context,
                     category = categoryId.toString(),
                     fromCity = "",
                     fromRegion = "",

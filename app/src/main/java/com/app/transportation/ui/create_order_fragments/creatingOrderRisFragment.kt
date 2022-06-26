@@ -136,6 +136,7 @@ class CreatingOrderRisFragment : Fragment() {
                 }
 
                 viewModel.createOrder(
+                    ctx=context,
                     category = categoryId.toString(),
                     description = b.comment.text.toString(),
                     fromCity = "",

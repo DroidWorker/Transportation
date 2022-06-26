@@ -69,7 +69,7 @@ class AdvertDetailsFragment : Fragment() {
             }
         }
         viewModel.cachedProfile.collect(this){
-            b.name.text = it.firstName+" "+it.lastName
+            b.name.text = it.firstName
             b.location.text = it.location
             b.telNumber.text = it.phone
         }

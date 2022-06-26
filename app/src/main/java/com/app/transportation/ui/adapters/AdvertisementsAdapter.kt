@@ -89,6 +89,10 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
                         println("Error: "+ex.message.toString())
                     }
                 }
+                item.options.forEach{
+                    if(it.option_id=="2")
+                        backLayout.setBackgroundResource(R.drawable.card_gradient)
+                }
                 Unit
             }
 

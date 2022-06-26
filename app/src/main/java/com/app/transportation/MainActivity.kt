@@ -8,6 +8,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
@@ -23,7 +24,6 @@ import com.app.transportation.data.upButtonSF
 import com.app.transportation.databinding.ActivityMainBinding
 import com.app.transportation.databinding.PopupMenuMainBinding
 import com.app.transportation.ui.MainViewModel
-import com.app.transportation.ui.TermsFragment
 import com.app.transportation.ui.login.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -43,6 +43,7 @@ import org.json.JSONObject
 import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
 import kotlin.math.roundToInt
+
 
 class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -120,9 +121,12 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         }
 
         viewModel.messageEvent.collectWithLifecycle(this) {
-            Snackbar
-                .make(findViewById(android.R.id.content), it, Snackbar.LENGTH_SHORT)
-                .show()
+            val snackbar =
+                Snackbar.make(findViewById(android.R.id.content), it, Snackbar.LENGTH_LONG).setDuration(Snackbar.LENGTH_LONG)
+            val snackbarView = snackbar.view
+            val tv = snackbarView.findViewById<View>( com.google.android.material.R.id.snackbar_text) as TextView
+            tv.maxLines = 10
+            snackbar.show()
         }
     }
 
