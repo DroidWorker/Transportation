@@ -137,6 +137,25 @@ class Repository(private val dao: MainDao) : KoinComponent {
             ProfileShortResponse.Failure(it.stackTraceToString())
     }
 
+    suspend fun getNotice(): NoticeResponce = kotlin.runCatching {
+        val token = authToken ?: return@runCatching NoticeResponce.Failure("token is null")
+        val response: HttpResponse =
+            client.get("http://api-transport.mvp-pro.top/api/v1/notice") {
+                headers { append("X-Access-Token", token) }
+            }
+        var responseBody: String = response.receive()
+        val json = Json.Default
+
+        kotlin.runCatching {
+            val map = json.decodeFromString<NoticeDTO>(responseBody)
+            NoticeResponce.Success(map)
+        }.getOrElse {
+            println("notice = $it")
+            json.decodeFromString<NoticeResponce.Failure>(responseBody)
+        }
+    }.getOrElse {
+        NoticeResponce.Failure(it.stackTraceToString())
+    }
     suspend fun logout() = coroutineScope {
         val clearProfileJob = launch { dao.clearProfile() }
 
@@ -601,6 +620,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         photos: List<String>,
         options: List<String>
     ): AdvertCreateResponse = kotlin.runCatching {
+        if (authToken == null) logout()
         val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
@@ -626,26 +646,30 @@ class Repository(private val dao: MainDao) : KoinComponent {
     }.getOrElse { AdvertCreateResponse.Failure(it.stackTraceToString()) }.also { println("it= $it") }
 
     suspend fun editAdvert(
+        id: String,
         title: String,
         price: String,
         description: String,
         photos: List<String>
     ): AdvertCreateResponse = kotlin.runCatching {
+        if (authToken == null) logout()
         val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
                 url = "http://api-transport.mvp-pro.top/api/v1/advert_update",
                 formParameters = Parameters.build {
+                    if (id!=null)append("id", id)
                     if (title!=null)append("title", title)
                     if (price!=null)append("price", price)
                     if (description!=null)append("description", description)
-                    if (photos!=null)append("image", "[${photos.joinToString()}]")
+                    //if (photos!=null)append("image", "[${photos.joinToString()}]")
                 }
             ) {
                 headers { append("X-Access-Token", token) }
             }
 
         val responseBody: String = response.receive()
+        println("updaaaaate "+responseBody)
         val json = Json.Default
 
         println("responseBody = $responseBody")
@@ -654,6 +678,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
     }.getOrElse { AdvertCreateResponse.Failure(it.stackTraceToString()) }.also { println("it= $it") }
 
     suspend fun getAdvertList(category: String? = null): AdvertListResponse = kotlin.runCatching {
+        if (authToken == null) logout()
         val token = authToken ?: return@runCatching AdvertListResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
@@ -685,6 +710,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
     }
 
     suspend fun getOrderList(category: String? = null): OrderListResponse = kotlin.runCatching {
+        if (authToken == null) logout()
         val token = authToken ?: return@runCatching OrderListResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
@@ -711,7 +737,9 @@ class Repository(private val dao: MainDao) : KoinComponent {
             json.decodeFromString<OrderListResponse.Failure>(responseBody)
         }
     }.getOrElse {
-        OrderListResponse.Failure(it.stackTraceToString()) }
+        println("error: "+it.stackTraceToString())
+        OrderListResponse.Failure(it.stackTraceToString())
+    }
 
     suspend fun getAdvertFullList(): AdvertFullListResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AdvertFullListResponse.Failure("token is null")
@@ -788,33 +816,8 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }
     }.getOrElse { AdvertInfoResponse.Failure(it.stackTraceToString()) }
 
-    suspend fun updateAdvert(
-        title: String? = null,
-        price: String? = null,
-        description: String? = null
-    ): InfoMessageResponse = kotlin.runCatching {
-        val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
-        val response: HttpResponse =
-            client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_update",
-                formParameters = Parameters.build {
-                    if (title != null)
-                        append("title", title)
-                    if (price != null)
-                        append("price", price)
-                    if (description != null)
-                        append("description", description)
-                }
-            ) {
-                headers { append("X-Access-Token", token) }
-            }
-        val responseBody: String = response.receive()
-        val json = Json.Default
-
-        json.decodeFromString(responseBody)
-    }.getOrElse { InfoMessageResponse(it.stackTraceToString()) }
-
     suspend fun deleteAdvert(isOrder: Boolean, id: String): InfoMessageResponse = kotlin.runCatching {
+        if (authToken == null) logout()
         val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
         val urlPart = if (isOrder) "order" else "advert"
         val response: HttpResponse =
@@ -847,6 +850,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         payment: String,
         photos: List<String>
     ): AdvertCreateResponse = kotlin.runCatching {
+        if (authToken == null) logout()
         val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
@@ -890,6 +894,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         phone: String?,
         payment: String?
     ): AdvertCreateResponse = kotlin.runCatching {
+        if (authToken == null) logout()
         val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
@@ -909,6 +914,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                     if(phone!=null)append("phone", phone)
                     if(payment!=null)append("payment", payment)
                 }
+
             ) {
                 headers { append("X-Access-Token", token) }
             }

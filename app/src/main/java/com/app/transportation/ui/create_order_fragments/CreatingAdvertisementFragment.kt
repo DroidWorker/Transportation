@@ -89,7 +89,7 @@ class CreatingAdvertisementFragment : Fragment() {
             viewModel.userOrdersAdvertsFlow.collectWithLifecycle(this) {
                 it.forEach { item ->
                     if (item.id==categoryId) {
-                        EditCatId = item.categoryId
+                        EditCatId = item.id
                         b.advertTitle.setText(item.title)
                         b.price.setText(item.price)
                         b.location.text = viewModel.profileFlow.value?.cityArea
@@ -255,11 +255,13 @@ class CreatingAdvertisementFragment : Fragment() {
                     }
                 }
                 viewModel.editAdvert(
+                    id = EditCatId.toString(),
                     title = b.advertTitle.text.toString(),
                     price = b.price.text.toString(),
                     description = b.description.text.toString(),
                     photos = photos
                 )
+                findNavController().navigateUp()
             }
         }
         b.description.setOnClickListener {

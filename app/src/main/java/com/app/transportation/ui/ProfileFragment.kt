@@ -274,7 +274,9 @@ class ProfileFragment : Fragment() {
         }
 
         b.payment.setOnClickListener{
-            startActivity(Intent(activity, PaymentActivity::class.java))
+            val intent = Intent(activity, PaymentActivity::class.java)
+            intent.putExtra("summ", 150)
+            startActivity(intent)
         }
     }
 
@@ -284,7 +286,7 @@ class ProfileFragment : Fragment() {
         val nameChanged = b.nameET.text.toString() != profile.name
         val telNumberChanged = b.telNumberET.text.toString() != basePhone
         val emailChanged = b.emailET.text.toString() != profile.email
-        val paymentCardChanged = b.paymentCardET.text.toString() != profile.paymentCard
+        val paymentCardChanged = b.paymentCardET.text.toString() != profile.paymentCard && b.paymentCardET.text.toString() != ""
         val cityAreaChanged = b.cityAreaET.text.toString() != profile.cityArea
         val avatarChanged = b.avatar.tag == 1
         /* TODO val avatarChanged = b.avatar.text.toString() != profile.avatar*/

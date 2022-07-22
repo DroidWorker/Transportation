@@ -71,6 +71,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     val cachedOrderFeedbackPing = MutableStateFlow(emptyList<Advert>())
 
     val cachedProfile = MutableStateFlow(ProfileShort())
+    val cachedNotifications = MutableStateFlow(NoticeDTO("","","",""))
 
     val cachedAdvert = MutableStateFlow<Advert?>(null)
     val cachedOrder = MutableStateFlow<Advert?>(null)
@@ -763,7 +764,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     private suspend fun getOrders() =
         (repository.getOrderList() as? OrderListResponse.Success)?.let { response ->
             response.orderMap.map { entry ->
-                messageEvent.tryEmit("AllCorrect")
                 val photoList : ArrayList<String> = ArrayList()
                 entry.value.photo.forEach{photoitem->
                     photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
@@ -989,6 +989,17 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         logoutSF.tryEmit("")
     }
 
+    private suspend fun getNotification(){
+        (repository.getNotice() as? NoticeResponce.Success)?.let { response ->
+            cachedNotifications.tryEmit(response.notice)
+            response.notice
+        }
+    }
+
+    fun getNotice() = viewModelScope.launch(Dispatchers.IO) {
+        getNotification()
+    }
+
     suspend fun getChildrenID(categoryId : Int) = channelFlow {
         advertCategoriesFlow.collect() {
             val ids : ArrayList<Int> = ArrayList()
@@ -1113,18 +1124,18 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
     }
 
-    fun editAdvert(title: String,
+    fun editAdvert(id: String,
+                    title: String,
                    price: String,
                    description: String,
                    photos: List<String>)=
         viewModelScope.launch(Dispatchers.IO) {
-            when (val result = repository.editAdvert(title, price, description, photos)) {
+            when (val result = repository.editAdvert(id, title, price, description, photos)) {
                 is AdvertCreateResponse.Success -> {
-                    if (result.id != null)
-                        messageEvent.tryEmit("Объявление добавлено!")
+                        messageEvent.tryEmit("Объявление изменено!")
                 }
                 is AdvertCreateResponse.Failure -> {
-                    messageEvent.tryEmit("Ошибка при создании объявления!")
+                    messageEvent.tryEmit("Ошибка при обновлении объявления!")
                 }
             }
         }
