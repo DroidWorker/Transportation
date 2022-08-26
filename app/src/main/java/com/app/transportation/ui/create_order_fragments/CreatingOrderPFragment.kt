@@ -86,8 +86,13 @@ class CreatingOrderPFragment : Fragment() {
 
         b.order.setOnClickListener {
             if (isEdit==0) {
-                if (!allFieldsFilled()) {
+                val isFilled = allFieldsFilled()
+                if (isFilled==2) {
                     viewModel.messageEvent.tryEmit("Заполнены не все поля!")
+                    return@setOnClickListener
+                }
+                if (isFilled==1) {
+                    viewModel.messageEvent.tryEmit("фото не добавлено")
                     return@setOnClickListener
                 }
 
@@ -152,7 +157,7 @@ class CreatingOrderPFragment : Fragment() {
             }
     }
 
-    private fun allFieldsFilled(): Boolean {
+    private fun allFieldsFilled(): Int {
         val isCommentPresent = b.comment.text.isNotBlank()
         val isFromDateTime = viewModel.dateTime.isNotBlank()
         val isToCityPresent = b.toCity.text.isNotBlank()
@@ -161,8 +166,10 @@ class CreatingOrderPFragment : Fragment() {
         val isToNamePresent = b.toName.text.isNotBlank()
         val isToTelNumberPresent = b.toTelNumber.text.isNotBlank()
 
-        return isCommentPresent && isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
-                isToNamePresent && isToTelNumberPresent
+        return if(isCommentPresent && isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
+            isToNamePresent && isToTelNumberPresent){
+            0
+        } else 2
     }
 
     private fun showDatePicker() {

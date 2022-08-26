@@ -1,7 +1,12 @@
 package com.app.transportation
 
+import android.app.AlarmManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.content.SharedPreferences
+import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.MotionEvent
@@ -18,6 +23,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.app.transportation.core.AlarmReceiver
 import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.core.isLightTheme
 import com.app.transportation.data.upButtonSF
@@ -42,6 +48,7 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
+import java.util.*
 import kotlin.math.roundToInt
 
 
@@ -68,6 +75,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
     val RC_SIGN_IN : Int = 103
 
+    private lateinit var alarmManager: AlarmManager
+    private lateinit var pendingIntent: PendingIntent
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,6 +94,44 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         applyObservers()
 
         applyListeners()
+
+        createNotificationChannel()
+
+        cancelAlarm()
+        setAlarm()
+    }
+
+    private fun cancelAlarm(){
+        alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, AlarmReceiver::class.java)
+
+        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+
+        alarmManager.cancel(pendingIntent)
+    }
+
+
+    private fun setAlarm(){
+        alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+        val intent = Intent(this, AlarmReceiver::class.java)
+
+        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+
+        alarmManager.setInexactRepeating(
+            AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 60000, pendingIntent
+        )
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+            val name = "trnspChannel"
+            val description = "chaneel for repeater"
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val channel = NotificationChannel("trnsp", name, importance)
+            channel.description = description
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
+        }
     }
 
     private fun applyTheme() {

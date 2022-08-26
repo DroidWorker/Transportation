@@ -110,8 +110,13 @@ class CreatingOrderRisFragment : Fragment() {
         }
         b.order.setOnClickListener {
             if (isEdit==0) {
-                if (!allFieldsFilled()) {
+                val isFilled = allFieldsFilled()
+                if (isFilled==2) {
                     viewModel.messageEvent.tryEmit("Заполнены не все поля!")
+                    return@setOnClickListener
+                }
+                if (isFilled==1) {
+                    viewModel.messageEvent.tryEmit("фото не добавлено")
                     return@setOnClickListener
                 }
 
@@ -203,7 +208,7 @@ class CreatingOrderRisFragment : Fragment() {
             }
     }
 
-    private fun allFieldsFilled(): Boolean {
+    private fun allFieldsFilled(): Int {
         val isCommentPresent = b.comment.text.isNotBlank()
         val isFromDateTime = viewModel.dateTime.isNotBlank()
         val isToCityPresent = b.toCity.text.isNotBlank()
@@ -213,8 +218,12 @@ class CreatingOrderRisFragment : Fragment() {
         val isToTelNumberPresent = b.toTelNumber.text.isNotBlank()
         val isPhotoSet =  b.photo.tag==1
 
-        return isCommentPresent && isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
-                isToNamePresent && isToTelNumberPresent && isPhotoSet
+        return if(isCommentPresent && isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
+            isToNamePresent && isToTelNumberPresent && isPhotoSet){
+            0
+        } else if (!isPhotoSet){
+            1
+        } else 2
     }
 
     private fun showDatePicker() {

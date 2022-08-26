@@ -104,6 +104,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="12dp"
             android:background="@drawable/input_field_background_rounded"
+            android:editable="false"
             android:gravity="center"
             android:hint="Укажите время"
             android:paddingHorizontal="10dp"

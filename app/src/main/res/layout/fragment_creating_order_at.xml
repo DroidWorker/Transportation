@@ -117,6 +117,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:background="@drawable/input_field_background_rounded"
+            android:editable="false"
             android:gravity="center"
             android:hint="укажите дату и время"
             android:paddingHorizontal="10dp"

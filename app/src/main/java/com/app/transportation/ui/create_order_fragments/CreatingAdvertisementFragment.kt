@@ -201,11 +201,12 @@ class CreatingAdvertisementFragment : Fragment() {
                     photos = photos,
                     options = optionList.toList()
                 )
-                if (summ>0) {
+                //payment realisation
+                /*if (summ>0) {
                     val payIntent = Intent(activity, PaymentActivity::class.java)
                     payIntent.putExtra("summ", summ);
                     startActivity(payIntent)
-                }
+                }*/
                 findNavController().navigateUp()
             }
             else{

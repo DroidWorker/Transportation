@@ -275,7 +275,7 @@ class ProfileFragment : Fragment() {
 
         b.payment.setOnClickListener{
             val intent = Intent(activity, PaymentActivity::class.java)
-            intent.putExtra("summ", 150)
+            intent.putExtra("summ", 350)
             startActivity(intent)
         }
     }

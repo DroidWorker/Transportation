@@ -6,8 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.app.transportation.MainActivity
 import com.app.transportation.R
+import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.data.database.entities.Notification
 import com.app.transportation.databinding.FragmentNotificationsBinding
 import com.app.transportation.ui.adapters.NotificationsAdapter
@@ -18,6 +20,8 @@ class NotificationsFragment : Fragment() {
     private val b get() = binding!!
 
     private val adapter by lazy { NotificationsAdapter() }
+
+    private val viewModel by activityViewModels<MainViewModel>()
 
     private val id by lazy { arguments?.getLong("id") ?: 0L }
 
@@ -40,7 +44,8 @@ class NotificationsFragment : Fragment() {
 
         super.onViewCreated(view, savedInstanceState)
 
-        applyInitialData()
+        viewModel.getNotice()
+        //applyInitialData()
 
         applyAdapters()
 
@@ -54,13 +59,17 @@ class NotificationsFragment : Fragment() {
 
     private fun applyAdapters() {
         b.notificationsRV.adapter = adapter
+        viewModel.cachedNotifications.collectWithLifecycle(viewLifecycleOwner){ it ->
+            val notifications : ArrayList<Notification> = ArrayList()
+            it.forEach{
+                notifications.add(Notification(it.userId.toLong(), it.type, "ользователь ${it.userId} оставил отклик на объявление ${it.dataId}", false))
+            }
 
-        adapter.submitList(
-            listOf(
-                Notification(0, "Заголовок уведомления", "Текст уведомления", true),
-                Notification(1, "Заголовок уведомления", "Текст уведомления", false)
-            )
-        )
+            if (notifications.isEmpty())
+                notifications.add(Notification(1, "Уведомлений нет", "", false))
+
+            adapter.submitList(notifications.toList())
+        }
     }
 
     private fun applyListeners() {

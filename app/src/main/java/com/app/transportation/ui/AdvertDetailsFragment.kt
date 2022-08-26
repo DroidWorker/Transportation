@@ -1,5 +1,7 @@
 package com.app.transportation.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
@@ -16,6 +18,7 @@ import com.app.transportation.R
 import com.app.transportation.core.collect
 import com.app.transportation.core.repeatOnLifecycle
 import com.app.transportation.databinding.FragmentAdvertDetailsBinding
+
 
 class AdvertDetailsFragment : Fragment() {
 
@@ -121,6 +124,12 @@ class AdvertDetailsFragment : Fragment() {
         }
         b.nextPhoto.setOnClickListener {
             viewModel.adfNextPhoto()
+        }
+        b.telNumber.setOnClickListener{
+            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${b.telNumber.text}"))
+            if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
+                startActivity(intent)
+            }
         }
     }
 

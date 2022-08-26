@@ -92,8 +92,13 @@ class CreatingOrderPpAndKuFragment : Fragment() {
         }
         b.order.setOnClickListener {
             if(isEdit==0) {
-                if (!allFieldsFilled()) {
+                val isFilled = allFieldsFilled()
+                if (isFilled==2) {
                     viewModel.messageEvent.tryEmit("Заполнены не все поля!")
+                    return@setOnClickListener
+                }
+                if (isFilled==1) {
+                    viewModel.messageEvent.tryEmit("фото не добавлено")
                     return@setOnClickListener
                 }
 
@@ -152,7 +157,7 @@ class CreatingOrderPpAndKuFragment : Fragment() {
             }
     }
 
-    private fun allFieldsFilled(): Boolean {
+    private fun allFieldsFilled(): Int {
         val isCommentPresent = b.comment.text.isNotBlank()
         val isFromCityPresent = b.fromCity.text.isNotBlank()
         val isFromAreaPresent = b.fromArea.text.isNotBlank()
@@ -164,9 +169,11 @@ class CreatingOrderPpAndKuFragment : Fragment() {
         val isToNamePresent = b.toName.text.isNotBlank()
         val isToTelNumberPresent = b.toTelNumber.text.isNotBlank()
 
-        return isCommentPresent && isFromCityPresent && isFromAreaPresent && isFromPlacePresent &&
-                isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
-                isToNamePresent && isToTelNumberPresent
+        return if(isCommentPresent && isFromCityPresent && isFromAreaPresent && isFromPlacePresent &&
+            isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
+            isToNamePresent && isToTelNumberPresent){
+            0
+        } else 2
     }
 
     private fun showDatePicker() {

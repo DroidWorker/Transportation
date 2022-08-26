@@ -71,7 +71,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     val cachedOrderFeedbackPing = MutableStateFlow(emptyList<Advert>())
 
     val cachedProfile = MutableStateFlow(ProfileShort())
-    val cachedNotifications = MutableStateFlow(NoticeDTO("","","",""))
+    val cachedNotifications = MutableStateFlow(emptyList<NoticeDTO>())
 
     val cachedAdvert = MutableStateFlow<Advert?>(null)
     val cachedOrder = MutableStateFlow<Advert?>(null)
@@ -140,7 +140,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 messageEvent.tryEmit("Проблемы с интернетом или сервером")
             }
             else -> {
-                messageEvent.tryEmit(result.localizedMessage.toString())
+
             }
         }
     }

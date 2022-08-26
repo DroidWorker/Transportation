@@ -147,7 +147,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val json = Json.Default
 
         kotlin.runCatching {
-            val map = json.decodeFromString<NoticeDTO>(responseBody)
+            val map = json.decodeFromString<List<NoticeDTO>>(responseBody)
             NoticeResponce.Success(map)
         }.getOrElse {
             println("notice = $it")

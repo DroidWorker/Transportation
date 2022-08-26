@@ -1,5 +1,7 @@
 package com.app.transportation.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -82,6 +84,12 @@ class OrderDetailsFragment : Fragment() {
         b.addToFavourites2.setOnClickListener{
             b.addToFavourites2.setColorFilter(1)
             viewModel.addOrderFavorite(b.addToFavourites2.tag.toString())
+        }
+        b.telNumber.setOnClickListener{
+            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${b.telNumber.text}"))
+            if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
+                startActivity(intent)
+            }
         }
     }
 
