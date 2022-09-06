@@ -127,9 +127,9 @@ class AdvertDetailsFragment : Fragment() {
         }
         b.telNumber.setOnClickListener{
             val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${b.telNumber.text}"))
-            if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
-                startActivity(intent)
-            }
+            //if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
+            startActivity(intent)
+            //}
         }
     }
 

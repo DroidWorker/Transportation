@@ -78,6 +78,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     val cafTempPhotoUris = MutableStateFlow(Pair(0, mutableListOf<Uri>()))
     val adfTempPhotoUris = MutableStateFlow(Pair(0, emptyList<Bitmap>()))
+    val profilePhotoUri = MutableStateFlow(Pair(0, mutableListOf<Uri>()))
 
     val isCustomer = MutableStateFlow(
         prefs.getBoolean("isCustomer", false).takeIf { prefs.contains("isCustomer") }
@@ -862,7 +863,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         categoryId = it.parentId
                     )
                 )
-                getOrdersMessagefailure()?.let { it1 -> messageEvent.tryEmit(it1) }
+                getOrdersMessagefailure()?.let { it1 -> messageEvent.tryEmit("MVM865"/*+it1*/) }
                 val oders = getOrders()/*?.filter { order ->
                     /*secondLevelCategoriesFlow.value
                         .find { cat -> cat.id == order.categoryId }?.parentId == it.id*/
@@ -1247,6 +1248,15 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             )
         }
         cafTempPhotoUris.tryEmit(newValue)
+    }
+    fun applyProfilePhotoByUri(uri: Uri) = viewModelScope.launch(Dispatchers.IO) {
+        val newValue = profilePhotoUri.value.run {
+            Pair(
+                first,
+                second.toMutableList().apply { add(uri) }
+            )
+        }
+        profilePhotoUri.tryEmit(newValue)
     }
 
     fun cafRemoveCurrentPhoto() = viewModelScope.launch(Dispatchers.IO) {

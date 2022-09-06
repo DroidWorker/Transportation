@@ -1,11 +1,16 @@
 package com.app.transportation.ui.create_order_fragments
 
 import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
 import android.os.Bundle
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.ImageView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -16,8 +21,11 @@ import com.app.transportation.core.*
 import com.app.transportation.databinding.FragmentCreatingOrderAtBinding
 import com.app.transportation.ui.MainViewModel
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
+import java.io.ByteArrayOutputStream
+import java.io.File
 
 class CreatingOrderPFragment : Fragment() {
 
@@ -30,6 +38,11 @@ class CreatingOrderPFragment : Fragment() {
 
     private val categoryId by lazy { arguments?.getInt("id", 1) ?: 1 }
     private val isEdit by lazy {arguments?.getInt("isEdit", 0) ?: 0}
+
+    private val obtainPhotoUriLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            result.data?.data?.let { uri -> viewModel.cafApplyPhotoByUri(uri) }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -77,11 +90,26 @@ class CreatingOrderPFragment : Fragment() {
 
 
         applyListeners()
+        applyCollectors()
     }
 
     private fun applyListeners() {
         b.selectDateTime.setOnClickListener{
             showDatePicker()
+        }
+
+        b.photo.setOnClickListener{
+            val position = viewModel.cafTempPhotoUris.value.first
+            val currentValue = viewModel.cafTempPhotoUris.value.second.getOrNull(position)
+            currentValue?.let {
+                MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("Удалить фото?")
+                    .setPositiveButton("Да") { _, _ ->
+                        viewModel.cafRemoveCurrentPhoto()
+                    }
+                    .setNegativeButton("Нет") { _, _ -> }
+                    .show()
+            } ?: importViaSystemFE()
         }
 
         b.order.setOnClickListener {
@@ -97,9 +125,28 @@ class CreatingOrderPFragment : Fragment() {
                 }
 
                 var paymentMethod = "cash"
-                when (b.paymentMethod.selectedItemId) {
+                /*when (b.paymentMethod.selectedItemId) {
                     1 as Long -> paymentMethod = "cash"
                     2 as Long -> paymentMethod = "card"
+                }*/
+                val photos = mutableListOf<String>()
+                viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
+                    val contentResolver = requireContext().applicationContext.contentResolver
+                    contentResolver.openInputStream(it)?.use {
+                        val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
+                        File(requireContext().cacheDir.path + "/ttt.txt").writeText(base64String)
+                    }
+                }
+                viewModel.cafTempPhotoUris.value.second.forEach { uri ->
+                    val contentResolver = requireContext().applicationContext.contentResolver
+                    contentResolver.openInputStream(uri)?.use {
+                        var resultBitmap : Bitmap? = decodeSampledBitmapFromResource(it.readBytes(), 300, 200)
+                        val byteArrayOutputStream = ByteArrayOutputStream()
+                        resultBitmap?.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream)
+                        val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
+                        val base64String = Base64.encodeToString(byteArray, Base64.DEFAULT)
+                        photos.add("'data:image/jpg;base64,$base64String'")
+                    }
                 }
 
                 viewModel.createOrder(
@@ -116,8 +163,9 @@ class CreatingOrderPFragment : Fragment() {
                     name = b.toName.text.toString(),
                     phone = b.toTelNumber.text.toString(),
                     payment = paymentMethod,
-                    photos = emptyList()
+                    photos = photos
                 )
+                println("aaaaaaas"+viewModel.dateTime)
             }
             else{
                 viewModel.editOrder(
@@ -141,6 +189,16 @@ class CreatingOrderPFragment : Fragment() {
     }
 
     private fun applyCollectors() = viewLifecycleOwner.repeatOnLifecycle {
+        viewModel.cafTempPhotoUris.collect(this) {
+            it.second.getOrNull(it.first)?.let { uri ->
+                b.photo.scaleType = ImageView.ScaleType.FIT_XY
+                b.photo.setImageURI(uri)
+                b.photo.tag = 1
+            } ?: kotlin.run {
+                b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
+                b.photo.setImageResource(R.drawable.ic_photo)
+            }
+        }
         if (1==1)
             viewModel.addAdvertScreenCategoriesFlowFourthLevel(categoryId).collectWithLifecycle(viewLifecycleOwner) {
                 var data : ArrayList<String> = ArrayList()
@@ -165,10 +223,13 @@ class CreatingOrderPFragment : Fragment() {
         val isToPlacePresent = b.toPlace.text.isNotBlank()
         val isToNamePresent = b.toName.text.isNotBlank()
         val isToTelNumberPresent = b.toTelNumber.text.isNotBlank()
+        val isPhotoSet = b.photo.tag==1
 
         return if(isCommentPresent && isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
             isToNamePresent && isToTelNumberPresent){
             0
+        } else if (!isPhotoSet){
+            1
         } else 2
     }
 
@@ -196,6 +257,13 @@ class CreatingOrderPFragment : Fragment() {
             .show(parentFragmentManager, MaterialTimePicker::class.java.canonicalName)
     }
 
+    private fun importViaSystemFE() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
+            .addCategory(Intent.CATEGORY_OPENABLE)
+            .setType("*/*")
+        runCatching { obtainPhotoUriLauncher.launch(intent) }
+    }
+
     private fun onTimeSelected(hour: Int, minute: Int) {
         val hourAsText = if (hour < 10) "0$hour" else hour
         val minuteAsText = if (minute < 10) "0$minute" else minute
@@ -203,7 +271,7 @@ class CreatingOrderPFragment : Fragment() {
         viewModel.dateTime += " $hourAsText:$minuteAsText"
 
         val dateTime = requireContext().formatDate(viewModel.dateTime, "yyyy/MM/dd HH:mm", true)
-        // b.fromTime.text = dateTime
+        b.selectDateTime.text = dateTime
     }
 
     override fun onDestroyView() {

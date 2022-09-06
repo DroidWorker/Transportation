@@ -164,6 +164,7 @@ class MainFragment : Fragment() {
         viewModel.secondLevelCategoriesFlow.collectWithLifecycle(viewLifecycleOwner) {
             serviceTypeAdapter.submitList(it)
         }
+
         viewModel.isCustomer.filterNotNull().collectWithLifecycle(viewLifecycleOwner) {
             viewModel.clearCachedAdverts()
             when (it) {

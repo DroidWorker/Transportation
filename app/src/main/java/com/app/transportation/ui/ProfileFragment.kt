@@ -56,7 +56,7 @@ class ProfileFragment : Fragment() {
 
     private val obtainPhotoUriLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            result.data?.data?.let { uri -> viewModel.cafApplyPhotoByUri(uri) }
+            result.data?.data?.let { uri -> viewModel.applyProfilePhotoByUri(uri) }
         }
 
     override fun onCreateView(
@@ -176,7 +176,7 @@ class ProfileFragment : Fragment() {
     }
 
     private fun applyListeners() {
-        viewModel.cafTempPhotoUris.collectWithLifecycle(viewLifecycleOwner) {
+        viewModel.profilePhotoUri.collectWithLifecycle(viewLifecycleOwner) {
             it.second.getOrNull(it.first)?.let { uri ->
                 b.avatar.scaleType = ImageView.ScaleType.CENTER_CROP
                 b.avatar.setImageURI(uri)

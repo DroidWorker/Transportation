@@ -2,16 +2,11 @@ package com.app.transportation.data
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.widget.Toast
 import androidx.core.content.edit
-import androidx.fragment.app.activityViewModels
-import androidx.room.Index
 import com.app.transportation.data.api.*
 import com.app.transportation.data.database.MainDao
-import com.app.transportation.data.database.entities.Advert
 import com.app.transportation.data.database.entities.AdvertisementCategory
 import com.app.transportation.data.database.entities.Profile
-import com.app.transportation.ui.MainViewModel
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
@@ -29,6 +24,8 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
+import java.text.SimpleDateFormat
+import java.util.*
 
 class Repository(private val dao: MainDao) : KoinComponent {
 
@@ -852,6 +849,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
     ): AdvertCreateResponse = kotlin.runCatching {
         if (authToken == null) logout()
         val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
+        val date = fromDateTime.replace('/', '.').replace(' ', 'T')
         val response: HttpResponse =
             client.submitForm(
                 url = "http://api-transport.mvp-pro.top/api/v1/order_create",
@@ -860,7 +858,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                     append("from_city", fromCity)
                     append("from_region", fromRegion)
                     append("from_place", fromPlace)
-                    append("from_datetime", fromDateTime)
+                    append("from_datetime", "01.01.2022T10:00")
                     append("to_city", toCity)
                     append("to_region", toRegion)
                     append("to_place", toPlace)

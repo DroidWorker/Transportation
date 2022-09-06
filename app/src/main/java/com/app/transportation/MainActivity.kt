@@ -1,11 +1,13 @@
 package com.app.transportation
 
+import android.Manifest
 import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -17,6 +19,7 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
+import androidx.core.app.ActivityCompat.*
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.view.isVisible
@@ -81,6 +84,15 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.CALL_PHONE)
+            != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(this,
+                arrayOf(Manifest.permission.CALL_PHONE),
+                1)
+        }
+
         applyTheme()
 
         setContentView(b.root)
@@ -100,6 +112,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         cancelAlarm()
         setAlarm()
     }
+
+
 
     private fun cancelAlarm(){
         alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
@@ -303,6 +317,27 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         }
     }
 
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            1 -> {
+
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.isNotEmpty()
+                    && grantResults[0] === PackageManager.PERMISSION_GRANTED
+                ) {
+                    viewModel.messageEvent.tryEmit("разрешение получено")
+                } else {
+                    viewModel.messageEvent.tryEmit("разрешение не получено. Некоторые функции приложения могут быть недоступны")
+                }
+                return
+            }
+        }
+    }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)

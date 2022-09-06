@@ -210,7 +210,7 @@ class CreatingOrderAtFragment : Fragment() {
                 b.photo.setImageResource(R.drawable.ic_photo)
             }
         }
-        if (1==1)
+        if (true)
             viewModel.addAdvertScreenCategoriesFlowFourthLevel(categoryId).collectWithLifecycle(viewLifecycleOwner) {
                 var data : ArrayList<String> = ArrayList()
                 data.add("выбрать из списка")
@@ -281,7 +281,7 @@ class CreatingOrderAtFragment : Fragment() {
         viewModel.dateTime += " $hourAsText:$minuteAsText"
 
         val dateTime = requireContext().formatDate(viewModel.dateTime, "yyyy/MM/dd HH:mm", true)
-        b.selectDateTime.setText(dateTime)
+        b.selectDateTime.text = dateTime
     }
 
     override fun onDestroyView() {

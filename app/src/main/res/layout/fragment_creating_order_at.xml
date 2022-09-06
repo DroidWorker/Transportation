@@ -111,13 +111,12 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toCity" />
 
-        <EditText
+        <TextView
             android:id="@+id/selectDateTime"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="15dp"
             android:background="@drawable/input_field_background_rounded"
-            android:editable="false"
             android:gravity="center"
             android:hint="укажите дату и время"
             android:paddingHorizontal="10dp"
