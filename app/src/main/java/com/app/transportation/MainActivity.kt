@@ -5,9 +5,11 @@ import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -231,8 +233,27 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 setBackgroundDrawable(
                     ContextCompat.getDrawable(this@MainActivity, R.drawable.menu_background))
 
+                menuB.feedbackLayout.setOnClickListener{
+                    val email = Intent(Intent.ACTION_SENDTO)
+                    email.data = Uri.parse("mailto:sabbatum@inbox.ru")
+                    email.putExtra(Intent.EXTRA_SUBJECT, "Обращение пользователя")
+                    email.putExtra(Intent.EXTRA_TEXT, "")
+                    startActivity(email)
+
+                    try {
+                        startActivity(email)
+                    } catch (ex: ActivityNotFoundException) {
+                        viewModel.messageEvent.tryEmit("No email clients installed.")
+                    }
+                }
+
                 menuB.shareLayout.setOnClickListener {
-                    //TODO
+                    val sharingIntent = Intent(Intent.ACTION_SEND)
+                    sharingIntent.type = "text/plain"
+                    val shareBody = "Text to be shared"
+                    sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject")
+                    sharingIntent.putExtra(Intent.EXTRA_TEXT, shareBody)
+                    startActivity(Intent.createChooser(sharingIntent, "поделиться ..."))
                 }
 
                 menuB.logoutLayout.setOnClickListener {

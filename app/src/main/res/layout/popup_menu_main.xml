@@ -6,16 +6,52 @@
     android:background="@drawable/menu_background"
     android:padding="20dp">
 
+    <View
+        android:id="@+id/feedbackLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintBottom_toBottomOf="@+id/feedbackIcon"
+        app:layout_constraintEnd_toEndOf="@+id/feedbackText"
+        app:layout_constraintStart_toStartOf="@+id/feedbackIcon"
+        app:layout_constraintTop_toTopOf="@+id/feedbackIcon" />
+
+    <ImageView
+        android:id="@+id/feedbackIcon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_baseline_feedback_24"
+        app:layout_constraintEnd_toStartOf="@+id/feedbackText"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/feedbackText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat"
+        android:gravity="end"
+        android:text="Обратная связь"
+        android:textColor="@color/secondary_color"
+        app:layout_constraintBottom_toBottomOf="@+id/feedbackIcon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/feedbackIcon"
+        app:layout_constraintTop_toTopOf="@+id/feedbackIcon"
+        app:layout_constraintWidth_percent="0.8" />
+
+
     <ImageView
         android:id="@+id/shareIcon"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:src="@drawable/ic_share"
         app:layout_constraintEnd_toStartOf="@+id/shareText"
         app:layout_constraintHorizontal_bias="1"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/feedbackIcon" />
 
     <TextView
         android:id="@+id/shareText"
