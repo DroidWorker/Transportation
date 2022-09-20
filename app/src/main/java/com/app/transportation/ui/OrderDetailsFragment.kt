@@ -61,15 +61,25 @@ class OrderDetailsFragment : Fragment() {
             advert?.apply {
                 b.orderName.text = title
                 b.fromLocation.text = fromCity+" "+fromRegion+ " "+fromPlace
-                b.toLocation.text = toCity+""+toRegion+""+toPlace
+                b.toLocation.text = toCity+" "+toRegion+" "+toPlace
                 b.addToFavourites2.setColorFilter(0)
                 b.addToFavourites2.tag = id
-                b.date.text = date
-                b.time.text = time
+                b.date.text = if (date == "null") "" else date
+                b.time.text = if (time == "null") "" else time
                 b.comment.text = title
                 b.name.text = "Какое-то имя"
                 b.telNumber.text = "Какой-то номер"
+                (activity as? MainActivity)?.apply {
+                    b.title.text = category
+                }
             }
+            if (b.fromLocation.text == "  ") {
+                b.fromLocationIcon.visibility = View.GONE
+                b.fromLocation.visibility = View.GONE
+                b.locationArrow.visibility = View.GONE
+            }
+            if (b.date.text=="") b.date.visibility = View.GONE
+            if (b.time.text=="") b.time.visibility = View.GONE
         }
         viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
             b.name.text = it.firstName

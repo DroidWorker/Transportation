@@ -54,6 +54,9 @@ android {
 }
 
 dependencies {
+    //tinkoff
+    implementation 'ru.tinkoff.acquiring:ui:2.8.2'
+    implementation 'ru.tinkoff.acquiring:cardio:2.8.2'
 
     //Gmail
     implementation"com.google.android.gms:play-services-auth:18.1.0"

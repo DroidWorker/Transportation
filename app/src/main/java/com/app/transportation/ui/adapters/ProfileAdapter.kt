@@ -10,8 +10,7 @@ import com.app.transportation.databinding.ItemCategoryBinding
 import com.app.transportation.databinding.ItemProfileAddItemBinding
 import com.app.transportation.databinding.ItemProfileAdvertBinding
 
-class ProfileAdapter :
-    ListAdapter<ProfileRvItem, RecyclerView.ViewHolder>(DiffCallback()) {
+class ProfileAdapter :  ListAdapter<ProfileRvItem, RecyclerView.ViewHolder>(DiffCallback()) {
 
     var mode = 0;
 

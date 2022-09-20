@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.util.Base64
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
@@ -105,7 +106,7 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
             root.setOnClickListener { onClick?.invoke(item) }
 
             title.text = item.title
-            location.text = item.subtitle
+            location.text = item.fromCity+" "+item.fromRegion+" "+item.fromPlace
             date.text = item.date
             time.text = item.time
             price.isVisible = item.price != null && item.price != "null"
@@ -113,6 +114,11 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
                 horizontalBias = if (price.isVisible) 0.5F else 1F
             }
             price.text = item.price.toString()
+            if(date.text == "null"&& time.text == "null"){
+                date.visibility = View.GONE
+                time.visibility = View.GONE
+            }
+            if (price.text == "-1") price.visibility = View.GONE
         }
 
     }

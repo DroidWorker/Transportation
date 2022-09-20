@@ -743,8 +743,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     category = entry.value.category,
                     subcategoryId = entry.value.categoryId.toInt(),
                     title = entry.value.description,
-                    date = entry.value.date,
-                    time = entry.value.time,
+                    date = "${entry.value.fromDate}",
+                    time = "${entry.value.fromTime}",
                     fromCity = "${entry.value.fromCity}",
                     fromRegion = "${entry.value.fromRegion}",
                     fromPlace = "${entry.value.fromPlace}",
@@ -767,7 +767,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             response.orderMap.map { entry ->
                 val photoList : ArrayList<String> = ArrayList()
                 entry.value.photo.forEach{photoitem->
-                    photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                    photoitem.value?.let { photoList.add(it.replace("data:image/jpg;base64,", "")) }
                 }
                 Advert(
                     id = entry.key.toInt(),
@@ -798,7 +798,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             response.orderMap.forEach { entry ->
                 val photoList: ArrayList<String> = ArrayList()
                 entry.value.photo.forEach { photoitem ->
-                    photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                    photoitem.value?.let { photoList.add(it.replace("data:image/jpg;base64,", "")) }
                 }
                 if (entry.value.ping.isNotEmpty()) {
                     list.add(Advert(
@@ -821,7 +821,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         payment = entry.value.payment,
                         description = "Запрс на исполнение вашей заявки в категории " + entry.value.category,
                         photo = emptyList(),//photoList.toList()
-                        ping = entry.value.ping
+                        ping = (if(entry.value.ping!=null) entry.value.ping else emptyMap<String, String>()) as Map<String, String>
                     ))
                 }
             }
@@ -853,6 +853,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
             val list = mutableListOf<ProfileRvItem>()
             var index = 0L
+            val oders = getOrders()
+            val adverts = getAdverts()
+            getOrdersMessagefailure()?.let { it1 -> messageEvent.tryEmit("MVM865"/*+it1*/) }
             firstLevelCatsDeferred.await().forEach {
                 list.add(
                     ProfileRvItem(
@@ -863,12 +866,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         categoryId = it.parentId
                     )
                 )
-                getOrdersMessagefailure()?.let { it1 -> messageEvent.tryEmit("MVM865"/*+it1*/) }
-                val oders = getOrders()/*?.filter { order ->
-                    /*secondLevelCategoriesFlow.value
-                        .find { cat -> cat.id == order.categoryId }?.parentId == it.id*/
-                    getFirstLevelParentID(order.categoryId) == it.id
-                }*/
                 if (oders?.isNotEmpty() == true) {
                     oders.forEach { order ->
                         if (getFirstLevelParentID(order.categoryId) == it.id) {
@@ -884,7 +881,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         }
                     }
                 }
-                getAdverts()?.filter { order ->
+                adverts?.filter { order ->
                     /*secondLevelCategoriesFlow.value
                         .find { cat -> cat.id == order.categoryId }?.parentId == it.id*/
                     getFirstLevelParentID(order.categoryId) == it.id
@@ -1014,9 +1011,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
     }
     suspend fun getFirstLevelParentID(categoryId: Int) : Int {
-        var id: Int = 0
+        var id: Int = categoryId
             val list = advertCategoriesFlow.value
-        list.forEach { cat ->
+        /*list.forEach { cat ->
             if (categoryId == cat.id) {
                 id=cat.id
                 list.forEach { cat2 ->
@@ -1028,6 +1025,13 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                             }
                         }
                     }
+                }
+            }
+        }*/
+        while (id !in 0..3){
+            list.forEach{
+                if (it.id==id) {
+                    id = it.parentId
                 }
             }
         }

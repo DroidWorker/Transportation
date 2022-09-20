@@ -697,7 +697,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val json = Json.Default
         kotlin.runCatching {
             val map = json.decodeFromString<Map<String, AdvertDTO>>(responseBody)
-            println("map = $map")
             AdvertListResponse.Success(map)
         }.getOrElse {
             json.decodeFromString<AdvertListResponse.Failure>(responseBody)
@@ -731,6 +730,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<Map<String, OrderDTO>>(responseBody)
             OrderListResponse.Success(map)
         }.getOrElse {
+            println("orderlistFailure"+it.stackTraceToString())
             json.decodeFromString<OrderListResponse.Failure>(responseBody)
         }
     }.getOrElse {

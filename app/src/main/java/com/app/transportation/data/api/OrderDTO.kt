@@ -5,11 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class OrderDTO(
-    val id: String,
-    val date: String,
-    val time: String,
+    @SerialName("id")val id: String,
+    @SerialName("date")val date: String,
+    @SerialName("time")val time: String,
     @SerialName("category_id") val categoryId: String,
-    val category: String,
+    @SerialName("category")val category: String,
     @SerialName("from_city") val fromCity: String?,
     @SerialName("from_region") val fromRegion: String?,
     @SerialName("from_place") val fromPlace: String?,
@@ -18,10 +18,10 @@ data class OrderDTO(
     @SerialName("to_city") val toCity: String?,
     @SerialName("to_region") val toRegion: String?,
     @SerialName("to_place") val toPlace: String?,
-    val description: String,
-    val name: String,
-    val phone: String,
-    val payment: String,
-    val photo: Map<String, String>,
-    @SerialName("ping") val ping: Map<String, String>
+    @SerialName("description")val description: String,
+    @SerialName("name")val name: String,
+    @SerialName("phone")val phone: String,
+    @SerialName("payment")val payment: String,
+    @SerialName("photo")val photo: Map<String, String?>,
+    @SerialName("ping") val ping: Map<String, String?>
 )
