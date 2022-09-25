@@ -14,5 +14,5 @@ data class AdvertDTO(
     val price: String,
     val description: String,
     val photo: Map<String, String>,
-    @SerialName("ping") val ping: Map<String, String>
+    @SerialName("ping") val ping: Map<String, String?>
 )

@@ -13,7 +13,8 @@ import com.app.transportation.databinding.ItemRequestBinding
 
 class FeedbacksRequestsAdapter :
     ListAdapter<FeedbackRequest, RecyclerView.ViewHolder>(DiffCallback()) {
-    var onDeleteClick: ((Int) -> Unit)? = null
+    var onAdvertDeleteClick: ((Int) -> Unit)? = null
+    var onOrderDeleteClick: ((Int) -> Unit)? = null
     var onClick: ((Int) -> Unit)? = null
     var onFeedbackClick: ((Int) -> Unit)? = null
 
@@ -24,7 +25,7 @@ class FeedbacksRequestsAdapter :
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        return if (viewType == 0)
+        return if (viewType == 0||viewType==1)
             RequestViewHolder(ItemRequestBinding.inflate(layoutInflater, parent, false))
         else
             FeedbackViewHolder(ItemFeedbackBinding.inflate(layoutInflater, parent, false))
@@ -32,7 +33,7 @@ class FeedbacksRequestsAdapter :
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) =
         with(getItem(position)) {
-            if (viewType == 0)
+            if (viewType == 0||viewType==1)
                 (holder as RequestViewHolder).bind(this)
             else
                 (holder as FeedbackViewHolder).bind(this)
@@ -51,7 +52,7 @@ class FeedbacksRequestsAdapter :
 
         fun bind(item: FeedbackRequest) = with(binding) {
             root.setOnClickListener { onClick?.invoke(item.id.toInt()) }
-            delete.setOnClickListener{ onDeleteClick?.invoke(item.id.toInt())}
+            delete.setOnClickListener{ if (item.viewType==0) onAdvertDeleteClick?.invoke(item.id.toInt()) else onOrderDeleteClick?.invoke(item.id.toInt())}
             title.text = item.title
             location.text = item.subtitle
             date.text = item.dateTime.dateToString("dd/MM/yyyy")

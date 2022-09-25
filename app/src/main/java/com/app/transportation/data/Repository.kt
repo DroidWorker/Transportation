@@ -294,6 +294,71 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }
     }.getOrElse { OrderPingResponse.Failure(it.stackTraceToString()) }
 
+    suspend fun getAdvertCatgoryList(): StringResponce = kotlin.runCatching {
+        val token = authToken ?: return@runCatching StringResponce.Failure("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/advert_category_list",
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        var responseBody: String = response.receive()
+
+        kotlin.runCatching {
+            val array : List<String>
+            if (responseBody.contains("|"))  {
+                responseBody = responseBody.split(":")[1]
+                responseBody = responseBody.replace("\"", "")
+                responseBody = responseBody.replace("}", "")
+                array = responseBody.split("|")
+            }
+            else {throw Exception("No Items")}
+
+            StringResponce.Success(array)
+        }.getOrElse {
+            if (responseBody.contains("No Items")){
+                StringResponce.Failure("No Items")
+            }
+            else {
+                StringResponce.Failure(responseBody)
+            }
+        }
+    }.getOrElse {
+        StringResponce.Failure(it.stackTraceToString())
+    }
+
+    suspend fun getOrderCountNews(): IntIntResponce = kotlin.runCatching {
+        val token = authToken ?: return@runCatching IntIntResponce.Failure("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/order_count_news",
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        var responseBody: String = response.receive()
+        val json = Json.Default
+
+        kotlin.runCatching {
+            if (responseBody.contains("["))  {
+                responseBody = responseBody.replace("[", "")
+                responseBody = responseBody.replace("]", "")
+            }
+            else {throw Exception("No Items")}
+
+            val map = json.decodeFromString<Map<Int, Int>>(responseBody)
+            IntIntResponce.Success(map)
+        }.getOrElse {
+            if (responseBody.contains("No Items")){
+                IntIntResponce.Failure("No Items")
+            }
+            else {
+                IntIntResponce.Failure(responseBody)
+            }
+        }
+    }.getOrElse {
+        IntIntResponce.Failure(it.stackTraceToString())
+    }
+
     suspend fun addAdvertToFavorite(orderId: String): AddFavoriteResponsee = kotlin.runCatching {
         val token = authToken ?: return@runCatching AddFavoriteResponsee.Failure("token is null")
         val response: HttpResponse =

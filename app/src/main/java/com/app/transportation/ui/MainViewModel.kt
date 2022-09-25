@@ -11,6 +11,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.transportation.R
+import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.data.AuthTokenNotFoundException
 import com.app.transportation.data.Repository
 import com.app.transportation.data.api.*
@@ -24,6 +25,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import java.net.UnknownHostException
+import java.util.stream.Collectors.toList
 
 class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent {
 
@@ -69,6 +71,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     val cachedOrderPing = MutableStateFlow(emptyList<Advert>())
     val cachedAdvertFeedbackPing = MutableStateFlow(emptyList<Advert>())
     val cachedOrderFeedbackPing = MutableStateFlow(emptyList<Advert>())
+
+    val cachedAdvertCategories = MutableStateFlow(emptyList<Int>())
+    val cachedOrderNews = MutableStateFlow(emptyMap<Int, Int>())
 
     val cachedProfile = MutableStateFlow(ProfileShort())
     val cachedNotifications = MutableStateFlow(emptyList<NoticeDTO>())
@@ -289,7 +294,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     fun deleteAdvertPing(id: Int) =
         viewModelScope.launch(Dispatchers.IO) {
             when (repository.deleteAdvertPing(id.toString()).message) {
-                "Success deleted." -> {
+                "Success" -> {
                     messageEvent.tryEmit("Объявление успешно удалено!")
                     getAdvertsPing()
                 }
@@ -300,7 +305,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     fun deleteOrderPing(id: Int) =
         viewModelScope.launch(Dispatchers.IO) {
             when (repository.deleteOrderPing(id.toString()).message) {
-                "Success deleted." -> {
+                "Success" -> {
                     messageEvent.tryEmit("Объявление успешно удалено!")
                     getOrdersPing()
                 }
@@ -315,6 +320,12 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     fun getAdvertsPing() = viewModelScope.launch(Dispatchers.IO) {
         updatePingAdvertsFull()
     }
+    fun getAdvertCatsList() = viewModelScope.launch (Dispatchers.IO){
+        getAdvertCatgoryList()
+    }
+    fun getOrderCountNews() = viewModelScope.launch (Dispatchers.IO){
+        getOrderCount()
+    }
 
     private suspend fun getOrdersFavoriteFull() =
         (repository.getOrderFavoriteList() as? OrderFavResponse.Success)?.let { response ->
@@ -322,7 +333,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 if (entry.key!="empty") {
                     val photoList: ArrayList<String> = ArrayList()
                     entry.value.photo.forEach { photoitem ->
-                        photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                        photoitem.value?.let { photoList.add(it.replace("data:image/jpg;base64,", "")) }
                     }
                     Advert(
                         id = entry.value.order_id.toInt(),
@@ -375,7 +386,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 if (entry.key != "empty") {
                     val photoList: ArrayList<String> = ArrayList()
                     entry.value.photo.forEach { photoitem ->
-                        photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                        photoitem.value?.let { photoList.add(it.replace("data:image/jpg;base64,", "")) }
                     }
                     Advert(
                         id = entry.value.advert_id.toInt(),
@@ -424,8 +435,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
                     }
                     Advert(
-                        id = entry.key.toInt(),
-                        viewType = 0,
+                        id = entry.value.order_id.toInt(),//entry.key.toInt(),
+                        viewType = 1,
                         categoryId = advertCategoriesFlow.value.find {
                             it.id == entry.value.categoryId.toInt()
                         }?.parentId ?: 4,
@@ -478,7 +489,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
                     }
                     Advert(
-                        id = entry.key.toInt(),
+                        id = entry.value.advert_id.toInt(),//entry.key.toInt(),
                         viewType = 0,
                         categoryId = advertCategoriesFlow.value.find {
                             it.id == entry.value.categoryId.toInt()
@@ -516,6 +527,23 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
         }
 
+    private suspend fun getAdvertCatgoryList() =
+        (repository.getAdvertCatgoryList() as? StringResponce.Success)?.let { response ->
+            val l : ArrayList<Int> = ArrayList()
+            response.categoriesList.forEach{
+                l.add(it.toInt())
+            }
+            cachedAdvertCategories.tryEmit(l)
+        }
+
+    private suspend fun getOrderCount() =
+        (repository.getOrderCountNews() as? IntIntResponce.Success)?.let { response ->
+            cachedOrderNews.collect{
+                if (it.isEmpty())
+                    cachedOrderNews.tryEmit(response.categoriesList)
+            }
+        }
+
     private suspend fun updateFavoriteAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
         val list = getAdvertsFavoriteFull() ?: return@launch
         println("adverts Favorite fuuuuuuuuuuul = $list")
@@ -538,7 +566,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     var advert: Advert = item.copy()
                     advert.profile = emptyList()
                     advert.profile= listOf(item.profile[i])
-                    advert.id = (item.id.toString()+""+i.toString()).toInt()
+                    //advert.id = (item.id.toString()+""+i.toString()).toInt()
                     reslist.add(advert)
                 }
             }
@@ -558,7 +586,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     var advert: Advert = item.copy()
                     advert.profile = emptyList()
                     advert.profile= listOf(item.profile[i])
-                    advert.id = (item.id.toString()+""+i.toString()).toInt()
+                    //advert.id = (item.id.toString()+""+i.toString()).toInt()
                     reslist.add(advert)
                 }
             }
@@ -590,15 +618,25 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         updateCache: Boolean = false,
         categoryId: Int = -1
     ) = viewModelScope.launch(Dispatchers.IO) {
-        getChildrenID(categoryId).collect { ids ->
-            val list = getOrdersFull() ?: return@collect
-
-            ordersSF.tryEmit(list)
-
-            if (updateCache)
+        if (categoryId==-1){
+            val list = getOrdersFull() ?: return@launch
+            getChildrenID(cachedAdvertCategories.value).collect{ ids->
                 cachedOrdersSF.tryEmit(list.filter {
-                    ids.contains(it.categoryId)||ids.contains(it.subcategoryId)//categoryId == it.subcategoryId || categoryId == it.categoryId
+                    ids.contains(it.categoryId) || ids.contains(it.subcategoryId)//categoryId == it.subcategoryId || categoryId == it.categoryId
                 })
+            }
+        }
+        else {
+            getChildrenID(listOf(categoryId)).collect { ids ->
+                val list = getOrdersFull() ?: return@collect
+
+                ordersSF.tryEmit(list)
+
+                if (updateCache)
+                    cachedOrdersSF.tryEmit(list.filter {
+                        ids.contains(it.categoryId) || ids.contains(it.subcategoryId)//categoryId == it.subcategoryId || categoryId == it.categoryId
+                    })
+            }
         }
     }
 
@@ -998,12 +1036,12 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         getNotification()
     }
 
-    suspend fun getChildrenID(categoryId : Int) = channelFlow {
+    fun getChildrenID(categoryId : List<Int>) = channelFlow {
         advertCategoriesFlow.collect() {
             val ids : ArrayList<Int> = ArrayList()
-            ids.add(categoryId)
+            ids.addAll(categoryId)
             it.forEach{cat ->
-                if (cat.parentId==categoryId||ids.contains(cat.parentId)){
+                if (categoryId.contains(cat.parentId)||ids.contains(cat.parentId)){
                     ids.add(cat.id)
                 }
             }

@@ -22,5 +22,5 @@ data class FavOrderDTO(
     val name: String?,
     val phone: String?,
     val payment: String?,
-    val photo: Map<String, String>
+    val photo: Map<String, String?>
 )

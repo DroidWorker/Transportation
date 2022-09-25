@@ -191,6 +191,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             tv.maxLines = 10
             snackbar.show()
         }
+
+        viewModel.getOrderCountNews()
     }
 
     private fun applyListeners() {

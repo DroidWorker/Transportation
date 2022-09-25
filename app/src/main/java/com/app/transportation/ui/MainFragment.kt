@@ -81,6 +81,7 @@ class MainFragment : Fragment() {
             arguments?.putBoolean("needToUpdate", false)
             viewModel.updateMainFragmentData()
         }
+        viewModel.getAdvertCatsList()
 
         applyVPAdapter()
 
@@ -133,6 +134,9 @@ class MainFragment : Fragment() {
         b.serviceTypesRV.addItemDecoration(RVDecoration(25, true))
         b.serviceTypesRV.adapter = serviceTypeAdapter
         serviceTypeAdapter.lastCheckedCategoryId = lastCheckedCategoryId
+        viewModel.cachedOrderNews.collectWithLifecycle(viewLifecycleOwner){
+            serviceTypeAdapter.newsCount = it
+        }
         serviceTypeAdapter.onClick = {
             //TODO some refresh things in this fragment
             lastCheckedCategoryId = this
@@ -217,7 +221,7 @@ class MainFragment : Fragment() {
         b.imExecutor.setOnClickListener {
             isCustomer = false
             findNavController().navigate(R.id.advertisementsFragment,
-                bundleOf("categoryId" to lastCheckedCategoryId, "type" to 1))
+                bundleOf("categoryId" to -1, "type" to 1))
         }
 
         b.search.setOnEditorActionListener(TextView.OnEditorActionListener() {v, actionId, event ->

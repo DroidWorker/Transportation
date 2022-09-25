@@ -19,6 +19,8 @@ class ServiceTypeAdapter : ListAdapter<AdvertisementCategory, ServiceTypeAdapter
 
     var lastCheckedCategoryId = 0
 
+    var newsCount : Map<Int, Int> = emptyMap()
+
     init {
         setHasStableIds(true)
         //stateRestorationPolicy = StateRestorationPolicy.PREVENT_WHEN_EMPTY
@@ -56,8 +58,8 @@ class ServiceTypeAdapter : ListAdapter<AdvertisementCategory, ServiceTypeAdapter
 
                 serviceType.text = item.name
 
-                serviceNumber.text = "4"
-                serviceNumber.isVisible = item.id == 0
+                serviceNumber.text = newsCount[item.id].toString()
+                serviceNumber.isVisible = (serviceNumber.text != "0" && serviceNumber.text != "null")
 
                 //selectionTracker?.isSelected(item.id)?.let { root.isActivated = it }
             }

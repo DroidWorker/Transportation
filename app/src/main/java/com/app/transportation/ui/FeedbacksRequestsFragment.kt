@@ -95,8 +95,11 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
         adapter.onFeedbackClick = {
             findNavController().navigate(R.id.pingInfoFeedbackFragment, bundleOf("id" to  it))
         }
-        adapter.onDeleteClick = {
+        adapter.onAdvertDeleteClick = {
             viewModel.deleteAdvertPing(it)
+        }
+        adapter.onOrderDeleteClick = {
+            viewModel.deleteOrderPing(it)
         }
         viewModel.getAdvertsPing()
         viewModel.getOrdersPing()
@@ -117,7 +120,7 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
                         }
                     viewModel.cachedAdvertPing.collectWithLifecycle(viewLifecycleOwner){
                         it.toList().forEach{ order ->
-                            arrlist.add(FeedbackRequest((order.id).toLong(), 0, order.title, order.category, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
+                            arrlist.add(FeedbackRequest((order.id).toLong(), 1, order.title, order.category, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
                         }
                         adapter.submitList(arrlist.toList())
                         arrlist.clear()
@@ -127,13 +130,13 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
                     var arrlist : ArrayList<FeedbackRequest> = ArrayList()
                     viewModel.cachedAdvertFeedbackPing.collectWithLifecycle(viewLifecycleOwner){
                         it.toList().forEach{ order ->
-                            arrlist.add(FeedbackRequest((order.id).toLong(), 1, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
+                            arrlist.add(FeedbackRequest((order.id).toLong(), 2, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
                         }
                         adapter.submitList(arrlist.toList())
                     }
                     viewModel.cachedOrderFeedbackPing.collectWithLifecycle(viewLifecycleOwner){
                         it.toList().forEach{ order ->
-                            arrlist.add(FeedbackRequest((order.id).toLong(), 1, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
+                            arrlist.add(FeedbackRequest((order.id).toLong(), 2, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
                         }
                         adapter.submitList(arrlist.toList())
                         arrlist.clear()

@@ -35,7 +35,7 @@ class AdvertisementsFragment : Fragment() {
 
     private var popupWindow: PopupWindow? = null
 
-    private val categoryId by lazy { arguments?.getInt("categoryId") ?: 0 }
+    private val categoryId by lazy { arguments?.getInt("categoryId") ?: 0 }//if -1 from cachedAdverCategories
     private val type by lazy { arguments?.getInt("type") ?: 0 }//0-customer 1-seller 2- 3-search result
     private val orderItemShouldOpenId by lazy { arguments?.getInt("clickedItemId") ?: -1 }
     private val searchText by lazy { arguments?.getString("searchText") ?: "" }
@@ -68,18 +68,19 @@ class AdvertisementsFragment : Fragment() {
         }
 
         super.onViewCreated(view, savedInstanceState)
-        if (type==1){
-            viewModel.cachedOrdersSF.tryEmit(emptyList())
-            viewModel.getAllCategoryOrders(categoryId)
+        when (type) {
+            1 -> {
+                viewModel.cachedOrdersSF.tryEmit(emptyList())
+                viewModel.getAllCategoryOrders(-1)
+
+            }
+            2 -> {
+                viewModel.cachedAdvertsSF.tryEmit(emptyList())
+                viewModel.getAllCategoryAdverts(categoryId)
+            }
+            0 -> viewModel.getCategoryAdverts(categoryId)
+            else -> viewModel.getSearchResult(searchText)
         }
-        else if (type==2) {
-            viewModel.cachedAdvertsSF.tryEmit(emptyList())
-            viewModel.getAllCategoryAdverts(categoryId)
-        }
-        else if(type==0)
-            viewModel.getCategoryAdverts(categoryId)
-        else
-            viewModel.getSearchResult(searchText)
 
         applyRVAdapter()
 
