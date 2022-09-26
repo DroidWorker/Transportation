@@ -68,18 +68,19 @@
         android:id="@+id/accept"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="10dp"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
         android:backgroundTint="@color/primary_color"
         android:fontFamily="@font/montserrat"
         android:paddingVertical="12dp"
         android:text="Принять"
         android:textAllCaps="false"
         android:textColor="@color/white"
+        android:visibility="gone"
+        app:cornerRadius="10dp"
         app:layout_constraintEnd_toStartOf="@+id/decline"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/subtitle"
-        app:cornerRadius="10dp" />
+        app:layout_constraintTop_toBottomOf="@+id/subtitle" />
 
     <Button
         android:id="@+id/decline"
@@ -93,9 +94,10 @@
         android:text="Отказать"
         android:textAllCaps="false"
         android:textColor="@color/primary_color"
+        android:visibility="gone"
+        app:cornerRadius="10dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/accept"
-        app:layout_constraintTop_toBottomOf="@+id/subtitle"
-        app:cornerRadius="10dp" />
+        app:layout_constraintTop_toBottomOf="@+id/subtitle" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

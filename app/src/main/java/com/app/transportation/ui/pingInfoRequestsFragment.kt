@@ -60,6 +60,10 @@ class pingInfoRequestsFragment : Fragment() {
             adverts.forEach{ advert->
                 if (advert.id==id) {
                     advert?.apply {
+                        (activity as? MainActivity)?.apply {
+                            b.title.text = advert.category
+                        }
+                        b.priceView.visibility=View.GONE
                         b.orderName3.text = advert.title
                         b.fromLocation3.text = advert.fromCity+", "+advert.fromRegion+", "+advert.fromPlace
                         b.toLocation3.text = advert.toCity+", "+advert.toRegion+", "+advert.toPlace

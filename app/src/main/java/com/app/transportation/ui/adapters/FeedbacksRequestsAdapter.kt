@@ -71,11 +71,12 @@ class FeedbacksRequestsAdapter :
         fun bind(item: FeedbackRequest) = with(binding) {
             root.setOnClickListener { onFeedbackClick?.invoke(item.id.toInt()) }
             title.text = item.title
-            subtitle.text = item.subtitle
+            subtitle.text = item.subtitle.split(":")[0]
             if (item.price!=0)
                 price.text = item.price.toString() + " руб"
             else
                 priceCardView.visibility= View.GONE
+
         }
 
     }

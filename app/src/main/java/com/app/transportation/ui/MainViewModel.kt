@@ -26,6 +26,7 @@ import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import java.net.UnknownHostException
 import java.util.stream.Collectors.toList
+import java.util.stream.Collectors.toMap
 
 class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent {
 
@@ -74,6 +75,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     val cachedAdvertCategories = MutableStateFlow(emptyList<Int>())
     val cachedOrderNews = MutableStateFlow(emptyMap<Int, Int>())
+    val cachedBussinessLast = MutableStateFlow(emptyList<BusinessLastItemDTO>())
 
     val cachedProfile = MutableStateFlow(ProfileShort())
     val cachedNotifications = MutableStateFlow(emptyList<NoticeDTO>())
@@ -255,6 +257,30 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
         }
 
+    fun setPingStatus(
+        userId: String,
+        orderId: String?,
+        advertId: String?,
+        status: String
+    ) = viewModelScope.launch (Dispatchers.IO){
+        val result = repository.setPing(
+            userId = userId,
+            orderId = orderId,
+            advertId = advertId,
+            status = status
+        )
+        when (result) {
+            is AddPingResponse.Success -> {
+                if (result.message == "Success"||result.message == "Not change")
+                    messageEvent.tryEmit(status)
+            }
+            is AddPingResponse.Failure -> {
+                messageEvent.tryEmit("Ошибка! "+result.message)
+                println(result.message)
+            }
+        }
+    }
+
     fun addOrderPing(
         orderId: String
     ) = viewModelScope.launch(Dispatchers.IO) {
@@ -325,6 +351,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     }
     fun getOrderCountNews() = viewModelScope.launch (Dispatchers.IO){
         getOrderCount()
+    }
+    fun getBusinessLast() = viewModelScope.launch (Dispatchers.IO){
+        getBuisnessSix()
     }
 
     private suspend fun getOrdersFavoriteFull() =
@@ -454,7 +483,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         payment = entry.value.payment!!,
                         description = entry.value.description,
                         photo = photoList.toList(),
-                        profile = entry.value.ping
+                        profile = entry.value.ping,
                     )
                 }
                 else
@@ -541,6 +570,14 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             cachedOrderNews.collect{
                 if (it.isEmpty())
                     cachedOrderNews.tryEmit(response.categoriesList)
+            }
+        }
+
+    private suspend fun getBuisnessSix() =
+        (repository.getBussinessLast() as? businessLastResponce.Success)?.let { responce->
+            cachedBussinessLast.collect{
+                if (it.isEmpty())
+                    cachedBussinessLast.tryEmit(responce.categoriesList)
             }
         }
 
@@ -723,24 +760,27 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 }
 
                 if (entry.value.ping.isNotEmpty()) {
-                    list.add(
-                        Advert(
-                            id = entry.key.toInt(),
-                            viewType = 0,
-                            categoryId = advertCategoriesFlow.value.find {
-                                it.id == entry.value.categoryId.toInt()
-                            }?.parentId ?: 4,
-                            category = entry.value.category,
-                            subcategoryId = entry.value.categoryId.toInt(),
-                            title = entry.value.title,
-                            date = entry.value.date,
-                            time = entry.value.time,
-                            price = entry.value.price,
-                            description = "Отклик на ваше объявление в категории " + entry.value.category,
-                            photo = photoList.toList(),
-                            ping = entry.value.ping
-                        )
-                    )
+                    entry.value.ping.forEach{
+                        if (it.value!="REJECTED")
+                            list.add(
+                                Advert(
+                                    id = entry.key.toInt(),
+                                    viewType = 0,
+                                    categoryId = advertCategoriesFlow.value.find {
+                                        it.id == entry.value.categoryId.toInt()
+                                    }?.parentId ?: 4,
+                                    category = entry.value.category,
+                                    subcategoryId = entry.value.categoryId.toInt(),
+                                    title = entry.value.title,
+                                    date = entry.value.date,
+                                    time = entry.value.time,
+                                    price = entry.value.price,
+                                    description = "Отклик на ваше объявление в категории " + entry.value.category+" : "+entry.value.description,
+                                    photo = photoList.toList(),
+                                    ping = mapOf(it.toPair())
+                                )
+                            )
+                    }
                 }
             }
             list.toList()
@@ -839,28 +879,31 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     photoitem.value?.let { photoList.add(it.replace("data:image/jpg;base64,", "")) }
                 }
                 if (entry.value.ping.isNotEmpty()) {
-                    list.add(Advert(
-                        id = entry.key.toInt(),
-                        viewType = 0,
-                        categoryId = advertCategoriesFlow.value.find {
-                            it.id == entry.value.categoryId.toInt()
-                        }?.parentId ?: 4,
-                        category = entry.value.category,
-                        subcategoryId = entry.value.categoryId.toInt(),
-                        title = entry.value.description,
-                        date = entry.value.date,
-                        time = entry.value.time,
-                        fromCity = "${entry.value.fromCity}",
-                        fromRegion = "${entry.value.fromRegion}",
-                        fromPlace = "${entry.value.fromPlace}",
-                        toCity = "${entry.value.toCity}",
-                        toRegion = "${entry.value.toRegion}",
-                        toPlace = "${entry.value.toPlace}",
-                        payment = entry.value.payment,
-                        description = "Запрс на исполнение вашей заявки в категории " + entry.value.category,
-                        photo = emptyList(),//photoList.toList()
-                        ping = (if(entry.value.ping!=null) entry.value.ping else emptyMap<String, String>()) as Map<String, String>
-                    ))
+                    entry.value.ping.forEach{
+                        if (it.value!="REJECTED")
+                            list.add(Advert(
+                                id = entry.key.toInt(),
+                                viewType = 0,
+                                categoryId = advertCategoriesFlow.value.find {
+                                    it.id == entry.value.categoryId.toInt()
+                                }?.parentId ?: 4,
+                                category = entry.value.category,
+                                subcategoryId = entry.value.categoryId.toInt(),
+                                title = entry.value.description,
+                                date = entry.value.date,
+                                time = entry.value.time,
+                                fromCity = "${entry.value.fromCity}",
+                                fromRegion = "${entry.value.fromRegion}",
+                                fromPlace = "${entry.value.fromPlace}",
+                                toCity = "${entry.value.toCity}",
+                                toRegion = "${entry.value.toRegion}",
+                                toPlace = "${entry.value.toPlace}",
+                                payment = entry.value.payment,
+                                description = "Запрс на исполнение вашей заявки в категории " + entry.value.category,
+                                photo = emptyList(),//photoList.toList()
+                                ping = mapOf(it.toPair())
+                            ))
+                    }
                 }
             }
             list.toList()

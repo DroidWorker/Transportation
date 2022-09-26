@@ -82,6 +82,7 @@ class MainFragment : Fragment() {
             viewModel.updateMainFragmentData()
         }
         viewModel.getAdvertCatsList()
+        viewModel.getBusinessLast()
 
         applyVPAdapter()
 
@@ -122,12 +123,7 @@ class MainFragment : Fragment() {
             "dark"->jobsAdapter.mode=true
         }
         b.viewPager.adapter = jobsAdapter
-        jobsAdapter.submitList(
-            listOf(
-                Job("Ремонтные работы", "от 10000 руб/час"),
-                Job("Ремонтные работы", "от 10000 руб/час")
-            )
-        )
+        jobsAdapter.ctx = requireContext()
     }
 
     private fun applyRVAdapter() {
@@ -167,6 +163,10 @@ class MainFragment : Fragment() {
     private fun applyObservers() {
         viewModel.secondLevelCategoriesFlow.collectWithLifecycle(viewLifecycleOwner) {
             serviceTypeAdapter.submitList(it)
+        }
+
+        viewModel.cachedBussinessLast.collectWithLifecycle(viewLifecycleOwner){
+            jobsAdapter.submitList(it)
         }
 
         viewModel.isCustomer.filterNotNull().collectWithLifecycle(viewLifecycleOwner) {
