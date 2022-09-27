@@ -162,6 +162,13 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         updateFilterThirdLevelCategories(categoryId)
     }
 
+    fun getMyOrders() = viewModelScope.launch (Dispatchers.IO){
+        updateOrders(true, 0)
+    }
+    fun getMyAdverts() = viewModelScope.launch (Dispatchers.IO){
+        updateAdverts(true, 0)
+    }
+
     fun getFeedbackOrdersAdverts() = viewModelScope.launch(Dispatchers.IO){
         updateFeedbackOrders()
         updateFeedbackAdverts()
@@ -717,7 +724,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
         if (updateCache)
             cachedAdvertsSF.tryEmit(
-                list.filter { categoryId == it.categoryId }
+                if (categoryId!=0)
+                    list.filter { categoryId == it.categoryId }
+                else    list
             )
     }
     private suspend fun updateFeedbackAdverts() = viewModelScope.launch(Dispatchers.IO) {
@@ -795,8 +804,12 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         ordersSF.tryEmit(list)
 
         if (updateCache)
-            cachedAdvertsSF.tryEmit(
-                list.filter { categoryId == it.categoryId }
+            cachedOrdersSF.tryEmit(
+                if (categoryId!=0)
+                    list.filter { categoryId == it.categoryId }
+                else    {
+                    list
+                }
             )
     }
     private suspend fun updateFeedbackOrders() = viewModelScope.launch(Dispatchers.IO) {
@@ -995,7 +1008,13 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             //val thirdLevelCatsDeferred = advertCats.filter { it.level == 3 }
 
             val list = mutableListOf<Advert>()
-            firstLevelCatsDeferred.await().forEach {
+            getOrders()?.forEach{
+                list.add(it)
+            }
+            getAdverts()?.forEach{
+                list.add(it)
+            }
+            /*firstLevelCatsDeferred.await().forEach {
                 getOrders()?.filter { order ->
                     secondLevelCategoriesFlow.value
                         .find { cat -> cat.id == order.categoryId }?.parentId == it.id
@@ -1012,7 +1031,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         advert
                     )
                 }
-            }
+            }*/
             send(list)
         }
     }.shareIn(viewModelScope, SharingStarted.WhileSubscribed(0L, 0L), 1)
@@ -1089,6 +1108,17 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 }
             }
             send(ids)
+        }
+    }
+    fun getParentID(categoryId : Int) = channelFlow {
+        advertCategoriesFlow.collect() {
+            var id : Int = 1
+            it.forEach{cat ->
+                if (cat.id==categoryId){
+                    id = cat.parentId
+                }
+            }
+            send(id)
         }
     }
     suspend fun getFirstLevelParentID(categoryId: Int) : Int {

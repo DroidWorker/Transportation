@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -29,7 +30,8 @@ class CreatingOrderPpAndKuFragment : Fragment() {
 
     private val categoryId by lazy { arguments?.getInt("id", 1) ?: 1 }
     private val isEdit by lazy {arguments?.getInt("isEdit", 0) ?: 0}
-
+    private var catsID : HashMap<String, String> = HashMap<String, String>()
+    var selectedCat: String = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -47,6 +49,7 @@ class CreatingOrderPpAndKuFragment : Fragment() {
             b.toolbars.isVisible = true
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
+        viewModel.getMyOrders()
 
         super.onViewCreated(view, savedInstanceState)
 
@@ -54,7 +57,7 @@ class CreatingOrderPpAndKuFragment : Fragment() {
             b.orderCreationTitle.text = "Редактирование заказа"
             b.order.text = "Применить"
 
-            viewModel.userOrdersAdvertsFlow.collectWithLifecycle(this) {
+            viewModel.cachedOrdersSF.collectWithLifecycle(viewLifecycleOwner) {
                 it.forEach { item ->
                     if (item.id==categoryId) {
                         b.fromCity.setText(item.fromCity)
@@ -104,7 +107,10 @@ class CreatingOrderPpAndKuFragment : Fragment() {
 
                 viewModel.createOrder(
                     ctx = context,
-                    category = categoryId.toString(),
+                    category = if (b.spinnerSelectCategory5.isVisible)
+                        catsID.getValue(selectedCat!!)
+                    else
+                        categoryId.toString(),
                     description = b.comment.text.toString(),
                     fromCity = b.fromCity.text.toString(),
                     fromRegion = b.fromArea.text.toString(),
@@ -143,17 +149,39 @@ class CreatingOrderPpAndKuFragment : Fragment() {
     private fun applyCollectors() = viewLifecycleOwner.repeatOnLifecycle {
         if (1==1)
             viewModel.addAdvertScreenCategoriesFlowFourthLevel(categoryId).collectWithLifecycle(viewLifecycleOwner) {
-                var data : ArrayList<String> = ArrayList()
+                var data: ArrayList<String> = ArrayList()
                 data.add("выбрать из списка")
-                it.forEach{item ->
+                it.forEach { item ->
                     data.add(item.name)
+                    catsID[item.name]=item.realId.toString()
                 }
-                val adapter: ArrayAdapter<String> = ArrayAdapter<String>(ctx!!, android.R.layout.simple_spinner_item, data)
+                val adapter: ArrayAdapter<String> =
+                    ArrayAdapter<String>(ctx!!, android.R.layout.simple_spinner_item, data)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 b.spinnerSelectCategory5.adapter = adapter
 
-                if (data.size>1)
+                if (data.size > 1) {
                     b.spinnerSelectCategory5.visibility = View.VISIBLE
+                    b.spinnerSelectCategory5.onItemSelectedListener =
+                        object : AdapterView.OnItemSelectedListener {
+                            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                            }
+
+                            override fun onItemSelected(
+                                parent: AdapterView<*>?,
+                                view: View?,
+                                position: Int,
+                                id: Long
+                            ) {
+                                if (position != 0)
+                                    selectedCat =
+                                        b.spinnerSelectCategory5.getItemAtPosition(position)
+                                            .toString()
+                            }
+
+                        }
+                }
             }
     }
 

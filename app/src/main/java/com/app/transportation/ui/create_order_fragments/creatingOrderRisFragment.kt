@@ -10,6 +10,7 @@ import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
@@ -40,6 +41,9 @@ class CreatingOrderRisFragment : Fragment() {
     private val categoryId by lazy { arguments?.getInt("id", 1) ?: 1 }
     private val isEdit by lazy {arguments?.getInt("isEdit", 0) ?: 0}
 
+    private var catsID : HashMap<String, String> = HashMap<String, String>()
+    var selectedCat: String = ""
+
     private val obtainPhotoUriLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             result.data?.data?.let { uri -> viewModel.cafApplyPhotoByUri(uri) }
@@ -62,13 +66,14 @@ class CreatingOrderRisFragment : Fragment() {
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
 
+        viewModel.getMyOrders()
         super.onViewCreated(view, savedInstanceState)
 
         if (isEdit==1) {
             b.orderCreationTitle.text = "Редактирование заказа"
             b.order.text = "Применить"
 
-            viewModel.userOrdersAdvertsFlow.collectWithLifecycle(this) {
+            viewModel.cachedOrdersSF.collectWithLifecycle(this) {
                 it.forEach { item ->
                     if (item.id==categoryId) {
                         b.toCity.setText(item.toCity)
@@ -142,7 +147,10 @@ class CreatingOrderRisFragment : Fragment() {
 
                 viewModel.createOrder(
                     ctx=context,
-                    category = categoryId.toString(),
+                    category = if (b.spinnerSelectCategory6.isVisible)
+                        catsID.getValue(selectedCat!!)
+                    else
+                        categoryId.toString(),
                     description = b.comment.text.toString(),
                     fromCity = "",
                     fromRegion = "",
@@ -198,13 +206,34 @@ class CreatingOrderRisFragment : Fragment() {
                 data.add("выбрать из списка")
                 it.forEach{item ->
                     data.add(item.name)
+                    catsID[item.name]=item.realId.toString()
                 }
                 val adapter: ArrayAdapter<String> = ArrayAdapter<String>(ctx!!, android.R.layout.simple_spinner_item, data)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 b.spinnerSelectCategory6.adapter = adapter
 
-                if (data.size>1)
+                if (data.size>1) {
                     b.spinnerSelectCategory6.visibility = View.VISIBLE
+                    b.spinnerSelectCategory6.onItemSelectedListener =
+                        object : AdapterView.OnItemSelectedListener {
+                            override fun onNothingSelected(parent: AdapterView<*>?) {
+
+                            }
+
+                            override fun onItemSelected(
+                                parent: AdapterView<*>?,
+                                view: View?,
+                                position: Int,
+                                id: Long
+                            ) {
+                                if (position != 0)
+                                    selectedCat =
+                                        b.spinnerSelectCategory6.getItemAtPosition(position)
+                                            .toString()
+                            }
+
+                        }
+                }
             }
     }
 

@@ -218,6 +218,7 @@
         app:layout_constraintWidth_percent="0.5">
 
         <ImageView
+            android:id="@+id/photo"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:layout_gravity="center"

@@ -389,9 +389,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
     suspend fun getBussinessLast(): businessLastResponce = kotlin.runCatching {
         val token = authToken ?: return@runCatching businessLastResponce.Failure("token is null")
         val response: HttpResponse =
-            client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/bussiness_last",
-            )
+            client.get("http://api-transport.mvp-pro.top/api/v1/bussiness_last")
         var responseBody: String = response.receive()
         val json = Json.Default
 

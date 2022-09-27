@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.PopupWindow
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -72,6 +74,7 @@ class OrderDetailsFragment : Fragment() {
                 (activity as? MainActivity)?.apply {
                     b.title.text = category
                 }
+                viewModel.applyAdfPhotos(photo)
             }
             if (b.fromLocation.text == "  ") {
                 b.fromLocationIcon.visibility = View.GONE
@@ -84,6 +87,15 @@ class OrderDetailsFragment : Fragment() {
         viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
             b.name.text = it.firstName
             b.telNumber.text = it.phone
+        }
+        viewModel.adfTempPhotoUris.collectWithLifecycle(this) {
+            it.second.getOrNull(it.first)?.let { bitmap ->
+                b.photo.scaleType = ImageView.ScaleType.FIT_XY
+                b.photo.setImageBitmap(bitmap)
+            } ?: kotlin.run {
+                b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
+                b.photo.setImageResource(R.drawable.ic_photo)
+            }
         }
     }
 

@@ -78,6 +78,8 @@ class CreatingAdvertisementFragment : Fragment() {
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
 
+        viewModel.getMyAdverts()
+
         super.onViewCreated(view, savedInstanceState)
 
         b.name.text = viewModel.profileFlow.value?.name
@@ -86,7 +88,7 @@ class CreatingAdvertisementFragment : Fragment() {
             b.addAdvert.text = "Применить"
             b.addToFavourites.visibility = View.GONE
 
-            viewModel.userOrdersAdvertsFlow.collectWithLifecycle(this) {
+            viewModel.cachedAdvertsSF.collectWithLifecycle(this) {
                 it.forEach { item ->
                     if (item.id==categoryId) {
                         EditCatId = item.id
