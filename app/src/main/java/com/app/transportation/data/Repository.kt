@@ -332,12 +332,19 @@ class Repository(private val dao: MainDao) : KoinComponent {
         var responseBody: String = response.receive()
 
         kotlin.runCatching {
+            println("asssa"+responseBody)
             val array : List<String>
             if (responseBody.contains("|"))  {
                 responseBody = responseBody.split(":")[1]
                 responseBody = responseBody.replace("\"", "")
                 responseBody = responseBody.replace("}", "")
                 array = responseBody.split("|")
+            }
+            else if (responseBody.contains("category_id")){
+                responseBody = responseBody.split(":")[1]
+                responseBody = responseBody.replace("\"", "")
+                responseBody = responseBody.replace("}", "")
+                array = listOf(responseBody)
             }
             else {throw Exception("No Items")}
 

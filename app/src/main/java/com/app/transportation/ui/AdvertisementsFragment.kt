@@ -1,5 +1,7 @@
 package com.app.transportation.ui
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.view.*
 import android.widget.PopupWindow
@@ -8,6 +10,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
@@ -66,6 +69,8 @@ class AdvertisementsFragment : Fragment() {
             b.toolbars.isVisible = true
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
+
+        viewModel.getAdvertCatsList()
 
         super.onViewCreated(view, savedInstanceState)
         when (type) {
@@ -268,13 +273,47 @@ class AdvertisementsFragment : Fragment() {
 
 
     private fun applyListeners() {
+        var city : String? = null
         b.beSeller.setOnClickListener{
             findNavController().navigate(R.id.createOrderCategorySelectorFragment, bundleOf("id" to 0, "mode" to 3))
         }
         b.createOrder.setOnClickListener{
             findNavController().navigate(R.id.createOrderCategorySelectorFragment, bundleOf("id" to 0, "mode" to 3))
         }
-        b.city.setOnClickListener { findNavController().navigate(R.id.addCityDF) }
+        b.city.setOnClickListener {
+            findNavController().navigate(R.id.addCityDF)
+            setFragmentResultListener("1") { key, bundle ->
+                var city = bundle.getString("city")
+                if (city!=null&&city!="") {
+                    adapter.submitList(
+                        viewModel.cachedOrdersSF.value.filter {
+                            it.fromCity.contains(city!!, true) || it.toCity.contains(city!!, true)
+                        }
+                            .toMutableList()
+                    )
+                }
+            }
+        }
+        /*@Override
+        fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent) {
+            super.onActivityResult(requestCode, resultCode, data);
+            if (resultCode == Activity.RESULT_OK) {
+                when (requestCode) {
+                    1-> {
+                        city = data.getStringExtra("city")
+                        if (city!=null&&city!="") {
+                            adapter.submitList(
+                                viewModel.cachedOrdersSF.value.filter {
+                                    it.fromCity.contains(city!!) || it.toCity.contains(city!!)
+                                }
+                                    .toMutableList()
+                            )
+                        }
+                    }
+                    else-> return
+                }
+            }
+        }*/
         b.filter.setOnClickListener {
             popupWindow = PopupWindow(requireContext()).apply {
                 val menuB = PopupMenuServicesFilterBinding.inflate(layoutInflater)
@@ -291,15 +330,20 @@ class AdvertisementsFragment : Fragment() {
                     ContextCompat.getDrawable(requireContext(), R.drawable.menu_background)
                 )
 
-                val list = viewModel.advertCategoriesFlow.value
-                    .filter { it.parentId == categoryId }
-                    .map { ServiceType(it.id, it.name) }
-                menuB.filterRV.adapter = PopupMenuServicesFilterAdapter().apply {
-                    submitList(list)
-                    onClick = { id ->
-                        adapter.submitList(
-                            viewModel.cachedAdvertsSF.value.filter { it.subcategoryId == id }.toMutableList()
-                        )
+                viewModel.cachedAdvertCategories.collectWithLifecycle(viewLifecycleOwner) { clist->
+                    val list = viewModel.advertCategoriesFlow.value
+                        .filter { clist.contains(it.id) }
+                        .map { ServiceType(it.id, it.name) }
+                    menuB.filterRV.adapter = PopupMenuServicesFilterAdapter().apply {
+                        submitList(list)
+                        this.necessary=true
+                        this.onClick = { id ->
+                            adapter.submitList(
+                                viewModel.cachedOrdersSF.value.filter {
+                                    it.subcategoryId == id }
+                                    .toMutableList()
+                            )
+                        }
                     }
                 }
 
