@@ -58,11 +58,11 @@
         android:gravity="center"
         android:textColor="@color/secondary_color"
         android:textSize="16sp"
+        app:drawableStartCompat="@drawable/ic_calendar"
         app:layout_constraintEnd_toStartOf="@+id/time"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/location"
-        app:drawableStartCompat="@drawable/ic_calendar"
         tools:text="01/12/2022" />
 
     <TextView
@@ -97,5 +97,16 @@
         app:layout_constraintTop_toBottomOf="@+id/location"
         app:drawableStartCompat="@drawable/ic_ruble"
         tools:text="1000 руб" />
+
+    <TextView
+        android:id="@+id/status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="TextView"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/date" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

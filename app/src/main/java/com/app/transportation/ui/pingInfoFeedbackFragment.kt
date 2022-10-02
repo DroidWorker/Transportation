@@ -75,7 +75,7 @@ class pingInfoFeedbackFragment : Fragment() {
                 if (advert.id==id) {
                     isAdvert = true
                     advert.ping.entries.firstOrNull()?.let { viewModel.getProfile(it.key) }
-                    advert?.apply {
+                    advert.apply {
                         b.orderName3.text = advert.title
                         b.priceView.text = advert.price
                         b.date3.text = advert.date
@@ -87,6 +87,7 @@ class pingInfoFeedbackFragment : Fragment() {
                             b.name3.text = it.firstName+" "+it.lastName
                             b.telNumber3.text = it.phone
                         }
+                        b.pingStatus.text = getStatusName(advert.ping[advert.ping.keys.first()])
                     }
                     return@collectWithLifecycle
                 }
@@ -96,14 +97,13 @@ class pingInfoFeedbackFragment : Fragment() {
             adverts.forEach{ advert->
                 if (advert.id==id) {
                     advert.ping.entries.firstOrNull()?.let { viewModel.getProfile(it.key) }
-                    advert?.apply {
+                    advert.apply {
                         b.orderName3.text = advert.title
                         if (advert.fromCity==""&&advert.fromPlace==""&&advert.fromRegion=="") {
                             b.fromLocation3.visibility = View.GONE
                             b.fromLocationIcon3.visibility=View.GONE
                             b.locationArrow3.visibility=View.GONE
-                        }
-                        else
+                        } else
                             b.fromLocation3.text = advert.fromCity+", "+advert.fromRegion+", "+advert.fromPlace
                         b.toLocation3.text = advert.toCity+", "+advert.toRegion+", "+advert.toPlace
                         b.date3.text = advert.date
@@ -116,6 +116,7 @@ class pingInfoFeedbackFragment : Fragment() {
                             b.name3.text = it.firstName+" "+it.lastName
                             b.telNumber3.text = it.phone
                         }
+                        b.pingStatus.text = getStatusName(advert.ping[advert.ping.keys.first()])
                     }
                     return@collectWithLifecycle
                 }
@@ -156,4 +157,15 @@ class pingInfoFeedbackFragment : Fragment() {
         popupWindow = null
     }
 
+    private fun getStatusName(statusCode : String?): String{
+        if (statusCode!=null){
+            when(statusCode){
+                "SEND"->return "отправлена"
+                "REJECTED"->return "отменена"
+                "PROGRESS"->return "в работе"
+                "DONE"->return "выполнена"
+            }
+        }
+        return "не определен"
+    }
 }

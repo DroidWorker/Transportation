@@ -8,6 +8,7 @@ import java.util.*
 @Entity(tableName = "FeedbacksAndRequests")
 data class FeedbackRequest(
     @PrimaryKey val id: Long = 0,
+    var status: String = "",
     val viewType: Int,
     var title: String = "",
     var subtitle: String = "",

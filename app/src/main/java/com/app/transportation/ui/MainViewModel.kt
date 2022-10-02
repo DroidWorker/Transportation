@@ -767,7 +767,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 entry.value.photo.forEach{photoitem->
                     photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
                 }
-
                 if (entry.value.ping.isNotEmpty()) {
                     entry.value.ping.forEach{
                         if (it.value!="REJECTED")

@@ -1,5 +1,6 @@
 package com.app.transportation.ui.adapters
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -61,6 +62,11 @@ class FeedbacksRequestsAdapter :
                 price.text = item.price.toString() + " руб"
             else
                 price.visibility= View.GONE
+            if (item.status=="PROGRESS"){
+                status.visibility = View.VISIBLE
+                status.text = "В работе"
+                root.setBackgroundColor(Color.DKGRAY)
+            }
         }
 
     }
@@ -76,7 +82,11 @@ class FeedbacksRequestsAdapter :
                 price.text = item.price.toString() + " руб"
             else
                 priceCardView.visibility= View.GONE
-
+            if (item.status=="PROGRESS"){
+                decline.visibility = View.VISIBLE
+                decline.text = "В работе"
+                decline.isClickable = false
+            }
         }
 
     }
