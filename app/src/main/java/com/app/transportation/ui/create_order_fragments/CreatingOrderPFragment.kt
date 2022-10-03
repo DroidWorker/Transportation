@@ -172,7 +172,6 @@ class CreatingOrderPFragment : Fragment() {
                     payment = paymentMethod,
                     photos = photos
                 )
-                println("aaaaaaas"+viewModel.dateTime)
             }
             else{
                 viewModel.editOrder(
@@ -270,7 +269,7 @@ class CreatingOrderPFragment : Fragment() {
     }
 
     private fun onDateSelected(dateInMillis: Long) {
-        viewModel.dateTime = dateInMillis.millisToString("yyyy/MM/dd")
+        viewModel.dateTime = dateInMillis.millisToString("dd/MM/yyyy")
         showTimePicker()
     }
 
@@ -298,7 +297,7 @@ class CreatingOrderPFragment : Fragment() {
 
         viewModel.dateTime += " $hourAsText:$minuteAsText"
 
-        val dateTime = requireContext().formatDate(viewModel.dateTime, "yyyy/MM/dd HH:mm", true)
+        val dateTime = requireContext().formatDate(viewModel.dateTime, "dd/MM/yyyy HH:mm", true)
         b.selectDateTime.text = dateTime
     }
 

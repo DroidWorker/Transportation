@@ -8,6 +8,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.util.Base64
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -58,6 +59,7 @@ class JobsAdapter : ListAdapter<BusinessLastItemDTO, JobsAdapter.ViewHolder>(Dif
                     if (base64String.length>10) {
                         val byteArray = Base64.decode(base64String, Base64.DEFAULT)
                         val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                        catimage.scaleType = ImageView.ScaleType.FIT_CENTER
                         catimage.setImageBitmap(bitmap)
                         val blurred: Bitmap? = blurRenderScript(
                             ctx,
@@ -66,12 +68,16 @@ class JobsAdapter : ListAdapter<BusinessLastItemDTO, JobsAdapter.ViewHolder>(Dif
                         )//second parametre is radius//second parametre is radius
                         catimage.setBackgroundDrawable(BitmapDrawable(blurred))
                     }
+                    else{
+                        catimage.setImageResource(R.drawable.ic_photo)
+                        catimage.scaleType = ImageView.ScaleType.CENTER
+                    }
                 }
                 catch (ex : Exception){
                     println("Error: "+ex.message.toString())
                 }
                 title.text = item.category
-                price.text = item.price
+                price.text = item.price+" p"
             }
 
     }

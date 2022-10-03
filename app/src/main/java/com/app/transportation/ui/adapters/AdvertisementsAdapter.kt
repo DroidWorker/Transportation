@@ -69,7 +69,6 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
 
             fun bind(item: Advert) = with(binding) {
                 root.setOnClickListener { onClick?.invoke(item) }
-
                 title.text = item.title
                 date.text = item.date
                 time.text = item.time
@@ -104,7 +103,6 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
 
         fun bind(item: Advert) = with(binding) {
             root.setOnClickListener { onClick?.invoke(item) }
-
             title.text = item.title
             location.text = item.fromCity+" "+item.fromRegion+" "+item.fromPlace
             date.text = item.date

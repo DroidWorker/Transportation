@@ -93,6 +93,7 @@ class OrderDetailsFragment : Fragment() {
                 b.photo.scaleType = ImageView.ScaleType.FIT_XY
                 b.photo.setImageBitmap(bitmap)
             } ?: kotlin.run {
+                //b.photoholder.visibility = View.GONE
                 b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
                 b.photo.setImageResource(R.drawable.ic_photo)
             }

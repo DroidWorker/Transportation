@@ -264,7 +264,7 @@ class CreatingOrderRisFragment : Fragment() {
     }
 
     private fun onDateSelected(dateInMillis: Long) {
-        viewModel.dateTime = dateInMillis.millisToString("yyyy/MM/dd")
+        viewModel.dateTime = dateInMillis.millisToString("dd/MM/yyyy")
         showTimePicker()
     }
 
@@ -292,7 +292,7 @@ class CreatingOrderRisFragment : Fragment() {
 
         viewModel.dateTime += " $hourAsText:$minuteAsText"
 
-        val dateTime = requireContext().formatDate(viewModel.dateTime, "yyyy/MM/dd HH:mm", true)
+        val dateTime = requireContext().formatDate(viewModel.dateTime, "dd/MM/yyyy HH:mm", true)
     }
 
     override fun onDestroyView() {

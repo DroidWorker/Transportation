@@ -401,13 +401,11 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val json = Json.Default
 
         kotlin.runCatching {
-            println("aaaaaa0"+responseBody)
             responseBody = responseBody.replace("{\"bussiness\":", "")
-            responseBody = responseBody.replace("}", "")
+            responseBody = responseBody.substring(0, responseBody.length - 1)
             val map = json.decodeFromString<List<BusinessLastItemDTO>>(responseBody)
             businessLastResponce.Success(map)
         }.getOrElse {
-            println("aaaaaa2"+it.message)
             if (responseBody.contains("No Items")){
                 businessLastResponce.Failure("No Items")
             }
@@ -984,7 +982,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                     append("from_city", fromCity)
                     append("from_region", fromRegion)
                     append("from_place", fromPlace)
-                    append("from_datetime", "01.01.2022T10:00")
+                    append("from_datetime", date)
                     append("to_city", toCity)
                     append("to_region", toRegion)
                     append("to_place", toPlace)

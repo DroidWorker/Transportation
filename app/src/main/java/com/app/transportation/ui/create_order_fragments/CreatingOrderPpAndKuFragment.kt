@@ -213,7 +213,7 @@ class CreatingOrderPpAndKuFragment : Fragment() {
     }
 
     private fun onDateSelected(dateInMillis: Long) {
-        viewModel.dateTime = dateInMillis.millisToString("yyyy/MM/dd")
+        viewModel.dateTime = dateInMillis.millisToString("dd/MM/yyyy")
         showTimePicker()
     }
 
@@ -234,7 +234,7 @@ class CreatingOrderPpAndKuFragment : Fragment() {
 
         viewModel.dateTime += " $hourAsText:$minuteAsText"
 
-        val dateTime = requireContext().formatDate(viewModel.dateTime, "yyyy/MM/dd HH:mm", true)
+        val dateTime = requireContext().formatDate(viewModel.dateTime, "dd/MM/yyyy HH:mm", true)
         b.fromTime.text = dateTime
     }
 
