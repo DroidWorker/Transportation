@@ -37,6 +37,9 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
         get() = prefs.getString("feedbacksRequestsActiveTab", null) ?: "requests"
         set(value) = prefs.edit { putString("feedbacksRequestsActiveTab", value) }
     //private var popupWindow: PopupWindow? = null
+    var myId: String?
+        get() = prefs.getString("myId", "0").takeIf { it != "" }
+        set(value) = prefs.edit(true) { putString("myId", value ?: "") }
 
     private val id by lazy { arguments?.getLong("id") ?: 0L }
 
@@ -114,13 +117,15 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
                         var arrlist : ArrayList<FeedbackRequest> = ArrayList()
                         viewModel.cachedOrderPing.collectWithLifecycle(viewLifecycleOwner){
                             it.toList().forEach{ order ->
-                                arrlist.add(FeedbackRequest((order.id).toLong(), order.profile[0].status?: "",0, order.title, order.toCity+" "+order.toRegion+" "+order.toPlace, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), 0))
+                                if (order.profile.firstOrNull()?.userId==myId)
+                                    arrlist.add(FeedbackRequest((order.id.toString()+order.profile.firstOrNull()?.userId).toLong(), order.id,order.profile[0].status?: "",0, order.title, order.toCity+" "+order.toRegion+" "+order.toPlace, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), 0))
                             }
                             adapter.submitList(arrlist.toList())
                         }
                     viewModel.cachedAdvertPing.collectWithLifecycle(viewLifecycleOwner){
                         it.toList().forEach{ order ->
-                            arrlist.add(FeedbackRequest((order.id).toLong(), order.profile[0].status?: "",1, order.title, order.category, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
+                            if (order.profile.firstOrNull()?.userId==myId)
+                                arrlist.add(FeedbackRequest((order.id.toString()+order.profile.firstOrNull()?.userId).toLong(), order.id, order.profile[0].status?: "",1, order.title, order.category, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
                         }
                         adapter.submitList(arrlist.toList())
                         arrlist.clear()
@@ -130,13 +135,15 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
                     var arrlist : ArrayList<FeedbackRequest> = ArrayList()
                     viewModel.cachedAdvertFeedbackPing.collectWithLifecycle(viewLifecycleOwner){
                         it.toList().forEach{ order ->
-                            arrlist.add(FeedbackRequest((order.id).toLong(), order.ping[order.ping.keys.first()]?:"", 2, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
+                            if (order.ping.entries.firstOrNull()?.value!="REJECTED"&&order.ping.entries.firstOrNull()?.value!="DONE")
+                                arrlist.add(FeedbackRequest((order.id.toString()+order.ping.entries.firstOrNull()?.key).toLong(), order.id, order.ping.entries.firstOrNull()?.value?: "", 2, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
                         }
                         adapter.submitList(arrlist.toList())
                     }
                     viewModel.cachedOrderFeedbackPing.collectWithLifecycle(viewLifecycleOwner){
                         it.toList().forEach{ order ->
-                            arrlist.add(FeedbackRequest((order.id).toLong(), order.ping[order.ping.keys.first()]?:"",2, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
+                            if (order.ping.entries.firstOrNull()?.value!="REJECTED"&&order.ping.entries.firstOrNull()?.value!="DONE")
+                                arrlist.add(FeedbackRequest((order.id.toString()+order.ping.entries.firstOrNull()?.key).toLong(), order.id, order.ping.entries.firstOrNull()?.value?: "",2, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
                         }
                         adapter.submitList(arrlist.toList())
                         arrlist.clear()

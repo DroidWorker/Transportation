@@ -1,5 +1,7 @@
 package com.app.transportation.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -58,7 +60,7 @@ class pingInfoRequestsFragment : Fragment() {
     private fun applyObservers() {
         viewModel.cachedOrderPing.collectWithLifecycle(viewLifecycleOwner) { adverts ->
             adverts.forEach{ advert->
-                if (advert.id==id) {
+                if (advert.id.toString()+advert.profile.firstOrNull()?.userId==id.toString()) {
                     advert?.apply {
                         (activity as? MainActivity)?.apply {
                             b.title.text = advert.category
@@ -72,7 +74,7 @@ class pingInfoRequestsFragment : Fragment() {
                         b.comment3.text = advert.description
                         b.name3.text = advert.profile[0].firstName+" "+advert.profile[0].lastName
                         b.telNumber3.text = advert.profile[0].phone
-                        b.pingStatus.text = advert.profile[0].status
+                        b.pingStatus.text = getStatusName(advert.profile[0].status)
                     }
                     return@collectWithLifecycle
                 }
@@ -80,7 +82,7 @@ class pingInfoRequestsFragment : Fragment() {
         }
         viewModel.cachedAdvertPing.collectWithLifecycle(viewLifecycleOwner) { adverts ->
             adverts.forEach{ advert->
-                if (advert.id==id) {
+                if (advert.id.toString()+advert.profile.firstOrNull()?.userId==id.toString()) {
                     advert?.apply {
                         b.orderName3.text = advert.title
                         b.priceView.text=advert.price
@@ -89,7 +91,7 @@ class pingInfoRequestsFragment : Fragment() {
                         b.comment3.text = advert.description
                         b.name3.text = advert.profile[0].firstName+" "+advert.profile[0].lastName
                         b.telNumber3.text = advert.profile[0].phone
-                        b.pingStatus.text = advert.profile[0].status
+                        b.pingStatus.text = getStatusName(advert.profile[0].status)
                     }
                     return@collectWithLifecycle
                 }
@@ -101,6 +103,12 @@ class pingInfoRequestsFragment : Fragment() {
         b.cancel.setOnClickListener{
             findNavController().navigateUp()
         }
+        b.telNumber3.setOnClickListener{
+            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${b.telNumber3.text}"))
+            //if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
+            startActivity(intent)
+            //}
+        }
     }
 
     override fun onDestroyView() {
@@ -109,4 +117,15 @@ class pingInfoRequestsFragment : Fragment() {
         popupWindow = null
     }
 
+    private fun getStatusName(statusCode : String?): String{
+        if (statusCode!=null){
+            when(statusCode){
+                "SEND"->return "отправлена"
+                "REJECTED"->return "отменена"
+                "PROGRESS"->return "в работе"
+                "DONE"->return "выполнена"
+            }
+        }
+        return "не определен"
+    }
 }

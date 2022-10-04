@@ -43,6 +43,8 @@ class AdvertisementsFragment : Fragment() {
     private val orderItemShouldOpenId by lazy { arguments?.getInt("clickedItemId") ?: -1 }
     private val searchText by lazy { arguments?.getString("searchText") ?: "" }
 
+    private var defaultCity = ""
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -86,6 +88,8 @@ class AdvertisementsFragment : Fragment() {
             0 -> viewModel.getCategoryAdverts(categoryId)
             else -> viewModel.getSearchResult(searchText)
         }
+
+        viewModel.updateProfile()
 
         applyRVAdapter()
 
@@ -146,6 +150,10 @@ class AdvertisementsFragment : Fragment() {
     }
 
     private fun applyObservers() = viewLifecycleOwner.repeatOnLifecycle {
+        viewModel.profileFlow.collectWithLifecycle(viewLifecycleOwner){
+            defaultCity = it?.cityArea?.split(",")?.firstOrNull()?:""
+            filterOrders(it?.cityArea?.split(",")?.firstOrNull()?:"")
+        }
         if(type==1){
             viewModel.cachedOrdersSF.collectWithLifecycle(viewLifecycleOwner) {
                 adapter.submitList(it)
@@ -281,16 +289,11 @@ class AdvertisementsFragment : Fragment() {
             findNavController().navigate(R.id.createOrderCategorySelectorFragment, bundleOf("id" to 0, "mode" to 3))
         }
         b.city.setOnClickListener {
-            findNavController().navigate(R.id.addCityDF)
+            findNavController().navigate(R.id.addCityDF, bundleOf("city" to defaultCity))
             setFragmentResultListener("1") { key, bundle ->
                 var city = bundle.getString("city")
                 if (city!=null&&city!="") {
-                    adapter.submitList(
-                        viewModel.cachedOrdersSF.value.filter {
-                            it.fromCity.contains(city!!, true) || it.toCity.contains(city!!, true)
-                        }
-                            .toMutableList()
-                    )
+                    filterOrders(city)
                 }
             }
         }
@@ -372,6 +375,15 @@ class AdvertisementsFragment : Fragment() {
                 showAsDropDown(b.city, 1, (0.1 * b.city.height).roundToInt(), Gravity.CENTER)
             }
         }
+    }
+
+    private fun filterOrders(city: String){
+        adapter.submitList(
+            viewModel.cachedOrdersSF.value.filter {
+                it.fromCity.contains(city!!, true) || it.toCity.contains(city!!, true)
+            }
+                .toMutableList()
+        )
     }
 
     override fun onDestroyView() {

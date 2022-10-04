@@ -53,7 +53,7 @@ class FeedbacksRequestsAdapter :
 
         fun bind(item: FeedbackRequest) = with(binding) {
             root.setOnClickListener { onClick?.invoke(item.id.toInt()) }
-            delete.setOnClickListener{ if (item.viewType==0) onAdvertDeleteClick?.invoke(item.id.toInt()) else onOrderDeleteClick?.invoke(item.id.toInt())}
+            delete.setOnClickListener{ if (item.viewType==0) onAdvertDeleteClick?.invoke(item.advId.toInt()) else onOrderDeleteClick?.invoke(item.id.toInt())}
             title.text = item.title
             location.text = item.subtitle
             date.text = item.dateTime.dateToString("dd/MM/yyyy")

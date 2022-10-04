@@ -1,6 +1,8 @@
 package com.app.transportation.ui
 
+import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -34,6 +36,9 @@ class pingInfoFeedbackFragment : Fragment() {
     var myId: String?
         get() = prefs.getString("myId", "0").takeIf { it != "" }
         set(value) = prefs.edit(true) { putString("myId", value ?: "") }
+
+    var pingOwnerId : String = ""
+    var resetStatusOrderId : String = ""
 
     private var popupWindow: PopupWindow? = null
 
@@ -72,22 +77,34 @@ class pingInfoFeedbackFragment : Fragment() {
     private fun applyObservers() {
         viewModel.cachedAdvertFeedbackPing.collectWithLifecycle(viewLifecycleOwner) { adverts ->
             adverts.forEach{ advert->
-                if (advert.id==id) {
+                if (advert.id.toString()+advert.ping.entries.firstOrNull()?.key==id.toString()) {
                     isAdvert = true
+                    resetStatusOrderId = advert.id.toString()
+                    pingOwnerId = advert.ping.entries.firstOrNull()?.key ?: ""
                     advert.ping.entries.firstOrNull()?.let { viewModel.getProfile(it.key) }
+                    viewModel.getAllCategoryAdverts(advert.categoryId)
                     advert.apply {
                         b.orderName3.text = advert.title
                         b.priceView.text = advert.price
                         b.date3.text = advert.date
                         b.time3.text = advert.time
                         b.comment3.text = advert.description
-                        b.name3.text = ". . ."
-                        b.telNumber3.text = ". . ."
+                        b.name3.text = ". . ."//advert.profile.firstOrNull()?.firstName+" "+advert.profile.firstOrNull()?.lastName
+                        b.telNumber3.text = ". . ."//advert.profile.firstOrNull()?.phone
                         viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
                             b.name3.text = it.firstName+" "+it.lastName
                             b.telNumber3.text = it.phone
                         }
-                        b.pingStatus.text = getStatusName(advert.ping[advert.ping.keys.first()])
+                        b.pingStatus.text = getStatusName(advert.ping.entries.firstOrNull()?.value)
+                        if (b.pingStatus.text=="в работе"){
+                            b.accept.visibility = View.GONE
+                            b.done.visibility = View.VISIBLE
+                        }
+                        else if(b.pingStatus.text=="выполнена"||b.pingStatus.text=="отменена"){
+                            b.accept.visibility = View.GONE
+                            b.done.visibility = View.GONE
+                            b.delete.visibility=View.VISIBLE
+                        }
                     }
                     return@collectWithLifecycle
                 }
@@ -95,8 +112,11 @@ class pingInfoFeedbackFragment : Fragment() {
         }
         viewModel.cachedOrderFeedbackPing.collectWithLifecycle(viewLifecycleOwner) { adverts ->
             adverts.forEach{ advert->
-                if (advert.id==id) {
+                if (advert.id.toString()+advert.ping.entries.firstOrNull()?.key==id.toString()) {
+                    resetStatusOrderId = advert.id.toString()
+                    pingOwnerId = advert.ping.entries.firstOrNull()?.key ?: ""
                     advert.ping.entries.firstOrNull()?.let { viewModel.getProfile(it.key) }
+                    viewModel.getAllCategoryAdverts(advert.categoryId)
                     advert.apply {
                         b.orderName3.text = advert.title
                         if (advert.fromCity==""&&advert.fromPlace==""&&advert.fromRegion=="") {
@@ -109,16 +129,28 @@ class pingInfoFeedbackFragment : Fragment() {
                         b.date3.text = advert.date
                         b.time3.text = advert.time
                         b.comment3.text = advert.description
-                        b.name3.text = ". . ."
-                        b.telNumber3.text = ". . ."
+                        b.name3.text = ". . ."//advert.profile.firstOrNull()?.firstName+" "+advert.profile.firstOrNull()?.lastName
+                        b.telNumber3.text = ". . ."//advert.profile.firstOrNull()?.phone
                         if (advert.price=="0") b.priceView.visibility=View.INVISIBLE
                         viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
                             b.name3.text = it.firstName+" "+it.lastName
                             b.telNumber3.text = it.phone
                         }
-                        b.pingStatus.text = getStatusName(advert.ping[advert.ping.keys.first()])
+                        b.pingStatus.text = getStatusName(advert.ping.entries.firstOrNull()?.value)
+                        if (b.pingStatus.text=="в работе"){
+                            b.accept.visibility = View.GONE
+                            b.done.visibility = View.VISIBLE
+                        }
                     }
                     return@collectWithLifecycle
+                }
+            }
+        }
+        viewModel.cachedAdvertsSF.collectWithLifecycle(viewLifecycleOwner){
+            it.forEach{advert->
+                if (advert.userId==pingOwnerId){
+                    b.comment3.text = b.comment3.text.toString() + ":\n" + advert.description
+                    return@forEach
                 }
             }
         }
@@ -127,27 +159,32 @@ class pingInfoFeedbackFragment : Fragment() {
     private fun applyListeners() {
         b.cancel.setOnClickListener{
             if (isAdvert)
-                viewModel.setPingStatus( myId!!, null, id.toString(), "REJECTED")
+                viewModel.setPingStatus( pingOwnerId, null, resetStatusOrderId, "REJECTED")
             else
-                viewModel.setPingStatus( myId!!, id.toString(), null, "REJECTED")
+                viewModel.setPingStatus( pingOwnerId, resetStatusOrderId, null, "REJECTED")
             findNavController().navigateUp()
         }
         b.accept.setOnClickListener{
             b.pingStatus.text = "в работе"
             if (isAdvert)
-                viewModel.setPingStatus( myId!!, null, id.toString(), "PROGRESS")
+                viewModel.setPingStatus( pingOwnerId, null, resetStatusOrderId, "PROGRESS")
             else
-                viewModel.setPingStatus( myId!!, id.toString(), null, "PROGRESS")
+                viewModel.setPingStatus( pingOwnerId, resetStatusOrderId, null, "PROGRESS")
             b.accept.visibility = View.GONE
-            b.cancel.visibility = View.GONE
             b.done.visibility = View.VISIBLE
         }
         b.done.setOnClickListener{
             if (isAdvert)
-                viewModel.setPingStatus( myId!!, null, id.toString(), "DONE")
+                viewModel.setPingStatus( pingOwnerId, null, resetStatusOrderId, "DONE")
             else
-                viewModel.setPingStatus( myId!!, id.toString(), null, "DONE")
+                viewModel.setPingStatus( pingOwnerId, resetStatusOrderId, null, "DONE")
             findNavController().navigateUp()
+        }
+        b.telNumber3.setOnClickListener{
+            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${b.telNumber3.text}"))
+            //if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
+            startActivity(intent)
+            //}
         }
     }
 

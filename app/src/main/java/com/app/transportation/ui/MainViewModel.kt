@@ -162,6 +162,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         updateFilterThirdLevelCategories(categoryId)
     }
 
+    fun getAdvertsInCategory(categoryId: Int) = viewModelScope.launch (Dispatchers.IO){
+        updateAdverts(true, categoryId)
+    }
+
     fun getMyOrders() = viewModelScope.launch (Dispatchers.IO){
         updateOrders(true, 0)
     }

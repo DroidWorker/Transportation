@@ -18,6 +18,8 @@ class AddCityDF : DialogFragment() {
     private var binding: FragmentAddCityDialogBinding? = null
     private val b get() = binding!!
 
+    private val defaultCity by lazy { arguments?.getString("city") ?: "" }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,6 +33,8 @@ class AddCityDF : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         requireDialog().window?.setLayout(MATCH_PARENT, WRAP_CONTENT)
+
+        b.city.setText(defaultCity)
 
         b.specifyWeight.setOnClickListener{
             setFragmentResult("1", bundleOf("city" to b.city.text.toString()))
