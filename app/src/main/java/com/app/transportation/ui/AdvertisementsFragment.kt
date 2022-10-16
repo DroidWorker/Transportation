@@ -150,13 +150,13 @@ class AdvertisementsFragment : Fragment() {
     }
 
     private fun applyObservers() = viewLifecycleOwner.repeatOnLifecycle {
-        viewModel.profileFlow.collectWithLifecycle(viewLifecycleOwner){
-            defaultCity = it?.cityArea?.split(",")?.firstOrNull()?:""
-            filterOrders(it?.cityArea?.split(",")?.firstOrNull()?:"")
-        }
         if(type==1){
             viewModel.cachedOrdersSF.collectWithLifecycle(viewLifecycleOwner) {
                 adapter.submitList(it)
+                viewModel.profileFlow.collectWithLifecycle(viewLifecycleOwner){ p->
+                    defaultCity = p?.cityArea?.split(",")?.firstOrNull()?:""
+                    filterOrders(defaultCity)
+                }
                 if (it.isEmpty()) {
                     var filler: ArrayList<Advert> = ArrayList()
                     filler.add(
@@ -292,7 +292,8 @@ class AdvertisementsFragment : Fragment() {
             findNavController().navigate(R.id.addCityDF, bundleOf("city" to defaultCity))
             setFragmentResultListener("1") { key, bundle ->
                 var city = bundle.getString("city")
-                if (city!=null&&city!="") {
+                if (city!=null) {
+                    defaultCity = city
                     filterOrders(city)
                 }
             }
@@ -378,9 +379,10 @@ class AdvertisementsFragment : Fragment() {
     }
 
     private fun filterOrders(city: String){
+        println("aaaaaaaa"+city)
         adapter.submitList(
             viewModel.cachedOrdersSF.value.filter {
-                it.fromCity.contains(city!!, true) || it.toCity.contains(city!!, true)
+                it.fromCity.contains(city!!, true) || it.toCity.contains(city!!, true) || city == ""
             }
                 .toMutableList()
         )

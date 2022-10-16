@@ -84,6 +84,9 @@ class pingInfoFeedbackFragment : Fragment() {
                     advert.ping.entries.firstOrNull()?.let { viewModel.getProfile(it.key) }
                     viewModel.getAllCategoryAdverts(advert.categoryId)
                     advert.apply {
+                        (activity as? MainActivity)?.apply {
+                            b.title.text = advert.category
+                        }
                         b.orderName3.text = advert.title
                         b.priceView.text = advert.price
                         b.date3.text = advert.date
@@ -92,7 +95,7 @@ class pingInfoFeedbackFragment : Fragment() {
                         b.name3.text = ". . ."//advert.profile.firstOrNull()?.firstName+" "+advert.profile.firstOrNull()?.lastName
                         b.telNumber3.text = ". . ."//advert.profile.firstOrNull()?.phone
                         viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
-                            b.name3.text = it.firstName+" "+it.lastName
+                            b.name3.text = it.firstName//+" "+it.lastName
                             b.telNumber3.text = it.phone
                         }
                         b.pingStatus.text = getStatusName(advert.ping.entries.firstOrNull()?.value)
@@ -118,6 +121,9 @@ class pingInfoFeedbackFragment : Fragment() {
                     advert.ping.entries.firstOrNull()?.let { viewModel.getProfile(it.key) }
                     viewModel.getAllCategoryAdverts(advert.categoryId)
                     advert.apply {
+                        (activity as? MainActivity)?.apply {
+                            b.title.text = advert.category
+                        }
                         b.orderName3.text = advert.title
                         if (advert.fromCity==""&&advert.fromPlace==""&&advert.fromRegion=="") {
                             b.fromLocation3.visibility = View.GONE
@@ -133,7 +139,7 @@ class pingInfoFeedbackFragment : Fragment() {
                         b.telNumber3.text = ". . ."//advert.profile.firstOrNull()?.phone
                         if (advert.price=="0") b.priceView.visibility=View.INVISIBLE
                         viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
-                            b.name3.text = it.firstName+" "+it.lastName
+                            b.name3.text = it.firstName//+" "+it.lastName
                             b.telNumber3.text = it.phone
                         }
                         b.pingStatus.text = getStatusName(advert.ping.entries.firstOrNull()?.value)

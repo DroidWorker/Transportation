@@ -236,7 +236,7 @@
                 android:clickable="false"
                 android:fontFamily="@font/montserrat"
                 android:paddingTop="12dp"
-                android:text="активировать бизнесс аккаунт (В разработке)"
+                android:text="активировать бизнесс аккаунт"
                 android:textColor="@color/button_text_color"
                 app:backgroundTint="@color/primary_color"
                 app:cornerRadius="10dp"

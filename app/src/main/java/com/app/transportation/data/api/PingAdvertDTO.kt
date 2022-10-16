@@ -6,6 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PingAdvertDTO(
     val id: String,
+    @SerialName("user_id")val user_id: String,
     @SerialName("advert_id")val advert_id: String,
     val date: String,
     val time: String,

@@ -2,6 +2,7 @@ package com.app.transportation.ui
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
@@ -29,6 +30,9 @@ import com.app.transportation.ui.adapters.ProfileAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.redmadrobot.inputmask.MaskedTextChangedListener
+import org.koin.android.ext.android.inject
+import org.koin.core.component.inject
+import org.koin.core.qualifier.named
 import java.io.ByteArrayOutputStream
 import java.io.File
 
@@ -51,6 +55,12 @@ class ProfileFragment : Fragment() {
     lateinit var ctx : Context
 
     private val id by lazy { arguments?.getLong("id") ?: 0L }
+
+    private val prefs: SharedPreferences by inject(named("MainSettings"))
+
+    private val userId : String? = prefs.getString("myId", null).takeIf { it != "" }
+
+    private var userEmail = "";
 
     var basePhone : String? =  ""
 
@@ -130,8 +140,14 @@ class ProfileFragment : Fragment() {
     private fun applyObservers() = viewLifecycleOwner.repeatOnLifecycle {
         viewModel.profileFlow.collect(this) { profile ->
             profile?.apply {
+                userEmail = email
                 b.name.text = name
                 b.login.text = login
+                println("buuuuuuu"+bussiness)
+                if (profile.bussiness=="ACTIVE"){
+                    b.payment.isClickable = false
+                    b.payment.text = "Бизнес аккаунт:\nтариф универсал"
+                }
 
                 b.nameET.setText(name)
                 if (telNumber.contains("0000000")) {
@@ -274,8 +290,13 @@ class ProfileFragment : Fragment() {
         }
 
         b.payment.setOnClickListener{
+            if (userEmail.isEmpty() || userId?.toInt()==0)
+                return@setOnClickListener
             val intent = Intent(activity, PaymentActivity::class.java)
-            intent.putExtra("summ", 350)
+            intent.putExtra("summ", 35000)
+            intent.putExtra("mode", 1)
+            intent.putExtra("id", userId?.toInt())
+            intent.putExtra("email", userEmail)
             startActivity(intent)
         }
     }

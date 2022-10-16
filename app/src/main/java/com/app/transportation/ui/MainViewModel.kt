@@ -93,6 +93,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     val deletedAdvertPosition = MutableSharedFlow<Int>(extraBufferCapacity = 1)
 
+    public var lastAdvertAdded = 0
+
     var dateTime = ""
 
     init {
@@ -265,6 +267,17 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     getOrdersPing()
                 }
                 else -> messageEvent.tryEmit("Ошибка при удалении!"+s+"|||"+id)
+            }
+        }
+
+    fun setBusinessStatus(id: String, status: String) =
+        viewModelScope.launch(Dispatchers.IO) {
+            when (repository.setBusiness(id, status).message) {
+                "Success" -> {
+                    messageEvent.tryEmit("Бизнес статус активен!")
+                    getAdvertsPing()
+                }
+                else -> messageEvent.tryEmit("Ошибка! Потеряно соединение")
             }
         }
 
@@ -476,6 +489,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     }
                     Advert(
                         id = entry.value.order_id.toInt(),//entry.key.toInt(),
+                        userId = entry.value.user_id,
                         viewType = 1,
                         categoryId = advertCategoriesFlow.value.find {
                             it.id == entry.value.categoryId.toInt()
@@ -530,6 +544,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     }
                     Advert(
                         id = entry.value.advert_id.toInt(),//entry.key.toInt(),
+                        userId = entry.value.user_id,
                         viewType = 0,
                         categoryId = advertCategoriesFlow.value.find {
                             it.id == entry.value.categoryId.toInt()
@@ -1235,6 +1250,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         when (val result = repository.createAdvert(ctx, title, price, description, categoryId, photos, options)) {
             is AdvertCreateResponse.Success -> {
                 if (result.id != null)
+                    lastAdvertAdded = result.id
                     messageEvent.tryEmit("Объявление добавлено!")
             }
             is AdvertCreateResponse.Failure -> {

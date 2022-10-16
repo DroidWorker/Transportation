@@ -2,6 +2,7 @@ package com.app.transportation.ui.create_order_fragments
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
@@ -31,6 +32,8 @@ import com.app.transportation.core.*
 import com.app.transportation.databinding.FragmentCreatingAdvertisementBinding
 import com.app.transportation.ui.MainViewModel
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.koin.android.ext.android.inject
+import org.koin.core.qualifier.named
 import java.io.ByteArrayOutputStream
 import java.io.File
 
@@ -43,6 +46,12 @@ class CreatingAdvertisementFragment : Fragment() {
     private val viewModel by activityViewModels<MainViewModel>()
 
     private var ctx : Context? = null
+
+    private val prefs: SharedPreferences by inject(named("MainSettings"))
+
+    private val userId : String? = prefs.getString("myId", null).takeIf { it != "" }
+
+    private var userEmail = "";
 
     private val categoryId by lazy { arguments?.getInt("id", 1) ?: 1 }
     private val mode by lazy { arguments?.getInt("mode", 1) ?: 0 }//if mode 1 category has 4level item show spinner
@@ -191,8 +200,18 @@ class CreatingAdvertisementFragment : Fragment() {
                     optionList.add("3")
                     summ+=50
                 }
+                //payment realisation
+                if (summ>0) {
+
+                    val payIntent = Intent(activity, PaymentActivity::class.java)
+                    payIntent.putExtra("summ", summ);
+                    payIntent.putExtra("mode", 2)
+                    payIntent.putExtra("id", userId?.toInt())
+                    payIntent.putExtra("email", userEmail)
+                    startActivity(payIntent)
+                }
                 viewModel.createAdvert(
-                    ctx=context,
+                    ctx = context,
                     title = b.advertTitle.text.toString(),
                     price = b.price.text.toString(),
                     description = b.description.text.toString(),
@@ -203,12 +222,6 @@ class CreatingAdvertisementFragment : Fragment() {
                     photos = photos,
                     options = optionList.toList()
                 )
-                //payment realisation
-                /*if (summ>0) {
-                    val payIntent = Intent(activity, PaymentActivity::class.java)
-                    payIntent.putExtra("summ", summ);
-                    startActivity(payIntent)
-                }*/
                 findNavController().navigateUp()
             }
             else{
@@ -305,6 +318,10 @@ class CreatingAdvertisementFragment : Fragment() {
     }
 
     private fun applyCollectors() = viewLifecycleOwner.repeatOnLifecycle {
+        viewModel.profileFlow.collect(this) { profile ->
+            userEmail = if(profile!=null)  profile!!.email else ""
+        }
+
         viewModel.cafTempPhotoUris.collect(this) {
             it.second.getOrNull(it.first)?.let { uri ->
                 b.photo.scaleType = ImageView.ScaleType.FIT_XY

@@ -121,7 +121,11 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, AlarmReceiver::class.java)
 
-        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+        pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_MUTABLE)
+        } else {
+            PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+        }
 
         alarmManager.cancel(pendingIntent)
     }
@@ -131,7 +135,11 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, AlarmReceiver::class.java)
 
-        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
+        pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE)
+        } else {
+            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+        }
 
         alarmManager.setInexactRepeating(
             AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 60000, pendingIntent

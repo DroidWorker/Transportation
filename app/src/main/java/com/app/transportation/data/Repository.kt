@@ -60,6 +60,25 @@ class Repository(private val dao: MainDao) : KoinComponent {
             }
     }
 
+    suspend fun setBusiness(id: String, stsus: String): InfoMessageResponse = kotlin.runCatching {
+        if (authToken == null) logout()
+        val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/bussiness",
+                formParameters = Parameters.build {
+                    append("id", id)
+                    append("bussiness", stsus)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        json.decodeFromString(responseBody)
+    }.getOrElse { InfoMessageResponse(it.stackTraceToString()) }
+
     suspend fun editProfile(
         name: String = "",
         telNumber: String = "",
@@ -101,6 +120,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                     val oldProfile = profile()
                     myId=id
                     val profile = Profile(
+                        id = 0,//id.toLong(),
                         login = oldProfile?.login ?: "",
                         name = firstName,
                         telNumber = phone.takeIf { it.isNotBlank() } ?: oldProfile?.telNumber ?: "",
@@ -108,7 +128,8 @@ class Repository(private val dao: MainDao) : KoinComponent {
                         paymentCard = card,
                         cityArea = location,
                         specialization = status,
-                        avatar = avatar
+                        avatar = avatar,
+                        bussiness = bussiness
                     )
                     dao.insert(profile)
                     println("profileResponse = $this")
@@ -286,7 +307,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it fav alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, PingAdvertDTO> = mutableMapOf("empty" to PingAdvertDTO("","","","","","","", "", "", emptyMap(), emptyList()))
+                var emty : Map<String, PingAdvertDTO> = mutableMapOf("empty" to PingAdvertDTO("","","","","","","","", "", "", emptyMap(), emptyList()))
                 AdvertPingResponse.Success(emty)
             }
             json.decodeFromString<AdvertPingResponse.Failure>(responseBody)
@@ -312,7 +333,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it ping alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, PingOrderDTO> = mutableMapOf("empty" to PingOrderDTO("","","","","","","", "","","","","","","","","", "", "",emptyMap(), emptyList()))
+                var emty : Map<String, PingOrderDTO> = mutableMapOf("empty" to PingOrderDTO("","","","","","","","", "","","","","","","","","", "", "",emptyMap(), emptyList()))
                 OrderPingResponse.Success(emty)
             }
             else {

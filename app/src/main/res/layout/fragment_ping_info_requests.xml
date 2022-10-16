@@ -107,7 +107,6 @@
 
     <TextView
         android:id="@+id/date3"
-        tools:text="01/12/2022"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
@@ -117,14 +116,12 @@
         android:textColor="@color/secondary_color"
         android:textSize="15sp"
         app:drawableStartCompat="@drawable/ic_calendar"
-        app:layout_constraintEnd_toStartOf="@+id/time3"
-        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toLocation3" />
+        app:layout_constraintTop_toBottomOf="@+id/toLocation3"
+        tools:text="01/12/2022" />
 
     <TextView
         android:id="@+id/time3"
-        tools:text="12:30"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
@@ -135,8 +132,9 @@
         android:textSize="15sp"
         app:drawableStartCompat="@drawable/ic_time_18"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toLocation3" />
+        app:layout_constraintStart_toEndOf="@+id/date3"
+        app:layout_constraintTop_toBottomOf="@+id/toLocation3"
+        tools:text="12:30" />
 
     <TextView
         android:id="@+id/comment3"

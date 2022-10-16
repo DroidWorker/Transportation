@@ -61,6 +61,7 @@ class pingInfoRequestsFragment : Fragment() {
         viewModel.cachedOrderPing.collectWithLifecycle(viewLifecycleOwner) { adverts ->
             adverts.forEach{ advert->
                 if (advert.id.toString()+advert.profile.firstOrNull()?.userId==id.toString()) {
+                    viewModel.getProfile(advert.userId)
                     advert?.apply {
                         (activity as? MainActivity)?.apply {
                             b.title.text = advert.category
@@ -72,8 +73,12 @@ class pingInfoRequestsFragment : Fragment() {
                         b.date3.text = advert.date
                         b.time3.text = advert.time
                         b.comment3.text = advert.description
-                        b.name3.text = advert.profile[0].firstName+" "+advert.profile[0].lastName
-                        b.telNumber3.text = advert.profile[0].phone
+                        /*b.name3.text = advert.profile[0].firstName
+                        b.telNumber3.text = advert.profile[0].phone*/
+                        viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
+                            b.name3.text = it.firstName//+" "+it.lastName
+                            b.telNumber3.text = it.phone
+                        }
                         b.pingStatus.text = getStatusName(advert.profile[0].status)
                     }
                     return@collectWithLifecycle
@@ -83,14 +88,22 @@ class pingInfoRequestsFragment : Fragment() {
         viewModel.cachedAdvertPing.collectWithLifecycle(viewLifecycleOwner) { adverts ->
             adverts.forEach{ advert->
                 if (advert.id.toString()+advert.profile.firstOrNull()?.userId==id.toString()) {
+                    viewModel.getProfile(advert.userId)
                     advert?.apply {
+                        (activity as? MainActivity)?.apply {
+                            b.title.text = advert.category
+                        }
                         b.orderName3.text = advert.title
                         b.priceView.text=advert.price
                         b.date3.text = advert.date
                         b.time3.text = advert.time
                         b.comment3.text = advert.description
-                        b.name3.text = advert.profile[0].firstName+" "+advert.profile[0].lastName
-                        b.telNumber3.text = advert.profile[0].phone
+                        /*b.name3.text = advert.profile[0].firstName+" "+advert.profile[0].lastName
+                        b.telNumber3.text = advert.profile[0].phone*/
+                        viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
+                            b.name3.text = it.firstName//+" "+it.lastName
+                            b.telNumber3.text = it.phone
+                        }
                         b.pingStatus.text = getStatusName(advert.profile[0].status)
                     }
                     return@collectWithLifecycle

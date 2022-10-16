@@ -14,5 +14,5 @@ data class Profile(
     var cityArea: String = "",
     var specialization: String = "",
     var avatar: String = "",
-    var bussiness: String = "NO_ACTIVE"
+    var bussiness: String = ""
 )
