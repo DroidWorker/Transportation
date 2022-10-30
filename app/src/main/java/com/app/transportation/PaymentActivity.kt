@@ -12,6 +12,7 @@ import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.ui.MainViewModel
 import com.google.android.material.snackbar.Snackbar
 import org.koin.android.ext.android.inject
@@ -45,6 +46,7 @@ class PaymentActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<MainViewModel>()
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_payment)
@@ -63,8 +65,8 @@ class PaymentActivity : AppCompatActivity() {
 
         descriptionTV = findViewById(R.id.textView4)
         when(paymentMode){
-            1->descriptionTV.text = "покупка бизнес аккаунта\n тариф универсал"
-            2->descriptionTV.text = "активация платных опций"
+            1->descriptionTV.text = getString(R.string.descr_business_universal)
+            2->descriptionTV.text = getString(R.string.option_photo)+"\n"+getString(R.string.option_color)+"\n"+getString(R.string.option_notification)
         }
 
         //AcquiringSdk.isDeveloperMode = true
@@ -116,7 +118,8 @@ class PaymentActivity : AppCompatActivity() {
                         findViewById<TextView>(R.id.descriptionTV).text = "оплата прошла успешно\nзапрос на активацию бизнес сатуса отправлен"
                     }
                     2 ->{
-                        //viewModel.updateOptions(viewModel.lastAdvertAdded) - activate all options for this advert
+                        println("asdaasda"+viewModel.lastAdvertAdded)
+                        viewModel.setOptionStatus(viewModel.lastAdvertAdded.toString(), "ON")
                         findViewById<Button>(R.id.readyButton).text = "готово"
                         findViewById<Button>(R.id.readyButton).setOnClickListener{
                             this.finish()

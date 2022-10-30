@@ -92,6 +92,7 @@ class CreatingAdvertisementFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         b.name.text = viewModel.profileFlow.value?.name
+        b.location.text = viewModel.profileFlow.value?.cityArea
         b.telNumber.text = viewModel.profileFlow.value?.telNumber
         if (isEdit==1) {
             b.addAdvert.text = "Применить"
@@ -190,19 +191,18 @@ class CreatingAdvertisementFragment : Fragment() {
                 var summ: Int = 0
                 if (b.photoInShowcaseCB.isChecked) {
                     optionList.add("1")
-                    summ+=50
+                    summ+=5000
                 }
                 if (b.colorHighlightingCB.isChecked) {
                     optionList.add("2")
-                    summ+=30
+                    summ+=3000
                 }
                 if (b.newOrderNotificationCB.isChecked) {
                     optionList.add("3")
-                    summ+=50
+                    summ+=5000
                 }
                 //payment realisation
                 if (summ>0) {
-
                     val payIntent = Intent(activity, PaymentActivity::class.java)
                     payIntent.putExtra("summ", summ);
                     payIntent.putExtra("mode", 2)

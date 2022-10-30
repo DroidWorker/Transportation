@@ -45,6 +45,14 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         get() = prefs.getString("authToken", null)
         set(value) = prefs.edit { putString("authToken", value) }
 
+    var lastAdvertAdded: Int?
+        get() = prefs.getInt("lastAdvertAdded", 1)
+        set(value) = prefs.edit {
+            if (value != null) {
+                putInt("lastAdvertAdded", value)
+            }
+        }
+
 
     val messageEvent = MutableSharedFlow<String>(extraBufferCapacity = 1)
 
@@ -78,7 +86,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     val cachedBussinessLast = MutableStateFlow(emptyList<BusinessLastItemDTO>())
 
     val cachedProfile = MutableStateFlow(ProfileShort())
-    val cachedNotifications = MutableStateFlow(emptyList<NoticeDTO>())
+    val cachedNotifications = MutableStateFlow(emptyMap<String, NoticeDTO>())
 
     val cachedAdvert = MutableStateFlow<Advert?>(null)
     val cachedOrder = MutableStateFlow<Advert?>(null)
@@ -92,8 +100,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     )
 
     val deletedAdvertPosition = MutableSharedFlow<Int>(extraBufferCapacity = 1)
-
-    public var lastAdvertAdded = 0
 
     var dateTime = ""
 
@@ -275,6 +281,17 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             when (repository.setBusiness(id, status).message) {
                 "Success" -> {
                     messageEvent.tryEmit("Бизнес статус активен!")
+                    getAdvertsPing()
+                }
+                else -> messageEvent.tryEmit("Ошибка! Потеряно соединение")
+            }
+        }
+
+    fun setOptionStatus(advertId: String, status: String) =
+        viewModelScope.launch(Dispatchers.IO) {
+            when (repository.setOptionStatus(advertId, status).message) {
+                "Success" -> {
+                    messageEvent.tryEmit("Платные функции активированы!")
                     getAdvertsPing()
                 }
                 else -> messageEvent.tryEmit("Ошибка! Потеряно соединение")
@@ -1111,6 +1128,15 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             response.notice
         }
     }
+    fun deleteNotification(id: String) =
+        viewModelScope.launch(Dispatchers.IO) {
+            when (repository.deleteNotice(id).message) {
+                "Success" -> {
+                    getNotification()
+                }
+                else -> messageEvent.tryEmit("Ошибка при удалении оповещения!")
+            }
+        }
 
     fun getNotice() = viewModelScope.launch(Dispatchers.IO) {
         getNotification()
@@ -1250,7 +1276,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         when (val result = repository.createAdvert(ctx, title, price, description, categoryId, photos, options)) {
             is AdvertCreateResponse.Success -> {
                 if (result.id != null)
-                    lastAdvertAdded = result.id
+                    lastAdvertAdded=result.id
                     messageEvent.tryEmit("Объявление добавлено!")
             }
             is AdvertCreateResponse.Failure -> {

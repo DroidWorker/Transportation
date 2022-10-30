@@ -1,7 +1,9 @@
 package com.app.transportation.ui
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.widget.Toast
+import androidx.core.content.edit
 import androidx.lifecycle.viewModelScope
 import com.app.transportation.data.NotificationRepository
 import com.app.transportation.data.api.NoticeResponce
@@ -14,6 +16,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import org.koin.core.component.inject
+import org.koin.core.qualifier.named
+import org.koin.java.KoinJavaComponent.inject
 import java.util.stream.Collectors.toList
 
 class NotificationViewModel(ctx : Context) {
@@ -23,21 +28,30 @@ class NotificationViewModel(ctx : Context) {
     val cachedNotifications = MutableStateFlow(emptyList<Notification>())
     val cachedOrder = MutableStateFlow(emptyList<OrderDTO>())
 
+    private val prefs =  ctx.getSharedPreferences("MainSettings",Context.MODE_PRIVATE)
+
+    private var lastNotificationID: String?
+        get() = prefs.getString("lastNotificationID", "0")
+        set(value) = prefs.edit { putString("lastNotificationID", value) }
+
     private suspend fun getNotification(){
-        val answer = repository.getNotice()
-        if(answer is NoticeResponce.Success) {
-            if (answer.notice[0].type!="empty"){
+        val answ = repository.getNotice()
+        (answ as? NoticeResponce.Success)?.let {answer->
+            if (answer.notice.entries.firstOrNull()?.value?.type!="empty"){
                 var list : ArrayList<Notification> = ArrayList()
                 answer.notice.forEach{
-                    var description : String = it.dataId
-                    val title = when(it.type){
-                        "ORDER"-> {
-                            description = ""
-                            "новая заявка на ваше объявление"
+                    if (it.key.toInt()>lastNotificationID!!.toInt()) {
+                        var description: String = it.value.dataId
+                        val title = when (it.value.type) {
+                            "ORDER" -> {
+                                description = "пользователь ${it.value.userId} оставил заявку"
+                                "новая заявка на ваше объявление"
+                            }
+                            else -> "новое уведомление"
                         }
-                        else -> "новое уведомление"
+                        lastNotificationID = it.key
+                        list.add(Notification(it.key.toLong(), title, description, false))
                     }
-                    list.add(Notification(it.userId.toLong(), title, description, false))
                 }
                 cachedNotifications.tryEmit(list.toList())
             }
@@ -46,9 +60,6 @@ class NotificationViewModel(ctx : Context) {
             }
             //cachedNotifications.tryEmit(response.notice)
             //response.notice
-        }
-        else{
-            println("nooooooo$answer")
         }
     }
 

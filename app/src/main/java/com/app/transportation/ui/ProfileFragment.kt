@@ -143,7 +143,6 @@ class ProfileFragment : Fragment() {
                 userEmail = email
                 b.name.text = name
                 b.login.text = login
-                println("buuuuuuu"+bussiness)
                 if (profile.bussiness=="ACTIVE"){
                     b.payment.isClickable = false
                     b.payment.text = "Бизнес аккаунт:\nтариф универсал"

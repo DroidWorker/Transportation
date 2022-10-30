@@ -51,8 +51,11 @@ class TermsFragment : Fragment() {
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
 
-        println("getStatic")
-        viewModel.getStaticData("privacy_policy")
+        when (title){
+            "руковдство пользователя"-> viewModel.getStaticData("user_manual")
+            "условия использования"-> viewModel.getStaticData("terms_of_use")
+            "политика конфиденциальности"-> viewModel.getStaticData("privacy_policy")
+        }
 
         bview = view
         super.onViewCreated(view, savedInstanceState)
@@ -67,6 +70,7 @@ class TermsFragment : Fragment() {
     private fun applyObservers() = viewLifecycleOwner.repeatOnLifecycle {
         viewModel.cachedStatic.collectWithLifecycle(viewLifecycleOwner){
             b.termsText.text = it
+            b.WVText.loadData(it, "text/html", "en_US");
         }
     }
 

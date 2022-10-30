@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 sealed class NoticeResponce {
     @Serializable
     data class Success(
-        val notice: List<NoticeDTO>
+        val notice: Map<String, NoticeDTO>
     ) : NoticeResponce()
 
     @Serializable

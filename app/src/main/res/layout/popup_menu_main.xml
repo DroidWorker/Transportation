@@ -7,6 +7,40 @@
     android:padding="20dp">
 
     <View
+        android:id="@+id/guidelineLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintBottom_toBottomOf="@+id/guidelineText"
+        app:layout_constraintEnd_toEndOf="@+id/guidelineText"
+        app:layout_constraintStart_toStartOf="@+id/guidelineIcon"
+        app:layout_constraintTop_toTopOf="@+id/guidelineText" />
+
+    <ImageView
+        android:id="@+id/guidelineIcon"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_guideline_24"
+        app:layout_constraintEnd_toStartOf="@+id/guidelineText"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/guidelineText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/montserrat"
+        android:gravity="end"
+        android:text="Руководство пользователя"
+        android:textColor="@color/secondary_color"
+        app:layout_constraintBottom_toBottomOf="@+id/guidelineIcon"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/guidelineIcon"
+        app:layout_constraintTop_toTopOf="@+id/guidelineIcon"
+        app:layout_constraintWidth_percent="0.8" />
+
+    <View
         android:id="@+id/feedbackLayout"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -20,11 +54,12 @@
         android:id="@+id/feedbackIcon"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:src="@drawable/ic_baseline_feedback_24"
         app:layout_constraintEnd_toStartOf="@+id/feedbackText"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/guidelineLayout" />
 
     <TextView
         android:id="@+id/feedbackText"

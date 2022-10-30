@@ -24,9 +24,12 @@ import androidx.appcompat.app.AppCompatDelegate.*
 import androidx.core.app.ActivityCompat.*
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.app.transportation.core.AlarmReceiver
 import com.app.transportation.core.collectWithLifecycle
@@ -135,14 +138,10 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
         val intent = Intent(this, AlarmReceiver::class.java)
 
-        pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE)
-        } else {
-            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
-        }
+        pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
 
         alarmManager.setInexactRepeating(
-            AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 60000, pendingIntent
+            AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000, pendingIntent
         )
     }
 
@@ -242,6 +241,12 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
                 setBackgroundDrawable(
                     ContextCompat.getDrawable(this@MainActivity, R.drawable.menu_background))
+
+                menuB.guidelineLayout.setOnClickListener{
+                    navController.navigate(R.id.termsFragment,
+                        bundleOf("title" to "руковдство пользователя")
+                    )
+                }
 
                 menuB.feedbackLayout.setOnClickListener{
                     val email = Intent(Intent.ACTION_SENDTO)

@@ -34,11 +34,11 @@ class NotificationRepository (ctx : Context){
         val json = Json.Default
 
         kotlin.runCatching {
-            val map = json.decodeFromString<List<NoticeDTO>>(responseBody)
+            val map = json.decodeFromString<Map<String, NoticeDTO>>(responseBody)
             NoticeResponce.Success(map)
         }.getOrElse {
             if (responseBody.contains("message\":\"Empty")){
-                return@getOrElse NoticeResponce.Success(listOf(NoticeDTO("0","empty", "empty", "0")))
+                return@getOrElse NoticeResponce.Success(mapOf("0" to NoticeDTO("0","empty", "empty", "0")))
             }
             println("notice = $it")
             json.decodeFromString<NoticeResponce.Failure>(responseBody)

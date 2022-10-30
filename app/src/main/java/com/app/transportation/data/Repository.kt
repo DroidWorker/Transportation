@@ -24,8 +24,6 @@ import kotlinx.serialization.json.Json
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
-import java.text.SimpleDateFormat
-import java.util.*
 
 class Repository(private val dao: MainDao) : KoinComponent {
 
@@ -75,6 +73,27 @@ class Repository(private val dao: MainDao) : KoinComponent {
             }
         val responseBody: String = response.receive()
         val json = Json.Default
+
+        json.decodeFromString(responseBody)
+    }.getOrElse { InfoMessageResponse(it.stackTraceToString()) }
+
+    suspend fun setOptionStatus(idAdvert: String, status: String): InfoMessageResponse = kotlin.runCatching {
+        if (authToken == null) logout()
+        val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/advert_update_options",
+                formParameters = Parameters.build {
+                    append("advert_id", idAdvert)
+                    append("option_status", status)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        println("asd3")
+        val responseBody: String = response.receive()
+        val json = Json.Default
+        println("setOptionStatus"+responseBody)
 
         json.decodeFromString(responseBody)
     }.getOrElse { InfoMessageResponse(it.stackTraceToString()) }
@@ -170,7 +189,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val json = Json.Default
 
         kotlin.runCatching {
-            val map = json.decodeFromString<List<NoticeDTO>>(responseBody)
+            val map = json.decodeFromString<Map<String, NoticeDTO>>(responseBody)
             NoticeResponce.Success(map)
         }.getOrElse {
             println("notice = $it")
@@ -179,6 +198,24 @@ class Repository(private val dao: MainDao) : KoinComponent {
     }.getOrElse {
         NoticeResponce.Failure(it.stackTraceToString())
     }
+    suspend fun deleteNotice(id: String): InfoMessageResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/notice_delete",
+                formParameters = Parameters.build {
+                    append("id", id)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        json.decodeFromString(responseBody)
+    }.getOrElse { InfoMessageResponse(it.stackTraceToString()) }
+
+
     suspend fun logout() = coroutineScope {
         val clearProfileJob = launch { dao.clearProfile() }
 

@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.app.transportation.MainActivity
@@ -24,20 +25,14 @@ class AlarmReceiver : BroadcastReceiver() {
 
         var notif : com.app.transportation.data.database.entities.Notification
 
-        val notificationVM : NotificationViewModel = NotificationViewModel(context!!)
+        val notificationVM = NotificationViewModel(context!!)
+        println("noooooooot getNotice")
         notificationVM.getNotice()
         CoroutineScope(Dispatchers.Main).launch{
             notificationVM.cachedNotifications.collect{
                 if (it.isNotEmpty()){
                     notificationVM.getOrderInfo(it.firstOrNull()!!.description)
                     notif = it.first()
-                }
-            }
-
-            notificationVM.cachedOrder.collect{
-                if (it.isNotEmpty()){
-                    notif.description=it.first().description
-
                     val i = Intent(context, MainActivity::class.java)
                     intent!!.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                     var pendingIntent = PendingIntent.getActivity(context, 0, i, 0)
@@ -68,6 +63,17 @@ class AlarmReceiver : BroadcastReceiver() {
 
                     val notificationManager = NotificationManagerCompat.from(context)
                     notificationManager.notify(123, builder.build())
+                    println("noooooooot"+notif)
+                    Toast.makeText(context, notif.toString(), Toast.LENGTH_LONG).show()
+                }
+            }
+
+            notificationVM.cachedOrder.collect{
+                println("noooooooot unreach")
+                if (it.isNotEmpty()){
+                    notif.description=it.first().description
+
+
                 }
             }
         }
