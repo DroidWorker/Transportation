@@ -61,24 +61,24 @@ class pingInfoRequestsFragment : Fragment() {
         viewModel.cachedOrderPing.collectWithLifecycle(viewLifecycleOwner) { adverts ->
             adverts.forEach{ advert->
                 if (advert.id.toString()+advert.profile.firstOrNull()?.userId==id.toString()) {
-                    viewModel.getProfile(advert.userId)
-                    advert?.apply {
+                    //viewModel.getProfile(advert.userId)
+                    advert.apply {
                         (activity as? MainActivity)?.apply {
                             b.title.text = advert.category
                         }
                         b.priceView.visibility=View.GONE
-                        b.orderName3.text = advert.title
+                        b.orderName3.text = "Заказ #"+advert.id
                         b.fromLocation3.text = advert.fromCity+", "+advert.fromRegion+", "+advert.fromPlace
                         b.toLocation3.text = advert.toCity+", "+advert.toRegion+", "+advert.toPlace
                         b.date3.text = advert.date
                         b.time3.text = advert.time
                         b.comment3.text = advert.description
-                        /*b.name3.text = advert.profile[0].firstName
-                        b.telNumber3.text = advert.profile[0].phone*/
-                        viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
-                            b.name3.text = it.firstName//+" "+it.lastName
-                            b.telNumber3.text = it.phone
-                        }
+                        b.name3.text = advert.title.split("|")[0]
+                        b.telNumber3.text = advert.title.split("|")[1]
+                        /*viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
+                                            b.name3.text = it.firstName//+" "+it.lastName
+                                            b.telNumber3.text = it.phone
+                                        }*/
                         b.pingStatus.text = getStatusName(advert.profile[0].status)
                     }
                     return@collectWithLifecycle
@@ -89,7 +89,7 @@ class pingInfoRequestsFragment : Fragment() {
             adverts.forEach{ advert->
                 if (advert.id.toString()+advert.profile.firstOrNull()?.userId==id.toString()) {
                     viewModel.getProfile(advert.userId)
-                    advert?.apply {
+                    advert.apply {
                         (activity as? MainActivity)?.apply {
                             b.title.text = advert.category
                         }
@@ -101,9 +101,9 @@ class pingInfoRequestsFragment : Fragment() {
                         /*b.name3.text = advert.profile[0].firstName+" "+advert.profile[0].lastName
                         b.telNumber3.text = advert.profile[0].phone*/
                         viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
-                            b.name3.text = it.firstName//+" "+it.lastName
-                            b.telNumber3.text = it.phone
-                        }
+                                            b.name3.text = it.firstName//+" "+it.lastName
+                                            b.telNumber3.text = it.phone
+                                        }
                         b.pingStatus.text = getStatusName(advert.profile[0].status)
                     }
                     return@collectWithLifecycle

@@ -1,6 +1,8 @@
 package com.app.transportation.ui
 
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
@@ -15,6 +17,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.app.transportation.MainActivity
 import com.app.transportation.R
+import com.app.transportation.core.blurRenderScript
 import com.app.transportation.core.collect
 import com.app.transportation.core.repeatOnLifecycle
 import com.app.transportation.databinding.FragmentAdvertDetailsBinding
@@ -78,8 +81,10 @@ class AdvertDetailsFragment : Fragment() {
         }
         viewModel.adfTempPhotoUris.collect(this) {
             it.second.getOrNull(it.first)?.let { bitmap ->
-                b.photo.scaleType = ImageView.ScaleType.FIT_XY
+                b.photo.scaleType = ImageView.ScaleType.FIT_CENTER
                 b.photo.setImageBitmap(bitmap)
+                val blurred: Bitmap? = blurRenderScript(requireContext(), bitmap, 25)//second parametre is radius//second parametre is radius
+                b.photo.setBackgroundDrawable(BitmapDrawable(blurred))
             } ?: kotlin.run {
                 b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
                 b.photo.setImageResource(R.drawable.ic_photo)

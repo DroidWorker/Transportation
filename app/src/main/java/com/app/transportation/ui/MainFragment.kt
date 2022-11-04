@@ -76,6 +76,7 @@ class MainFragment : Fragment() {
         }
 
         super.onViewCreated(view, savedInstanceState)
+        b.search.clearFocus()
 
         if (arguments?.getBoolean("needToUpdate") == true) {
             arguments?.putBoolean("needToUpdate", false)

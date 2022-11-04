@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -106,6 +107,7 @@ class CreatingOrderRisFragment : Fragment() {
             b.toArea.setText(strings?.get(strings?.size-1))
         }
 
+        applyCollectors()
         applyListeners()
     }
 
@@ -200,6 +202,16 @@ class CreatingOrderRisFragment : Fragment() {
     }
 
     private fun applyCollectors() = viewLifecycleOwner.repeatOnLifecycle {
+        viewModel.cafTempPhotoUris.collect(this) {
+            it.second.getOrNull(it.first)?.let { uri ->
+                b.photo.scaleType = ImageView.ScaleType.FIT_XY
+                b.photo.setImageURI(uri)
+                b.photo.tag = 1
+            } ?: kotlin.run {
+                b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
+                b.photo.setImageResource(R.drawable.ic_photo)
+            }
+        }
         if (1==1)
             viewModel.addAdvertScreenCategoriesFlowFourthLevel(categoryId).collectWithLifecycle(viewLifecycleOwner) {
                 var data : ArrayList<String> = ArrayList()
@@ -293,6 +305,7 @@ class CreatingOrderRisFragment : Fragment() {
         viewModel.dateTime += " $hourAsText:$minuteAsText"
 
         val dateTime = requireContext().formatDate(viewModel.dateTime, "dd/MM/yyyy HH:mm", true)
+        b.selectDateTime.text = dateTime
     }
 
     override fun onDestroyView() {

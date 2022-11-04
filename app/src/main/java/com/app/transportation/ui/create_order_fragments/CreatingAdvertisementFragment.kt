@@ -115,6 +115,7 @@ class CreatingAdvertisementFragment : Fragment() {
                                 val byteArray = Base64.decode(base64String, Base64.DEFAULT)
                                 val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
                                 b.photo.setImageBitmap(bitmap)
+                                b.photo.tag = 1
                                 val blurred: Bitmap? = blurRenderScript(ctx, bitmap, 25)//second parametre is radius//second parametre is radius
                                 b.photo.setBackgroundDrawable(BitmapDrawable(blurred))
                             }
@@ -202,14 +203,6 @@ class CreatingAdvertisementFragment : Fragment() {
                     summ+=5000
                 }
                 //payment realisation
-                if (summ>0) {
-                    val payIntent = Intent(activity, PaymentActivity::class.java)
-                    payIntent.putExtra("summ", summ);
-                    payIntent.putExtra("mode", 2)
-                    payIntent.putExtra("id", userId?.toInt())
-                    payIntent.putExtra("email", userEmail)
-                    startActivity(payIntent)
-                }
                 viewModel.createAdvert(
                     ctx = context,
                     title = b.advertTitle.text.toString(),
@@ -222,6 +215,14 @@ class CreatingAdvertisementFragment : Fragment() {
                     photos = photos,
                     options = optionList.toList()
                 )
+                if (summ>0) {
+                    val payIntent = Intent(activity, PaymentActivity::class.java)
+                    payIntent.putExtra("summ", summ);
+                    payIntent.putExtra("mode", 2)
+                    payIntent.putExtra("id", userId?.toInt())
+                    payIntent.putExtra("email", userEmail)
+                    startActivity(payIntent)
+                }
                 findNavController().navigateUp()
             }
             else{
@@ -248,10 +249,6 @@ class CreatingAdvertisementFragment : Fragment() {
                     }
                     b.price.text.isBlank() -> {
                         viewModel.messageEvent.tryEmit("Не заполнено поле с ценой")
-                        return@setOnClickListener
-                    }
-                    b.photo.tag != 1 -> {
-                        viewModel.messageEvent.tryEmit("Фото не добавлено")
                         return@setOnClickListener
                     }
                 }
@@ -328,8 +325,10 @@ class CreatingAdvertisementFragment : Fragment() {
                 b.photo.setImageURI(uri)
                 b.photo.tag = 1
             } ?: kotlin.run {
+                if (b.photo.tag!=1)
                 b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
                 b.photo.setImageResource(R.drawable.ic_photo)
+                b.photo.tag = 1
             }
             b.imageNumber.text =
                 if (it.second.size > 1) {

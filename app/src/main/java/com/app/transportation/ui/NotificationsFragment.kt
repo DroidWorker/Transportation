@@ -1,24 +1,26 @@
 package com.app.transportation.ui
 
-import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.PopupWindow
+import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.app.transportation.MainActivity
+import com.app.transportation.PaymentActivity
 import com.app.transportation.R
 import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.data.database.entities.Advert
 import com.app.transportation.data.database.entities.Notification
 import com.app.transportation.databinding.FragmentNotificationsBinding
+import com.app.transportation.databinding.PopupMenuServicesFilterBinding
+import com.app.transportation.databinding.PopupMessageBinding
 import com.app.transportation.ui.adapters.NotificationsAdapter
 import org.koin.android.ext.android.inject
-import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 
 class NotificationsFragment : Fragment() {
@@ -30,11 +32,15 @@ class NotificationsFragment : Fragment() {
 
     private val viewModel by activityViewModels<MainViewModel>()
 
-    private val id by lazy { arguments?.getLong("id") ?: 0L }
+    //private val id by lazy { arguments?.getLong("id") ?: 0L }
 
     var adverts : List<Advert> = emptyList()
 
     private val prefs: SharedPreferences by inject(named("MainSettings"))
+
+    private val userId : String? = prefs.getString("myId", null).takeIf { it != "" }
+
+    private var userEmail = "";
 
     private var lastCheckedNotificationID: String?
         get() = prefs.getString("lastCheckedNotificationID", "0")
@@ -61,6 +67,42 @@ class NotificationsFragment : Fragment() {
 
         viewModel.getMyAdverts()
         //applyInitialData()
+
+        viewModel.profileFlow.collectWithLifecycle(viewLifecycleOwner){
+            if (it?.bussiness!="ACTIVE"){
+                userEmail = it?.email.toString()
+                val popup = PopupWindow(requireContext()).apply {
+                    val menuB = PopupMessageBinding.inflate(layoutInflater)
+                    contentView = menuB.root
+                    menuB.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+
+                    setBackgroundDrawable(
+                        ContextCompat.getDrawable(requireContext(), R.drawable.menu_background)
+                    )
+
+                    menuB.pmButton.setOnClickListener{
+                        if (userEmail.isEmpty() || userId?.toInt()==0)
+                            return@setOnClickListener
+                        val intent = Intent(activity, PaymentActivity::class.java)
+                        intent.putExtra("summ", 35000)
+                        intent.putExtra("mode", 1)
+                        intent.putExtra("id", userId?.toInt())
+                        intent.putExtra("email", userEmail)
+                        startActivity(intent)
+                    }
+                    isOutsideTouchable = true
+                    setTouchInterceptor { v, event ->
+                        v.performClick()
+                        return@setTouchInterceptor if (event.action == MotionEvent.ACTION_OUTSIDE) {
+                            dismiss()
+                            true
+                        } else
+                            false
+                    }
+                    showAtLocation(b.parentLayout, Gravity.CENTER, 0, 0)
+                }
+            }
+        }
 
         applyAdapters()
 

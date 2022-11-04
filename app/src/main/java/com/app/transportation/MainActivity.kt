@@ -12,6 +12,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.text.Html
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
@@ -191,12 +192,20 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         }
 
         viewModel.messageEvent.collectWithLifecycle(this) {
-            val snackbar =
-                Snackbar.make(findViewById(android.R.id.content), it, Snackbar.LENGTH_LONG).setDuration(Snackbar.LENGTH_LONG)
-            val snackbarView = snackbar.view
-            val tv = snackbarView.findViewById<View>( com.google.android.material.R.id.snackbar_text) as TextView
-            tv.maxLines = 10
-            snackbar.show()
+            if (it=="401"){
+                val snack = Snackbar.make(findViewById(android.R.id.content), Html.fromHtml("Упс...<br><b>Вы не зарегистрированы</b><br>Пожалуйста зарегистрируйтесь, чтобы видеть активные заявки от заказчика и выполнять их и пользоваться всеми функциями приложения"), Snackbar.LENGTH_LONG)
+                val tv = snack.view.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
+                tv.maxLines = 7
+                snack.show()
+            }else {
+                val snackbar =
+                    Snackbar.make(findViewById(android.R.id.content), it, Snackbar.LENGTH_LONG)
+                        .setDuration(Snackbar.LENGTH_LONG)
+                val snackbarView = snackbar.view
+                val tv = snackbarView.findViewById<View>(com.google.android.material.R.id.snackbar_text) as TextView
+                tv.maxLines = 10
+                snackbar.show()
+            }
         }
 
         viewModel.getOrderCountNews()

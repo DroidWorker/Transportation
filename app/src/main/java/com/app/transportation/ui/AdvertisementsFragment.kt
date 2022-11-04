@@ -3,11 +3,15 @@ package com.app.transportation.ui
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
 import android.widget.PopupWindow
 import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doOnTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
@@ -44,6 +48,8 @@ class AdvertisementsFragment : Fragment() {
     private val searchText by lazy { arguments?.getString("searchText") ?: "" }
 
     private var defaultCity = ""
+    private var cityFrom = ""
+    private var cityTo = ""
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -99,6 +105,10 @@ class AdvertisementsFragment : Fragment() {
     }
 
     private fun applyRVAdapter() {
+        if(type!=1){
+            b.city.visibility = View.GONE
+            b.filter.visibility = View.GONE
+        }
         if (type == 1||type==2) {//if seller
             b.servicesRV.adapter = adapter
 
@@ -294,72 +304,109 @@ class AdvertisementsFragment : Fragment() {
                 var city = bundle.getString("city")
                 if (city!=null) {
                     defaultCity = city
-                    filterOrders(city)
+                    if (type==1) filterOrders(city)
+                    else if (type==2) filterAdverts(city)
                 }
             }
         }
-        /*@Override
-        fun onActivityResult(requestCode:Int, resultCode:Int, data: Intent) {
-            super.onActivityResult(requestCode, resultCode, data);
-            if (resultCode == Activity.RESULT_OK) {
-                when (requestCode) {
-                    1-> {
-                        city = data.getStringExtra("city")
-                        if (city!=null&&city!="") {
-                            adapter.submitList(
-                                viewModel.cachedOrdersSF.value.filter {
-                                    it.fromCity.contains(city!!) || it.toCity.contains(city!!)
-                                }
-                                    .toMutableList()
-                            )
-                        }
-                    }
-                    else-> return
-                }
-            }
-        }*/
+
         b.filter.setOnClickListener {
             popupWindow = PopupWindow(requireContext()).apply {
                 val menuB = PopupMenuServicesFilterBinding.inflate(layoutInflater)
                 contentView = menuB.root
                 menuB.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
 
-                width = ViewGroup.LayoutParams.WRAP_CONTENT
-                height = View.MeasureSpec.makeMeasureSpec(
+                //width = ViewGroup.LayoutParams.WRAP_CONTENT
+                /*height = View.MeasureSpec.makeMeasureSpec(
                     menuB.root.measuredHeight,
                     View.MeasureSpec.UNSPECIFIED
-                )
+                )*/
 
                 setBackgroundDrawable(
                     ContextCompat.getDrawable(requireContext(), R.drawable.menu_background)
                 )
 
-                viewModel.cachedAdvertCategories.collectWithLifecycle(viewLifecycleOwner) { clist->
-                    val list = viewModel.advertCategoriesFlow.value
-                        .filter { clist.contains(it.id) }
-                        .map { ServiceType(it.id, it.name) }
-                    menuB.filterRV.adapter = PopupMenuServicesFilterAdapter().apply {
-                        submitList(list)
-                        this.necessary=true
-                        this.onClick = { id ->
-                            adapter.submitList(
-                                viewModel.cachedOrdersSF.value.filter {
-                                    it.subcategoryId == id }
-                                    .toMutableList()
-                            )
+                if (type==1) {
+                    viewModel.cachedAdvertCategories.collectWithLifecycle(viewLifecycleOwner) { clist ->
+                        val list = viewModel.advertCategoriesFlow.value
+                            .filter { clist.contains(it.id) }
+                            .map { ServiceType(it.id, it.name) }
+                        menuB.filterRV.adapter = PopupMenuServicesFilterAdapter().apply {
+                            submitList(list)
+                            this.necessary = true
+                            this.onClick = { id ->
+                                popupWindow?.dismiss()
+                                adapter.submitList(
+                                    viewModel.cachedOrdersSF.value.filter {
+                                        it.subcategoryId == id
+                                    }
+                                        .toMutableList()
+                                )
+                            }
                         }
                     }
-                }
+                        menuB.from.visibility = View.VISIBLE
+                        menuB.to.visibility = View.VISIBLE
+                        menuB.searchByFT.visibility = View.VISIBLE
+                        menuB.from.addTextChangedListener(object : TextWatcher {
+                            override fun afterTextChanged(s: Editable?) {
+                                if (s != null) {
+                                    if (s.length > 2) {
+                                        cityFrom = s.toString()
+                                    }
+                                    else cityFrom = ""
+                                }
+                            }
+
+                            override fun beforeTextChanged(
+                                s: CharSequence?,
+                                start: Int,
+                                count: Int,
+                                after: Int
+                            ) {
+                            }
+
+                            override fun onTextChanged(
+                                s: CharSequence?,
+                                start: Int,
+                                before: Int,
+                                count: Int
+                            ) {
+                            }
+                        })
+                        menuB.to.addTextChangedListener(object : TextWatcher {
+                            override fun afterTextChanged(s: Editable?) {
+                                if (s != null) {
+                                    if (s.length > 2) {
+                                        cityTo = s.toString()
+                                    }
+                                    else cityTo = ""
+                                }
+
+                            }
+
+                            override fun beforeTextChanged(
+                                s: CharSequence?,
+                                start: Int,
+                                count: Int,
+                                after: Int
+                            ) {
+                            }
+
+                            override fun onTextChanged(
+                                s: CharSequence?,
+                                start: Int,
+                                before: Int,
+                                count: Int
+                            ) {
+                            }
+                        })
+                        menuB.searchByFT.setOnClickListener {
+                            filterByCity(to = cityTo, from = cityFrom)
+                        }
+                    }
 
                 menuB.specifyWeight.setOnClickListener {
-                    //TODO
-                }
-
-                menuB.from.setOnClickListener {
-                    //TODO
-                }
-
-                menuB.to.setOnClickListener {
                     //TODO
                 }
 
@@ -375,14 +422,33 @@ class AdvertisementsFragment : Fragment() {
 
                 showAsDropDown(b.city, 1, (0.1 * b.city.height).roundToInt(), Gravity.CENTER)
             }
+            popupWindow!!.isFocusable = true;
+            popupWindow!!.update();
         }
     }
 
     private fun filterOrders(city: String){
-        println("aaaaaaaa"+city)
         adapter.submitList(
             viewModel.cachedOrdersSF.value.filter {
                 it.fromCity.contains(city!!, true) || it.toCity.contains(city!!, true) || city == ""
+            }
+                .toMutableList()
+        )
+    }
+    private fun filterAdverts(city: String){
+        adapter.submitList(
+            viewModel.cachedAdvertsSF.value.filter {
+                it.fromCity.contains(city!!, true) || it.toCity.contains(city!!, true) || city == ""
+            }
+                .toMutableList()
+        )
+    }
+    private fun filterByCity(from: String = "", to: String = ""){
+        adapter.submitList(
+            viewModel.cachedOrdersSF.value.filter {
+                val f = it.fromCity+it.fromRegion+it.fromPlace+""
+                val t = it.toCity+it.toRegion+it.fromPlace+""
+                f.contains(from, true) && t.contains(to, true) || from == "" || to == ""
             }
                 .toMutableList()
         )

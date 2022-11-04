@@ -165,7 +165,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
             client.get("http://api-transport.mvp-pro.top/api/v1/profile_short?id=$id") {
                 headers { append("X-Access-Token", token) }
             }
-        var responseBody: String = response.receive()
+        val responseBody: String = response.receive()
         val json = Json.Default
 
         kotlin.runCatching {
@@ -185,7 +185,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
             client.get("http://api-transport.mvp-pro.top/api/v1/notice") {
                 headers { append("X-Access-Token", token) }
             }
-        var responseBody: String = response.receive()
+        val responseBody: String = response.receive()
         val json = Json.Default
 
         kotlin.runCatching {
@@ -344,7 +344,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it fav alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, PingAdvertDTO> = mutableMapOf("empty" to PingAdvertDTO("","","","","","","","", "", "", emptyMap(), emptyList()))
+                val emty : Map<String, PingAdvertDTO> = mutableMapOf("empty" to PingAdvertDTO("","","","","","","","", "", "", emptyMap(), emptyList()))
                 AdvertPingResponse.Success(emty)
             }
             json.decodeFromString<AdvertPingResponse.Failure>(responseBody)
@@ -370,7 +370,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it ping alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, PingOrderDTO> = mutableMapOf("empty" to PingOrderDTO("","","","","","","","", "","","","","","","","","", "", "",emptyMap(), emptyList()))
+                val emty : Map<String, PingOrderDTO> = mutableMapOf("empty" to PingOrderDTO("","","","","","","","", "","","","","","","","","", "", "",emptyMap(), emptyList()))
                 OrderPingResponse.Success(emty)
             }
             else {
@@ -452,7 +452,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
     }
 
     suspend fun getBussinessLast(): businessLastResponce = kotlin.runCatching {
-        val token = authToken ?: return@runCatching businessLastResponce.Failure("token is null")
         val response: HttpResponse =
             client.get("http://api-transport.mvp-pro.top/api/v1/bussiness_last")
         var responseBody: String = response.receive()
@@ -529,14 +528,14 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it fav alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, FavAdvertDTO> = mutableMapOf("empty" to FavAdvertDTO("","","","","","","", "", "", emptyMap()))
+                val emty : Map<String, FavAdvertDTO> = mutableMapOf("empty" to FavAdvertDTO("","","","","","","", "", "", emptyMap()))
                 AdvertFavResponse.Success(emty)
             }
             json.decodeFromString<AdvertFavResponse.Failure>(responseBody)
         }
     }.getOrElse {
         if (it.stackTraceToString().contains("Object not found")){
-            var emty : Map<String, FavAdvertDTO> = mutableMapOf("empty" to FavAdvertDTO("","","","","","","", "", "", emptyMap()))
+            val emty : Map<String, FavAdvertDTO> = mutableMapOf("empty" to FavAdvertDTO("","","","","","","", "", "", emptyMap()))
             AdvertFavResponse.Success(emty)
          }
         else
@@ -562,7 +561,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it fav alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, FavOrderDTO> = mutableMapOf("empty" to FavOrderDTO("","","","","","","", "","","","","", "",  "","","","","", emptyMap()))
+                val emty : Map<String, FavOrderDTO> = mutableMapOf("empty" to FavOrderDTO("","","","","","","", "","","","","", "",  "","","","","", emptyMap()))
                 OrderFavResponse.Success(emty)
             }
             else {
@@ -571,7 +570,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }
     }.getOrElse {
         if (it.stackTraceToString().contains("Object not found")){
-            var emty : Map<String, FavOrderDTO> = mutableMapOf("empty" to FavOrderDTO("","","","","","","", "","","","","","","","","","","", emptyMap()))
+            val emty : Map<String, FavOrderDTO> = mutableMapOf("empty" to FavOrderDTO("","","","","","","", "","","","","","","","","","","", emptyMap()))
             OrderFavResponse.Success(emty)
         }
         else
@@ -750,7 +749,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                     )
                     thirdLevelCategories.find { tlc->
                         tlc.id.toString() == it.value.parentId
-                    }?.childId=it.key.toInt() ?: 0
+                    }?.childId=it.key.toInt()
                 }
             }
             val unsortedAllCategories = cats.map {

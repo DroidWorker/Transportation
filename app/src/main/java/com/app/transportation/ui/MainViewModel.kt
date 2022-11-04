@@ -11,7 +11,6 @@ import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.transportation.R
-import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.data.AuthTokenNotFoundException
 import com.app.transportation.data.Repository
 import com.app.transportation.data.api.*
@@ -25,8 +24,6 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import java.net.UnknownHostException
-import java.util.stream.Collectors.toList
-import java.util.stream.Collectors.toMap
 
 class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent {
 
@@ -150,7 +147,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         when (val result = repository.updateAdvertCategories()) {
             null -> Unit
             is AuthTokenNotFoundException -> {
-                messageEvent.tryEmit("Проблемы с токеном. Переавторизуйтесь.")
+                messageEvent.tryEmit("401")
             }
             is UnknownHostException -> {
                 messageEvent.tryEmit("Проблемы с интернетом или сервером")
@@ -513,7 +510,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         }?.parentId ?: 4,
                         category = entry.value.category,
                         subcategoryId = entry.value.categoryId.toInt(),
-                        title = entry.value.description,
+                        title = entry.value.name+"|"+entry.value.phone,
                         date = entry.value.date,
                         time = entry.value.time,
                         fromCity = "${entry.value.fromCity}",
@@ -625,20 +622,35 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
 
     private suspend fun updateFavoriteAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
-        val list = getAdvertsFavoriteFull() ?: return@launch
+        val list = getAdvertsFavoriteFull()
+        if(list.isNullOrEmpty()){
+            messageEvent.tryEmit("401")
+            logout()
+            return@launch
+        }
         println("adverts Favorite fuuuuuuuuuuul = $list")
 
         cachedAdvertFavorite.tryEmit(list)
     }
     private suspend fun updateFavoriteOrdersFull() = viewModelScope.launch(Dispatchers.IO) {
-        val list = getOrdersFavoriteFull() ?: return@launch
+        val list = getOrdersFavoriteFull()
+        if(list.isNullOrEmpty()){
+            messageEvent.tryEmit("401")
+            logout()
+            return@launch
+        }
         println("orders Favorite fuuuuuuuuuuul = $list")
 
         cachedOrderFavorite.tryEmit(list)
     }
 
     private suspend fun updatePingAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
-        val list = getAdvertsPingFull() ?: return@launch
+        val list = getAdvertsPingFull()
+        if(list.isNullOrEmpty()){
+            messageEvent.tryEmit("401")
+            logout()
+            return@launch
+        }
         var reslist : ArrayList<Advert> = ArrayList()
         list.forEach{item->
             if (item.profile.size>1){
@@ -658,7 +670,12 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         cachedAdvertPing.tryEmit(reslist)
     }
     private suspend fun updatePingOrdersFull() = viewModelScope.launch(Dispatchers.IO) {
-        val list = getOrdersPingFull() ?: return@launch
+        val list = getOrdersPingFull()
+        if(list.isNullOrEmpty()){
+            messageEvent.tryEmit("401")
+            logout()
+            return@launch
+        }
         var reslist : ArrayList<Advert> = ArrayList()
         list.forEach{item->
             if (item.profile.size>1){
@@ -730,7 +747,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 Advert(
                     id = entry.key.toInt(),
                     userId = entry.value.userId,
-                    viewType = 0,
+                    viewType = if(photoList.size==0) 0 else 1,
                     categoryId = advertCategoriesFlow.value.find {
                         it.id == entry.value.categoryId.toInt()
                     }?.parentId ?: 4,
@@ -780,7 +797,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
                 Advert(
                     id = entry.key.toInt(),
-                    viewType = 0,
+                    viewType = if(photoList.size==0) 1 else 0,
                     categoryId = advertCategoriesFlow.value.find {
                         it.id == entry.value.categoryId.toInt()
                     }?.parentId ?: 4,
@@ -897,7 +914,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 }
                 Advert(
                     id = entry.key.toInt(),
-                    viewType = 0,
+                    viewType = if (photoList.isEmpty()) 1 else 0,
                     categoryId = advertCategoriesFlow.value.find {
                         it.id == entry.value.categoryId.toInt()
                     }?.parentId ?: 4,
@@ -984,7 +1001,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             var index = 0L
             val oders = getOrders()
             val adverts = getAdverts()
-            getOrdersMessagefailure()?.let { it1 -> messageEvent.tryEmit("MVM865"/*+it1*/) }
+            //getOrdersMessagefailure()?.let { it1 -> messageEvent.tryEmit("MVM865"/*+it1*/) }
             firstLevelCatsDeferred.await().forEach {
                 list.add(
                     ProfileRvItem(
@@ -1087,6 +1104,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     )
                 }
                 //TODO need to re-authorize to obtain token
+                messageEvent.tryEmit("401")//unauthorized
                 logout()
             }
         }
