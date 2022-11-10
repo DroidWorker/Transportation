@@ -105,13 +105,13 @@
                 android:textCursorDrawable="@null"
                 android:textSize="16sp"
                 android:theme="@style/EditTextTheme"
-                app:layout_constraintBottom_toTopOf="@+id/paymentCardET"
+                app:layout_constraintBottom_toTopOf="@+id/bussinessTerm"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/telNumberET" />
 
             <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/paymentCardET"
+                android:id="@+id/bussinessTerm"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
@@ -144,7 +144,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/office"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/paymentCardET" />
+                app:layout_constraintTop_toBottomOf="@+id/bussinessTerm" />
 
             <Button
                 android:id="@+id/office"

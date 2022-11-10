@@ -78,6 +78,14 @@ class OrderDetailsFragment : Fragment() {
                     b.title.text = category
                 }
                 viewModel.applyAdfPhotos(photo)
+                if (options.isNotEmpty()){
+                    options.forEach{
+                        if(it.option_id=="-1"&&it.status=="ACTIVE"){
+                            b.addToFavourites2.visibility = View.GONE
+                            return@forEach
+                        }
+                    }
+                }
             }
             if (b.fromLocation.text == "  ") {
                 b.fromLocationIcon.visibility = View.GONE

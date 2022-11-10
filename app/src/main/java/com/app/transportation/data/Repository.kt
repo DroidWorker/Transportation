@@ -148,7 +148,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                         cityArea = location,
                         specialization = status,
                         avatar = avatar,
-                        bussiness = bussiness
+                        bussiness = "$bussiness|$bussiness_update"
                     )
                     dao.insert(profile)
                     println("profileResponse = $this")
@@ -939,7 +939,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, AdvertFullDTO> = mutableMapOf("empty" to AdvertFullDTO("", "","","","","","","", "", emptyMap(), emptyList()))
+                var emty : Map<String, AdvertFullDTO> = mutableMapOf("empty" to AdvertFullDTO("", "","","","","","","", "", emptyMap(), emptyList(), "NO_ACTIVE", ""))
                 AdvertFullListResponse.Success(emty)
             }
             json.decodeFromString<AdvertFullListResponse.Failure>(responseBody)
@@ -966,7 +966,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, OrderFullDTO> = mutableMapOf("empty" to OrderFullDTO("", "","","","","","","","","","","","","","","","","", emptyMap()))
+                var emty : Map<String, OrderFullDTO> = mutableMapOf("empty" to OrderFullDTO("", "","","","","","","","","","","","","","","","","", emptyMap(), "NO_ACTIVE", ""))
                 OrderFullListResponse.Success(emty)
             }
             json.decodeFromString<OrderFullListResponse.Failure>(responseBody)

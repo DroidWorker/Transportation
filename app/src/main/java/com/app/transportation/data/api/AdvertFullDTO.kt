@@ -15,5 +15,7 @@ data class AdvertFullDTO(
     val price: String,
     val description: String,
     val photo: Map<String, String>,
-    val options: List<optionDTO>
+    val options: List<optionDTO>,
+    @SerialName("bussiness") val bussiness: String?,
+    @SerialName("bussiness_update") val bussiness_update: String?
 )

@@ -76,7 +76,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/telNumberLayout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/payment">
+                app:layout_constraintTop_toBottomOf="@+id/paymentCardLayout">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/nameET"
@@ -113,6 +113,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:backgroundTint="@color/transparent"
+                    android:digits="1234567890+-() "
                     android:fontFamily="@font/montserrat"
                     android:gravity="start|center_vertical"
                     android:hint="Номер телефона"
@@ -143,7 +144,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:backgroundTint="@color/transparent"
-                    android:digits="1234567890+-() "
                     android:fontFamily="@font/montserrat"
                     android:gravity="start|center_vertical"
                     android:hint="E-mail"
@@ -161,26 +161,27 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="15dp"
-                android:visibility="gone"
+                android:visibility="visible"
                 app:boxStrokeColor="@color/box_stroke_color"
                 app:hintTextAppearance="@style/HintTextAppearance"
                 app:hintTextColor="@color/secondary_color"
-                app:layout_constraintBottom_toTopOf="@+id/cityAreaLayout"
+                app:layout_constraintBottom_toTopOf="@+id/nameLayout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/emailLayout">
+                app:layout_constraintTop_toBottomOf="@+id/payment">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/paymentCardET"
+                    android:id="@+id/bussinessTerm"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:backgroundTint="@color/transparent"
                     android:digits="1234567890+-() "
+                    android:editable="false"
                     android:fontFamily="@font/montserrat"
                     android:gravity="start|center_vertical"
-                    android:hint="Карта оплаты"
                     android:importantForAutofill="no"
                     android:inputType="number"
+                    android:text="Бизнесс аккаунт будет отключен через 63 ч"
                     android:textColor="@color/secondary_color"
                     android:textCursorDrawable="@null"
                     android:textSize="16sp" />
@@ -199,7 +200,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/profileRV"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/paymentCardLayout">
+                app:layout_constraintTop_toBottomOf="@+id/emailLayout">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/cityAreaET"

@@ -68,6 +68,8 @@ class LoginFragment : Fragment() {
                 }
                 is AuthState.UserNotFound -> {
                     val text = getString(R.string.user_not_found)
+                    viewModel.VKLogin = null
+                    viewModel.VKPassword = null
                     makeSnackbar(text)
                     b.signInSecondTitle.text = text
                 }

@@ -24,17 +24,21 @@ import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.PaymentActivity
 import com.app.transportation.R
-import com.app.transportation.core.*
+import com.app.transportation.core.collect
+import com.app.transportation.core.collectWithLifecycle
+import com.app.transportation.core.decodeSampledBitmapFromResource
+import com.app.transportation.core.repeatOnLifecycle
 import com.app.transportation.databinding.FragmentProfileBinding
 import com.app.transportation.ui.adapters.ProfileAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.redmadrobot.inputmask.MaskedTextChangedListener
 import org.koin.android.ext.android.inject
-import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ProfileFragment : Fragment() {
 
@@ -143,9 +147,21 @@ class ProfileFragment : Fragment() {
                 userEmail = email
                 b.name.text = name
                 b.login.text = login
-                if (profile.bussiness=="ACTIVE"){
+                if (profile.bussiness.contains("ACTIVE")){
                     b.payment.isClickable = false
                     b.payment.text = "Бизнес аккаунт:\nтариф универсал"
+                    if (profile.bussiness.contains("|")&&!profile.bussiness.contains("null")) {
+                        val dateTo: String = profile.bussiness.split("|")[1]
+                        val cal = Calendar.getInstance()
+                        val formatter = SimpleDateFormat("dd.MM.yyyy hh:mm", Locale.ENGLISH)
+                        formatter.parse(dateTo)?.let { cal.time = it }
+                        cal.add(Calendar.DATE, 30)
+                        val resstr = "Бизнесс аккаунт будет отключен через ${cal.get(Calendar.DAY_OF_MONTH)} дней ${cal.get(Calendar.HOUR)} часов"
+                        b.bussinessTerm.setText(resstr)
+                    }
+                    else{
+                        b.bussinessTerm.visibility = View.GONE
+                    }
                 }
 
                 b.nameET.setText(name)
@@ -159,7 +175,6 @@ class ProfileFragment : Fragment() {
                     basePhone = telNumber
                 }
                 b.emailET.setText(email)
-                b.paymentCardET.setText(paymentCard)
                 b.cityAreaET.setText(cityArea)
                 if(avatar.length>1) {
                     avatar.let { photoitem ->
@@ -220,22 +235,6 @@ class ProfileFragment : Fragment() {
         })
         //b.telNumberET.onFocusChangeListener = telNumberListener
 
-        paymentCardListener = MaskedTextChangedListener(
-            "[0000] [0000] [0000] [0000]",
-            true, b.paymentCardET, null,
-            object : MaskedTextChangedListener.ValueListener {
-                override fun onTextChanged(
-                    maskFilled: Boolean,
-                    extractedValue: String,
-                    formattedValue: String
-                ) {
-                    checkIfProfileChanged()
-                }
-            }
-        )
-        b.paymentCardET.addTextChangedListener(paymentCardListener)
-        b.paymentCardET.onFocusChangeListener = paymentCardListener
-
         b.applyProfileChanges.setOnClickListener {
             val photos = mutableListOf<String>()
             if (!b.cityAreaET.text.toString().matches("^[а-яА-Я]+[,]{1}[а-яА-Я ]+\$".toRegex())){
@@ -267,7 +266,7 @@ class ProfileFragment : Fragment() {
                     name = b.nameET.text.toString(),
                     telNumber = b.telNumberET.text.toString(),
                     email = b.emailET.text.toString(),
-                    paymentCard = b.paymentCardET.text.toString(),
+                    paymentCard = "",
                     cityArea = b.cityAreaET.text.toString(),
                     avatar = photos
                 )
@@ -306,7 +305,7 @@ class ProfileFragment : Fragment() {
         val nameChanged = b.nameET.text.toString() != profile.name
         val telNumberChanged = b.telNumberET.text.toString() != basePhone
         val emailChanged = b.emailET.text.toString() != profile.email
-        val paymentCardChanged = b.paymentCardET.text.toString() != profile.paymentCard && b.paymentCardET.text.toString() != ""
+        val paymentCardChanged = false
         val cityAreaChanged = b.cityAreaET.text.toString() != profile.cityArea
         val avatarChanged = b.avatar.tag == 1
         /* TODO val avatarChanged = b.avatar.text.toString() != profile.avatar*/
@@ -328,7 +327,6 @@ class ProfileFragment : Fragment() {
         b.profileRV.adapter = null
         b.telNumberET.removeTextChangedListener(telNumberListener)
         telNumberListener = null
-        b.paymentCardET.removeTextChangedListener(paymentCardListener)
         paymentCardListener = null
         binding = null
         //popupWindow = null

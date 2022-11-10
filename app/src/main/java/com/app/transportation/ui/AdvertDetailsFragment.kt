@@ -72,6 +72,14 @@ class AdvertDetailsFragment : Fragment() {
                 b.price.text = price
                 b.description.text = description
                 viewModel.applyAdfPhotos(photo)
+                if (options.isNotEmpty()){
+                    options.forEach{
+                        if(it.option_id=="-1"&&it.status=="ACTIVE"){
+                            b.addToFavourites.visibility = View.GONE
+                            return@forEach
+                        }
+                    }
+                }
             }
         }
         viewModel.cachedProfile.collect(this){

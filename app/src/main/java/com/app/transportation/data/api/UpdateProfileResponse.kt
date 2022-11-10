@@ -16,7 +16,8 @@ sealed class UpdateProfileResponse {
         val location: String,
         val avatar: String,
         val status: String,
-        @SerialName("bussiness") val bussiness: String
+        @SerialName("bussiness") val bussiness: String,
+        @SerialName("bussiness_update") val bussiness_update: String?
     ) : UpdateProfileResponse()
 
     @Serializable

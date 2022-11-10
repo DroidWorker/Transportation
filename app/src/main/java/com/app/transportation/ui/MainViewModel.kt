@@ -549,50 +549,63 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
         }
     private suspend fun getAdvertsPingFull() =
-        (repository.getAdvertPingList() as? AdvertPingResponse.Success)?.let { response ->
-            response.advertMap.map { entry ->
-                if (entry.key != "empty") {
-                    val photoList: ArrayList<String> = ArrayList()
-                    entry.value.photo.forEach { photoitem ->
-                        photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+        (repository.getAdvertPingList() as? AdvertPingResponse)?.let { SFresponse ->
+            var response : AdvertPingResponse
+            if(SFresponse is AdvertPingResponse.Success) {
+                response = SFresponse as AdvertPingResponse.Success
+                response.advertMap.map { entry ->
+                    if (entry.key != "empty") {
+                        val photoList: ArrayList<String> = ArrayList()
+                        entry.value.photo.forEach { photoitem ->
+                            photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                        }
+                        Advert(
+                            id = entry.value.advert_id.toInt(),//entry.key.toInt(),
+                            userId = entry.value.user_id,
+                            viewType = 0,
+                            categoryId = advertCategoriesFlow.value.find {
+                                it.id == entry.value.categoryId.toInt()
+                            }?.parentId ?: 4,
+                            category = entry.value.category,
+                            subcategoryId = entry.value.categoryId.toInt(),
+                            title = entry.value.title,
+                            date = entry.value.date,
+                            time = entry.value.time,
+                            price = entry.value.price,
+                            photo = photoList.toList(),
+                            profile = entry.value.ping
+                        )
+                    } else {
+                        Advert(
+                            id = 0,
+                            viewType = 2,
+                            categoryId = 0,
+                            category = "",
+                            subcategoryId = 0,
+                            title = "Откликов не найдено",
+                            date = "",
+                            time = "",
+                            fromCity = "",
+                            fromRegion = "",
+                            fromPlace = "",
+                            toCity = "",
+                            toRegion = "",
+                            toPlace = "",
+                            payment = "",
+                            description = "",
+                            photo = emptyList()
+                        )
                     }
-                    Advert(
-                        id = entry.value.advert_id.toInt(),//entry.key.toInt(),
-                        userId = entry.value.user_id,
-                        viewType = 0,
-                        categoryId = advertCategoriesFlow.value.find {
-                            it.id == entry.value.categoryId.toInt()
-                        }?.parentId ?: 4,
-                        category = entry.value.category,
-                        subcategoryId = entry.value.categoryId.toInt(),
-                        title = entry.value.title,
-                        date = entry.value.date,
-                        time = entry.value.time,
-                        price = entry.value.price,
-                        photo = photoList.toList(),
-                        profile = entry.value.ping
-                    )
                 }
-                else{
-                    Advert(
-                        id = 0,
-                        viewType = 2,
-                        categoryId = 0,
-                        category = "",
-                        subcategoryId = 0,
-                        title = "Откликов не найдено",
-                        date = "",
-                        time = "",
-                        fromCity = "",
-                        fromRegion = "",
-                        fromPlace = "",
-                        toCity = "",
-                        toRegion = "",
-                        toPlace = "",
-                        payment = "",
-                        description = "",
-                        photo = emptyList())
+            }
+            else{
+                response = SFresponse as AdvertPingResponse.Failure
+                if (response.message=="token is null") {
+                    messageEvent.tryEmit("401")
+                    logout()
+                    null
                 }
+                else null
             }
         }
 
@@ -625,7 +638,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         val list = getAdvertsFavoriteFull()
         if(list.isNullOrEmpty()){
             messageEvent.tryEmit("401")
-            logout()
             return@launch
         }
         println("adverts Favorite fuuuuuuuuuuul = $list")
@@ -636,7 +648,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         val list = getOrdersFavoriteFull()
         if(list.isNullOrEmpty()){
             messageEvent.tryEmit("401")
-            logout()
             return@launch
         }
         println("orders Favorite fuuuuuuuuuuul = $list")
@@ -646,13 +657,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     private suspend fun updatePingAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
         val list = getAdvertsPingFull()
-        if(list.isNullOrEmpty()){
-            messageEvent.tryEmit("401")
-            logout()
-            return@launch
-        }
+
         var reslist : ArrayList<Advert> = ArrayList()
-        list.forEach{item->
+        list?.forEach{item->
             if (item.profile.size>1){
                 for (i in 0 until item.profile.size){
                     var advert: Advert = item.copy()
@@ -671,13 +678,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     }
     private suspend fun updatePingOrdersFull() = viewModelScope.launch(Dispatchers.IO) {
         val list = getOrdersPingFull()
-        if(list.isNullOrEmpty()){
-            messageEvent.tryEmit("401")
-            logout()
-            return@launch
-        }
+
         var reslist : ArrayList<Advert> = ArrayList()
-        list.forEach{item->
+        list?.forEach{item->
             if (item.profile.size>1){
                 for (i in 0..item.profile.size-1){
                     var advert: Advert = item.copy()
@@ -744,6 +747,11 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 entry.value.photo.forEach{photoitem->
                     photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
                 }
+                var isActiveBussiness = false
+                if(entry.value.bussiness=="ACTIVE"){
+                    isActiveBussiness = true
+                }
+                val l = listOf<optionDTO>(optionDTO("-1", "bussiness", "0", "ACTIVE"))
                 Advert(
                     id = entry.key.toInt(),
                     userId = entry.value.userId,
@@ -762,7 +770,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     price = entry.value.price,
                     photo = photoList.toList(),
                     description = entry.value.description,
-                    options = entry.value.options
+                    options = if(isActiveBussiness) (entry.value.options+l) else entry.value.options
                 )
             }
         }
@@ -876,6 +884,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 entry.value.photo.forEach{photoitem->
                     photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
                 }
+                var isActiveBussiness = false;
+                if (entry.value.bussiness=="ACTIVE"){
+                    isActiveBussiness = true;
+                }
                 Advert(
                     id = entry.key.toInt(),
                     userId = entry.value.userId,
@@ -896,7 +908,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     toPlace = "${entry.value.toPlace}",
                     payment = entry.value.payment,
                     description = entry.value.description,
-                    photo = photoList.toList()
+                    photo = photoList.toList(),
+                    options = if (isActiveBussiness) listOf(optionDTO("-1", "bussiness", "0", "ACTIVE")) else emptyList()
                 )
             }
         }
@@ -1104,8 +1117,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     )
                 }
                 //TODO need to re-authorize to obtain token
-                messageEvent.tryEmit("401")//unauthorized
-                logout()
             }
         }
     }

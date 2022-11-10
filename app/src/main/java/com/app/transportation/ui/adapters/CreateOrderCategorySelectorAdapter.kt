@@ -3,16 +3,13 @@ package com.app.transportation.ui.adapters
 import com.app.transportation.R
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.res.Resources
 import android.content.res.TypedArray
-import android.graphics.drawable.Drawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.app.transportation.MainActivity
 import com.app.transportation.data.database.entities.SelectorCategory
 import com.app.transportation.databinding.EmptyItemBinding
 import com.app.transportation.databinding.ItemAdvertCategoryTextItemBinding
@@ -42,7 +39,7 @@ import com.app.transportation.databinding.ItemCategoryImageBinding
      }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-ctx = parent.getContext()
+ctx = parent.context
         val layoutInflater = LayoutInflater.from(parent.context)
         return if (viewType == 2&&mode!=4)
             CategoryViewHolder(ItemCategoryBinding.inflate(layoutInflater, parent, false))
@@ -119,10 +116,10 @@ ctx = parent.getContext()
                 viewState[item.realId] = false
             }
             if (mode==1){
-                binding.button.setOnClickListener(View.OnClickListener {
+                binding.button.setOnClickListener {
                     viewState[item.realId] = viewState[item.realId] != true
                     notifyDataSetChanged()
-                })
+                }
             }
             binding.button.text = item.name
         }
@@ -142,14 +139,14 @@ ctx = parent.getContext()
                     notifyDataSetChanged()
                 })
             }
-            var imgs : TypedArray = ctx.getResources().obtainTypedArray(R.array.myDrawables);
+            val imgs : TypedArray = ctx.resources.obtainTypedArray(R.array.myDrawables)
 
             binding.catimage.setImageResource(imgs.getResourceId(imgTableIds.getValue(item.realId), 0))
             binding.category.text = item.name
         }
     }
 
-    inner class EmptyViewHolder(private val binding: EmptyItemBinding) :
+    inner class EmptyViewHolder(binding: EmptyItemBinding) :
     RecyclerView.ViewHolder(binding.root){
         fun bind(item: SelectorCategory){
 

@@ -23,5 +23,7 @@ data class OrderFullDTO(
     val name: String,
     val phone: String,
     val payment: String,
-    val photo: Map<String, String>
+    val photo: Map<String, String>,
+    @SerialName("bussiness") val bussiness: String?,
+    @SerialName("bussiness_update") val bussiness_update: String?
 )
