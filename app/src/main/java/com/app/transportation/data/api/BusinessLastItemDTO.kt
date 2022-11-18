@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BusinessLastItemDTO (
+    @SerialName("id") val id: String,
     @SerialName("category") val category: String,
     @SerialName("price") val price: String,
     @SerialName("photo") val photo: String

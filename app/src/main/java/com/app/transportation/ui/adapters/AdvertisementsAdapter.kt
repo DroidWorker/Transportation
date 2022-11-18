@@ -117,6 +117,10 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
                 time.visibility = View.GONE
             }
             if (price.text == "-1") price.visibility = View.GONE
+            item.options.forEach{
+                if(it.option_id=="2")
+                    backLayout.setBackgroundResource(R.drawable.card_gradient)
+            }
         }
 
     }

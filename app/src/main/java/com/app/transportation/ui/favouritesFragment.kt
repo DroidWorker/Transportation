@@ -67,6 +67,7 @@ class favouritesFragment : Fragment() {
     private fun applyObservers() = viewLifecycleOwner.repeatOnLifecycle {
         var list : ArrayList<Advert> = ArrayList()
         viewModel.cachedAdvertFavorite.collectWithLifecycle(viewLifecycleOwner){
+            if (it.firstOrNull()?.title=="Избранного не найдено"&& adapter.itemCount>0) return@collectWithLifecycle
             if (it.isEmpty())
             else if (it[0].viewType==2&&adapter.itemCount>0)
                 b.progressBar.visibility=View.GONE
@@ -82,9 +83,11 @@ class favouritesFragment : Fragment() {
                 b.progressBar.visibility=View.GONE
             }
             else {
+                if (it.firstOrNull()?.title=="Избранного не найдено"&& adapter.itemCount>0) return@collectWithLifecycle
+                var list = (adapter.currentList.toMutableList())
                 list.addAll(it)
                 b.progressBar.visibility = View.GONE
-                adapter.submitList(list.toList())
+                adapter.submitList(list)
             }
         }
     }

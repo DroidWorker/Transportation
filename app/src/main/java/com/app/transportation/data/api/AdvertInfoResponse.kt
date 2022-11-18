@@ -14,6 +14,7 @@ sealed class AdvertInfoResponse {
         val category: String,
         val title: String,
         val price: String,
+        @SerialName("city") val city: String,
         val description: String,
         val photo: Map<String, String>
     ) : AdvertInfoResponse()

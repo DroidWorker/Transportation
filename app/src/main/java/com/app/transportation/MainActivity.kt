@@ -207,8 +207,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 snackbar.show()
             }
         }
-
-        viewModel.getOrderCountNews()
     }
 
     private fun applyListeners() {

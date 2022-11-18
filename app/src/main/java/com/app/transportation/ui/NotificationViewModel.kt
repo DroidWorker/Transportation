@@ -44,8 +44,12 @@ class NotificationViewModel(ctx : Context) {
                         var description: String = it.value.dataId
                         val title = when (it.value.type) {
                             "ORDER" -> {
-                                description = "пользователь ${it.value.userId} оставил заявку"
+                                description = "пользователь ${it.value.userName} оставил заявку"
                                 "новая заявка на ваше объявление"
+                            }
+                            "ADVERT" -> {
+                                description = "был опубликован новый заказ в вашей категории: #${it.value.dataId}"
+                                "новый заказ в вашей категории"
                             }
                             else -> "новое уведомление"
                         }

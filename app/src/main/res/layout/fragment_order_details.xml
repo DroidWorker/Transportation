@@ -15,6 +15,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_favourites"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/orderName"
         app:layout_constraintEnd_toEndOf="@+id/fromLocationIcon"
         app:layout_constraintStart_toStartOf="parent"

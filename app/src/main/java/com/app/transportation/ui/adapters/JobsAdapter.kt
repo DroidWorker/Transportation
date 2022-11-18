@@ -24,6 +24,7 @@ import org.koin.core.qualifier.named
 import org.koin.java.KoinJavaComponent.inject
 
 class JobsAdapter : ListAdapter<BusinessLastItemDTO, JobsAdapter.ViewHolder>(DiffCallback()) {
+    var onClick: (String.() -> Unit)? = null
     public var mode:Boolean = false;//day
     lateinit var ctx : Context
     init {
@@ -78,6 +79,9 @@ class JobsAdapter : ListAdapter<BusinessLastItemDTO, JobsAdapter.ViewHolder>(Dif
                 }
                 title.text = item.category
                 price.text = item.price+" p"
+                iemJOb.setOnClickListener{
+                    item.id?.let { id -> onClick?.invoke(id) }
+                }
             }
 
     }

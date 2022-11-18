@@ -81,7 +81,7 @@ class OrderDetailsFragment : Fragment() {
                 if (options.isNotEmpty()){
                     options.forEach{
                         if(it.option_id=="-1"&&it.status=="ACTIVE"){
-                            b.addToFavourites2.visibility = View.GONE
+                            b.addToFavourites2.visibility = View.VISIBLE
                             return@forEach
                         }
                     }

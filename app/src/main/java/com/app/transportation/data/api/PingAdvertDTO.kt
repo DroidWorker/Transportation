@@ -14,6 +14,7 @@ data class PingAdvertDTO(
     val category: String,
     @SerialName("title")val title: String,
     @SerialName("price")val price: String,
+    @SerialName("city") val city: String,
     @SerialName("description")val description: String,
     val photo: Map<String, String>,
     @SerialName("ping")val ping: List<@Contextual PingDTO>

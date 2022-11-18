@@ -66,6 +66,10 @@ class AdvertisementsFragment : Fragment() {
             b.filter.visibility = View.GONE
         }
 
+        adapter1.onscrollBottom = {
+            b.servicesRV.smoothScrollToPosition(adapter1.itemCount)//scrollToPosition(it+2)
+        }
+
         (activity as? MainActivity)?.apply {
             /*b.title.text =
                 viewModel.advertCategoriesFlow.value.find { it.id == categoryId }?.name
@@ -74,6 +78,7 @@ class AdvertisementsFragment : Fragment() {
                 b.title.text = "я заказчик"
             else
                 b.title.text = "я исполнитель"
+            if (type == 0) b.title.text = "я заказчик"
             b.toolbars.isVisible = true
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
@@ -113,7 +118,7 @@ class AdvertisementsFragment : Fragment() {
             b.servicesRV.adapter = adapter
 
             adapter.onClick = {
-                if (viewModel.isCustomer.value == true) {
+                if (viewModel.isCustomer.value == true || type == 2) {
                     viewModel.cachedAdvert.tryEmit(this)
                     findNavController().navigate(R.id.advertDetailsFragment)//not use here
                 } else {
@@ -142,12 +147,14 @@ class AdvertisementsFragment : Fragment() {
         else {//if customer
             b.servicesRV.adapter = adapter1
             adapter1.mode=4
+            println("cuuuucustomer")
 
             adapter1.onClick = { i: Int, i1: Int ->
                 var ParentId: Int = i
                 var ItemId: Int = i1
 
                 if (adapter1.parentIds.contains(i1)) {
+                    println("cuuuuu4level")
                     findNavController().navigate(R.id.createOrderCategorySelectorFragment, bundleOf("id" to ItemId, "mode" to 2))
                 }
                 else{
@@ -276,7 +283,7 @@ class AdvertisementsFragment : Fragment() {
                 var list : ArrayList<SelectorCategory> = ArrayList()
                 if (orderItemShouldOpenId!=0){
                     it.forEach{ item ->
-                        if (item.realId==orderItemShouldOpenId||item.parentId==orderItemShouldOpenId){
+                        if (item.realId==orderItemShouldOpenId||item.parentId==orderItemShouldOpenId||item.level==4){
                             list.add(item)
                         }
                     }

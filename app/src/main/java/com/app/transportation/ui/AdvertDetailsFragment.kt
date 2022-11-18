@@ -60,14 +60,15 @@ class AdvertDetailsFragment : Fragment() {
 
     private fun applyObservers() = viewLifecycleOwner.repeatOnLifecycle {
         viewModel.cachedAdvert.collect(this) { advert ->
-            viewModel.getProfile(advert?.userId ?: "")
+            if (advert!=null) viewModel.getProfile(advert?.userId ?: "")
             advert?.apply {
+                b.progressBar4.visibility = View.GONE
                 b.title.text = title
                 b.addToFavourites.setColorFilter(0)
                 b.addToFavourites.tag = id
                 b.name.text = "Какое-то имя"
                 b.telNumber.text = "Какой-то номер"
-                b.location.text = "Какое-то местоположение"
+                b.location.text = fromCity
                 b.imageNumber.text = ""
                 b.price.text = price
                 b.description.text = description
@@ -75,7 +76,7 @@ class AdvertDetailsFragment : Fragment() {
                 if (options.isNotEmpty()){
                     options.forEach{
                         if(it.option_id=="-1"&&it.status=="ACTIVE"){
-                            b.addToFavourites.visibility = View.GONE
+                            b.addToFavourites.visibility = View.VISIBLE
                             return@forEach
                         }
                     }
@@ -84,7 +85,7 @@ class AdvertDetailsFragment : Fragment() {
         }
         viewModel.cachedProfile.collect(this){
             b.name.text = it.firstName
-            b.location.text = it.location
+            //b.location.text = it.location
             b.telNumber.text = it.phone
         }
         viewModel.adfTempPhotoUris.collect(this) {

@@ -104,7 +104,7 @@ class CreatingAdvertisementFragment : Fragment() {
                         EditCatId = item.id
                         b.advertTitle.setText(item.title)
                         b.price.setText(item.price)
-                        b.location.text = viewModel.profileFlow.value?.cityArea
+                        b.location.text = item.fromCity
                         if (b.description.text.isEmpty()) {
                             b.descriptionGroup.isVisible = item.description.isNotBlank()
                             b.addDescription.isVisible = item.description.isBlank()
@@ -207,6 +207,7 @@ class CreatingAdvertisementFragment : Fragment() {
                     ctx = context,
                     title = b.advertTitle.text.toString(),
                     price = b.price.text.toString(),
+                    city = viewModel.profileFlow.value?.cityArea ?: "",
                     description = b.description.text.toString(),
                     categoryId = if (b.spinnerSelectCategory.isVisible)
                         catsID.getValue(selectedCat!!)

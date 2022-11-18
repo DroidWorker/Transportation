@@ -21,6 +21,7 @@ import com.app.transportation.databinding.ItemCategoryImageBinding
     ListAdapter<SelectorCategory, RecyclerView.ViewHolder>(DiffCallback()) {
     var mode = 0//0-call from cabinet 1-call from main screen 2-show 4level categories 4-CategoryImageAdapter
     var onClick: ((Int, Int) -> Unit)? = null
+     var onscrollBottom: ((Int) -> Unit)? = null
 
     var viewState : HashMap<Int, Boolean> = HashMap<Int, Boolean>()
     var parentIds : ArrayList<Int> = ArrayList<Int>()
@@ -137,6 +138,9 @@ ctx = parent.context
                 binding.frameLayout.setOnClickListener(View.OnClickListener {
                     viewState[item.realId] = viewState[item.realId] != true
                     notifyDataSetChanged()
+                    if (item.realId==24){
+                        onscrollBottom?.invoke(layoutPosition)
+                    }
                 })
             }
             val imgs : TypedArray = ctx.resources.obtainTypedArray(R.array.myDrawables)

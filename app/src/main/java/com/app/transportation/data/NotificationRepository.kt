@@ -38,7 +38,7 @@ class NotificationRepository (ctx : Context){
             NoticeResponce.Success(map)
         }.getOrElse {
             if (responseBody.contains("message\":\"Empty")){
-                return@getOrElse NoticeResponce.Success(mapOf("0" to NoticeDTO("0","empty", "empty", "0")))
+                return@getOrElse NoticeResponce.Success(mapOf("0" to NoticeDTO("0","empty", "empty", "empty", "0")))
             }
             println("notice = $it")
             json.decodeFromString<NoticeResponce.Failure>(responseBody)

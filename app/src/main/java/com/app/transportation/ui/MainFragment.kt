@@ -84,6 +84,7 @@ class MainFragment : Fragment() {
         }
         viewModel.getAdvertCatsList()
         viewModel.getBusinessLast()
+        viewModel.getOrderCountNews()
 
         applyVPAdapter()
 
@@ -99,25 +100,6 @@ class MainFragment : Fragment() {
     private fun applyVPAdapter() {
         val pageMarginPx = resources.getDimensionPixelOffset(R.dimen.pageMargin)
         val offsetPx = resources.getDimensionPixelOffset(R.dimen.offset)
-        /*b.viewPager.apply {
-            //setPageTransformer(MarginPageTransformer(50))
-            clipToPadding = false
-            clipChildren = false
-            offscreenPageLimit = 3
-            //setPadding(0, 0, offsetPx*2 + pageMarginPx, 0)
-            b.viewPager.setPageTransformer { page, position ->
-                val offset = position * -(2 * offsetPx + pageMarginPx)
-                if (b.viewPager.orientation == ORIENTATION_HORIZONTAL) {
-                    page.translationX =
-                        if (ViewCompat.getLayoutDirection(b.viewPager) == ViewCompat.LAYOUT_DIRECTION_RTL)
-                            -offset
-                        else {
-                            if (b.advertisementsVP.currentItem == 0) offset-80 else offset+180
-                        }
-                } else
-                    page.translationY = offset
-            }
-        }*/
         b.viewPager.addItemDecoration(RVDecoration(25, false))
         when(prefs.getString("appTheme", "system")){
             "light"->jobsAdapter.mode=false
@@ -125,6 +107,13 @@ class MainFragment : Fragment() {
         }
         b.viewPager.adapter = jobsAdapter
         jobsAdapter.ctx = requireContext()
+        jobsAdapter.apply {
+            onClick = {
+                viewModel.cachedAdvert.tryEmit(null)
+                viewModel.getAdvertById(this)
+                findNavController().navigate(R.id.advertDetailsFragment)
+            }
+        }
     }
 
     private fun applyRVAdapter() {
@@ -136,6 +125,7 @@ class MainFragment : Fragment() {
         }
         serviceTypeAdapter.onClick = {
             //TODO some refresh things in this fragment
+            viewModel.resetOrderCountNews(this.toString())
             lastCheckedCategoryId = this
             serviceTypeAdapter.lastCheckedCategoryId = this
             serviceTypeAdapter.notifyDataSetChanged()
@@ -213,6 +203,7 @@ class MainFragment : Fragment() {
     }
 
     private fun applyListeners() {
+
         b.imCustomer.setOnClickListener {
             isCustomer = true
             findNavController().navigate(R.id.advertisementsFragment,

@@ -6,6 +6,7 @@ import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
+import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -57,6 +58,7 @@ class ProfileFragment : Fragment() {
     var bview : View? = null
 
     lateinit var ctx : Context
+    var photoFlag = false
 
     private val id by lazy { arguments?.getLong("id") ?: 0L }
 
@@ -147,7 +149,7 @@ class ProfileFragment : Fragment() {
                 userEmail = email
                 b.name.text = name
                 b.login.text = login
-                if (profile.bussiness.contains("ACTIVE")){
+                if (profile.bussiness.contains("ACTIVE")&&!profile.bussiness.contains("NO")){
                     b.payment.isClickable = false
                     b.payment.text = "Бизнес аккаунт:\nтариф универсал"
                     if (profile.bussiness.contains("|")&&!profile.bussiness.contains("null")) {
@@ -156,11 +158,12 @@ class ProfileFragment : Fragment() {
                         val formatter = SimpleDateFormat("dd.MM.yyyy hh:mm", Locale.ENGLISH)
                         formatter.parse(dateTo)?.let { cal.time = it }
                         cal.add(Calendar.DATE, 30)
-                        val resstr = "Бизнесс аккаунт будет отключен через ${cal.get(Calendar.DAY_OF_MONTH)} дней ${cal.get(Calendar.HOUR)} часов"
+                        val resstr = "Бизнесс аккаунт будет отключен ${cal.get(Calendar.DAY_OF_MONTH)} ${cal.getDisplayName(Calendar.MONTH, Calendar.LONG_FORMAT, Locale("ru"))}"
                         b.bussinessTerm.setText(resstr)
+                        b.paymentCardLayout.visibility = View.VISIBLE
                     }
                     else{
-                        b.bussinessTerm.visibility = View.GONE
+                        b.paymentCardLayout.visibility = View.GONE
                     }
                 }
 
@@ -208,9 +211,10 @@ class ProfileFragment : Fragment() {
     private fun applyListeners() {
         viewModel.profilePhotoUri.collectWithLifecycle(viewLifecycleOwner) {
             it.second.getOrNull(it.first)?.let { uri ->
+                viewModel.cafApplyPhotoByUri(uri)
                 b.avatar.scaleType = ImageView.ScaleType.CENTER_CROP
                 b.avatar.setImageURI(uri)
-                b.avatar.tag = 1
+                b.avatar.tag = if(photoFlag) 2 else 0
             }
             checkIfProfileChanged()
         }
@@ -262,18 +266,32 @@ class ProfileFragment : Fragment() {
                         photos.add("'data:image/jpg;base64,$base64String'")
                     }
                 }
-                viewModel.editProfile(
-                    name = b.nameET.text.toString(),
-                    telNumber = b.telNumberET.text.toString(),
-                    email = b.emailET.text.toString(),
-                    paymentCard = "",
-                    cityArea = b.cityAreaET.text.toString(),
-                    avatar = photos
-                )
+                if(b.avatar.tag==2) {
+                    viewModel.editProfile(
+                        name = b.nameET.text.toString(),
+                        telNumber = b.telNumberET.text.toString(),
+                        email = b.emailET.text.toString(),
+                        paymentCard = "",
+                        cityArea = b.cityAreaET.text.toString(),
+                        avatar = photos
+                    )
+                }
+                else{
+                    viewModel.editProfile(
+                        name = b.nameET.text.toString(),
+                        telNumber = b.telNumberET.text.toString(),
+                        email = b.emailET.text.toString(),
+                        paymentCard = "",
+                        cityArea = b.cityAreaET.text.toString()
+                    )
+                }
+                b.avatar.tag = 0
             }
         }
 
         b.avatar.setOnClickListener{
+            //val position = viewModel.cafTempPhotoUris.value.first
+            //val currentValue = viewModel.cafTempPhotoUris.value.second.getOrNull(position)
             val position = viewModel.cafTempPhotoUris.value.first
             val currentValue = viewModel.cafTempPhotoUris.value.second.getOrNull(position)
             currentValue?.let {
@@ -281,6 +299,7 @@ class ProfileFragment : Fragment() {
                     .setTitle("Удалить фото?")
                     .setPositiveButton("Да") { _, _ ->
                         viewModel.cafRemoveCurrentPhoto()
+                        importViaSystemFE()
                     }
                     .setNegativeButton("Нет") { _, _ -> }
                     .show()
@@ -307,7 +326,7 @@ class ProfileFragment : Fragment() {
         val emailChanged = b.emailET.text.toString() != profile.email
         val paymentCardChanged = false
         val cityAreaChanged = b.cityAreaET.text.toString() != profile.cityArea
-        val avatarChanged = b.avatar.tag == 1
+        val avatarChanged = b.avatar.tag == 2
         /* TODO val avatarChanged = b.avatar.text.toString() != profile.avatar*/
         /* TODOval specializationChanged = b.nameET.text.toString() != profile.specialization*/
         var fieldsChanged = nameChanged || telNumberChanged ||
@@ -316,6 +335,8 @@ class ProfileFragment : Fragment() {
     }
 
     private fun importViaSystemFE() {
+        photoFlag = true
+        println("taaaag1"+b.avatar.tag)
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             .addCategory(Intent.CATEGORY_OPENABLE)
             .setType("*/*")

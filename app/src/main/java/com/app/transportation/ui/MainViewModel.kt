@@ -90,7 +90,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     val cafTempPhotoUris = MutableStateFlow(Pair(0, mutableListOf<Uri>()))
     val adfTempPhotoUris = MutableStateFlow(Pair(0, emptyList<Bitmap>()))
-    val profilePhotoUri = MutableStateFlow(Pair(0, mutableListOf<Uri>()))
+    val profilePhotoUri = MutableStateFlow(Pair(-1, mutableListOf<Uri>()))
 
     val isCustomer = MutableStateFlow(
         prefs.getBoolean("isCustomer", false).takeIf { prefs.contains("isCustomer") }
@@ -148,6 +148,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             null -> Unit
             is AuthTokenNotFoundException -> {
                 messageEvent.tryEmit("401")
+                logout()
             }
             is UnknownHostException -> {
                 messageEvent.tryEmit("Проблемы с интернетом или сервером")
@@ -176,6 +177,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     }
     fun getMyAdverts() = viewModelScope.launch (Dispatchers.IO){
         updateAdverts(true, 0)
+    }
+    fun getAdvertById(id: String) = viewModelScope.launch (Dispatchers.IO){
+        updateCategoryAdvertsFull(true, 0, id)
     }
 
     fun getFeedbackOrdersAdverts() = viewModelScope.launch(Dispatchers.IO){
@@ -390,6 +394,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     fun getOrderCountNews() = viewModelScope.launch (Dispatchers.IO){
         getOrderCount()
     }
+    fun resetOrderCountNews(id: String) = viewModelScope.launch (Dispatchers.IO){
+        repository.resetOrderCountNews(id)
+    }
     fun getBusinessLast() = viewModelScope.launch (Dispatchers.IO){
         getBuisnessSix()
     }
@@ -494,58 +501,70 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
 
     private suspend fun getOrdersPingFull() =
-        (repository.getOrderPingList() as? OrderPingResponse.Success)?.let { response ->
-            response.orderMap.map { entry ->
-                if (entry.key!="empty") {
-                    val photoList: ArrayList<String> = ArrayList()
-                    entry.value.photo.forEach { photoitem ->
-                        photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+        (repository.getOrderPingList() as? OrderPingResponse.Success)?.let { SFresponse ->
+            var response : OrderPingResponse
+            if(SFresponse is OrderPingResponse.Success) {
+                response = SFresponse as OrderPingResponse.Success
+                response.orderMap.map { entry ->
+                    if (entry.key!="empty") {
+                        val photoList: ArrayList<String> = ArrayList()
+                        entry.value.photo.forEach { photoitem ->
+                            photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+                        }
+                        Advert(
+                            id = entry.value.order_id.toInt(),//entry.key.toInt(),
+                            userId = entry.value.user_id,
+                            viewType = 1,
+                            categoryId = advertCategoriesFlow.value.find {
+                                it.id == entry.value.categoryId.toInt()
+                            }?.parentId ?: 4,
+                            category = entry.value.category,
+                            subcategoryId = entry.value.categoryId.toInt(),
+                            title = entry.value.name+"|"+entry.value.phone,
+                            date = entry.value.date,
+                            time = entry.value.time,
+                            fromCity = "${entry.value.fromCity}",
+                            fromRegion = "${entry.value.fromRegion}",
+                            fromPlace = "${entry.value.fromPlace}",
+                            toCity = "${entry.value.toCity}",
+                            toRegion = "${entry.value.toRegion}",
+                            toPlace = "${entry.value.toPlace}",
+                            payment = entry.value.payment!!,
+                            description = entry.value.description,
+                            photo = photoList.toList(),
+                            profile = entry.value.ping,
+                        )
                     }
-                    Advert(
-                        id = entry.value.order_id.toInt(),//entry.key.toInt(),
-                        userId = entry.value.user_id,
-                        viewType = 1,
-                        categoryId = advertCategoriesFlow.value.find {
-                            it.id == entry.value.categoryId.toInt()
-                        }?.parentId ?: 4,
-                        category = entry.value.category,
-                        subcategoryId = entry.value.categoryId.toInt(),
-                        title = entry.value.name+"|"+entry.value.phone,
-                        date = entry.value.date,
-                        time = entry.value.time,
-                        fromCity = "${entry.value.fromCity}",
-                        fromRegion = "${entry.value.fromRegion}",
-                        fromPlace = "${entry.value.fromPlace}",
-                        toCity = "${entry.value.toCity}",
-                        toRegion = "${entry.value.toRegion}",
-                        toPlace = "${entry.value.toPlace}",
-                        payment = entry.value.payment!!,
-                        description = entry.value.description,
-                        photo = photoList.toList(),
-                        profile = entry.value.ping,
-                    )
+                    else
+                    {
+                        Advert(
+                            id = 0,
+                            viewType = 2,
+                            categoryId = 0,
+                            category = "",
+                            subcategoryId = 0,
+                            title = "Откликов не найдено",
+                            date = "",
+                            time = "",
+                            fromCity = "",
+                            fromRegion = "",
+                            fromPlace = "",
+                            toCity = "",
+                            toRegion = "",
+                            toPlace = "",
+                            payment = "",
+                            description = "",
+                            photo = emptyList())
+                    }
                 }
-                else
-                {
-                    Advert(
-                        id = 0,
-                        viewType = 2,
-                        categoryId = 0,
-                        category = "",
-                        subcategoryId = 0,
-                        title = "Откликов не найдено",
-                        date = "",
-                        time = "",
-                        fromCity = "",
-                        fromRegion = "",
-                        fromPlace = "",
-                        toCity = "",
-                        toRegion = "",
-                        toPlace = "",
-                        payment = "",
-                        description = "",
-                        photo = emptyList())
+            }
+            else{
+                response = SFresponse as OrderPingResponse.Failure
+                if (response.message.contains("header not found")) {
+                    messageEvent.tryEmit("401")
+                    null
                 }
+                else null
             }
         }
     private suspend fun getAdvertsPingFull() =
@@ -573,6 +592,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                             time = entry.value.time,
                             price = entry.value.price,
                             photo = photoList.toList(),
+                            fromCity = entry.value.city,
                             profile = entry.value.ping
                         )
                     } else {
@@ -600,9 +620,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
             else{
                 response = SFresponse as AdvertPingResponse.Failure
-                if (response.message=="token is null") {
+                if (response.message.contains("header not found")||response.message == "token is null") {
                     messageEvent.tryEmit("401")
-                    logout()
                     null
                 }
                 else null
@@ -636,23 +655,45 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     private suspend fun updateFavoriteAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
         val list = getAdvertsFavoriteFull()
-        if(list.isNullOrEmpty()){
+        if (authToken == ""){
             messageEvent.tryEmit("401")
-            return@launch
         }
+
         println("adverts Favorite fuuuuuuuuuuul = $list")
 
-        cachedAdvertFavorite.tryEmit(list)
+        if (list != null) {
+            cachedAdvertFavorite.tryEmit(list)
+        }
     }
     private suspend fun updateFavoriteOrdersFull() = viewModelScope.launch(Dispatchers.IO) {
         val list = getOrdersFavoriteFull()
-        if(list.isNullOrEmpty()){
+        if (authToken == ""){
             messageEvent.tryEmit("401")
-            return@launch
+            cachedOrderFavorite.tryEmit(
+                listOf(Advert(
+                id = 0,
+                viewType = 2,
+                categoryId = 0,
+                category = "",
+                subcategoryId = 0,
+                title = "Избранного не найдено",
+                date = "",
+                time = "",
+                fromCity = "",
+                fromRegion = "",
+                fromPlace = "",
+                toCity = "",
+                toRegion = "",
+                toPlace = "",
+                payment = "",
+                description = "",
+                photo = emptyList())))
+                return@launch
         }
-        println("orders Favorite fuuuuuuuuuuul = $list")
-
-        cachedOrderFavorite.tryEmit(list)
+        println("fuuuuuuuul"+list)
+        if (list != null) {
+            cachedOrderFavorite.tryEmit(list)
+        }
     }
 
     private suspend fun updatePingAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
@@ -700,26 +741,36 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     private suspend fun updateCategoryAdvertsFull(
         updateCache: Boolean = false,
-        categoryId: Int = -1
+        categoryId: Int = -1,
+        advertId: String? = null
     ) = viewModelScope.launch(Dispatchers.IO) {
         val list = getAdvertsFull() ?: return@launch
         println("adverts fuuuuuuuuuuul = $list")
 
         advertsSF.tryEmit(list)
-        if (updateCache)
-            cachedAdvertsSF.tryEmit(list.filter {
-                categoryId == it.subcategoryId || categoryId == it.categoryId ||
-                        advertCategoriesFlow.value.find { acf->
-                            acf.id == categoryId
-                        }?.parentId ?: 0 == it.subcategoryId
-            })
+        if (updateCache) {
+            if (advertId == null) {
+                cachedAdvertsSF.tryEmit(list.filter {
+                    categoryId == it.subcategoryId || categoryId == it.categoryId ||
+                            advertCategoriesFlow.value.find { acf ->
+                                acf.id == categoryId
+                            }?.parentId ?: 0 == it.subcategoryId
+                })
+            }
+             else {
+                val adv = list.filter { it.id.toString()==advertId}
+                cachedAdvert.tryEmit(adv.firstOrNull())
+             }
+        }
     }
     private suspend fun updateCategoryOrdersFull(
         updateCache: Boolean = false,
         categoryId: Int = -1
     ) = viewModelScope.launch(Dispatchers.IO) {
         if (categoryId==-1){
+            println("steeeep1")
             val list = getOrdersFull() ?: return@launch
+            println("steeep2")
             getChildrenID(cachedAdvertCategories.value).collect{ ids->
                 cachedOrdersSF.tryEmit(list.filter {
                     ids.contains(it.categoryId) || ids.contains(it.subcategoryId)//categoryId == it.subcategoryId || categoryId == it.categoryId
@@ -731,7 +782,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 val list = getOrdersFull() ?: return@collect
 
                 ordersSF.tryEmit(list)
-
                 if (updateCache)
                     cachedOrdersSF.tryEmit(list.filter {
                         ids.contains(it.categoryId) || ids.contains(it.subcategoryId)//categoryId == it.subcategoryId || categoryId == it.categoryId
@@ -748,14 +798,14 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
                 }
                 var isActiveBussiness = false
-                if(entry.value.bussiness=="ACTIVE"){
+                if(entry.value.bussiness?.contains("NO_ACTIVE") == false){
                     isActiveBussiness = true
                 }
                 val l = listOf<optionDTO>(optionDTO("-1", "bussiness", "0", "ACTIVE"))
                 Advert(
                     id = entry.key.toInt(),
                     userId = entry.value.userId,
-                    viewType = if(photoList.size==0) 0 else 1,
+                    viewType = if(photoList.size==0) 1 else 0,
                     categoryId = advertCategoriesFlow.value.find {
                         it.id == entry.value.categoryId.toInt()
                     }?.parentId ?: 4,
@@ -769,6 +819,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     time = entry.value.time,
                     price = entry.value.price,
                     photo = photoList.toList(),
+                    fromCity = entry.value.city,
                     description = entry.value.description,
                     options = if(isActiveBussiness) (entry.value.options+l) else entry.value.options
                 )
@@ -777,18 +828,27 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     private suspend fun updateAdverts(
         updateCache: Boolean = false,
-        categoryId: Int = -1
+        categoryId: Int = -1,
+        advertId: String? = null
     ) = viewModelScope.launch(Dispatchers.IO) {
         val list = getAdverts() ?: return@launch
-        println("adverts = $list")
+        //println("adverts = $list")
         advertsSF.tryEmit(list)
 
-        if (updateCache)
-            cachedAdvertsSF.tryEmit(
-                if (categoryId!=0)
-                    list.filter { categoryId == it.categoryId }
-                else    list
-            )
+        if (updateCache) {
+            if (advertId.isNullOrEmpty()) {
+                cachedAdvertsSF.tryEmit(
+                    if (categoryId != 0)
+                        list.filter { categoryId == it.categoryId }
+                    else list
+                )
+            } else {
+                println("iiiiiidi"+advertId)
+                val adv = list.filter { it.id.toString()==advertId}
+                println("iiiiiid"+adv)
+                cachedAdvert.tryEmit(adv.firstOrNull())
+            }
+        }
     }
     private suspend fun updateFeedbackAdverts() = viewModelScope.launch(Dispatchers.IO) {
         val list = getFeedbackAdverts() ?: return@launch
@@ -816,10 +876,12 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     date = entry.value.date,
                     time = entry.value.time,
                     price = entry.value.price,
-                    photo = photoList.toList()
+                    photo = photoList.toList(),
+                    fromCity = entry.value.city
                 )
             }
         }
+
     private suspend fun getFeedbackAdverts() =
         (repository.getAdvertList() as? AdvertListResponse.Success)?.let { response ->
             var list : ArrayList<Advert> = ArrayList()
@@ -912,6 +974,38 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     options = if (isActiveBussiness) listOf(optionDTO("-1", "bussiness", "0", "ACTIVE")) else emptyList()
                 )
             }
+        }
+
+    private suspend fun getAdvertInfo(id: String) =
+        (repository.getAdvertInfo(id) as? AdvertInfoResponse.Success)?.let { response ->
+            val photoList : ArrayList<String> = ArrayList()
+            response.photo.forEach{photoitem->
+                photoList.add(photoitem.value.replace("data:image/jpg;base64,", ""))
+            }
+            var isActiveBussiness = true
+            Advert(
+                id = response.id.toInt(),
+                userId = "0",
+                viewType = if(response.photo.isNotEmpty()) 0 else 1,
+                categoryId = advertCategoriesFlow.value.find {
+                    it.id == response.categoryId.toInt()
+                }?.parentId ?: 4,
+                category = response.category,
+                subcategoryId = response.categoryId.toInt(),
+                title = response.description,
+                date = "",
+                time = "",
+                fromCity = "${response.city}",
+                fromRegion = "",
+                fromPlace = "",
+                toCity = "",
+                toRegion = "",
+                toPlace = "",
+                payment = "card",
+                description = response.description,
+                photo = photoList.toList(),
+                options = if (isActiveBussiness) listOf(optionDTO("-1", "bussiness", "0", "ACTIVE")) else emptyList()
+            )
         }
 
     private suspend fun getOrdersMessagefailure() =
@@ -1109,9 +1203,12 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 /*messageEvent.tryEmit("Профиль обновлен!")*/
             is UpdateProfileResponse.Failure -> {
                 when (result.message) {
-                    "Authorization header not found" -> messageEvent.tryEmit(
-                        "Ошибка!" + app.getString(R.string.user_not_found)
-                    )
+                    "Authorization header not found" -> {
+                        messageEvent.tryEmit(
+                            "Ошибка!" + app.getString(R.string.user_not_found)
+                        )
+                        logout()
+                    }
                     "Authorization header is expired" -> messageEvent.tryEmit(
                         "Ошибка! Сессия авторизации истекла!"
                     )
@@ -1139,7 +1236,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         email: String = "",
         cityArea: String = "",
         paymentCard: String = "",
-        avatar: List<String>
+        avatar: List<String>? = null
     ) = viewModelScope.launch(Dispatchers.IO) {
         repository.editProfile(name, telNumber, email, cityArea, paymentCard, avatar)
         delay(1000)
@@ -1297,12 +1394,13 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         ctx: Context?,
         title: String,
         price: String,
+        city: String,
         description: String,
         categoryId: String,
         photos: List<String>,
         options: List<String>
     ) = viewModelScope.launch(Dispatchers.IO) {
-        when (val result = repository.createAdvert(ctx, title, price, description, categoryId, photos, options)) {
+        when (val result = repository.createAdvert(ctx, title, price, city, description, categoryId, photos, options)) {
             is AdvertCreateResponse.Success -> {
                 if (result.id != null)
                     lastAdvertAdded=result.id
@@ -1441,7 +1539,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     fun applyProfilePhotoByUri(uri: Uri) = viewModelScope.launch(Dispatchers.IO) {
         val newValue = profilePhotoUri.value.run {
             Pair(
-                first,
+                first+1,
                 second.toMutableList().apply { add(uri) }
             )
         }

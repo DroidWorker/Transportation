@@ -35,6 +35,8 @@ class NotificationsFragment : Fragment() {
     //private val id by lazy { arguments?.getLong("id") ?: 0L }
 
     var adverts : List<Advert> = emptyList()
+    var orders : List<Advert> = emptyList()
+    var ReadyToloadflag = false
 
     private val prefs: SharedPreferences by inject(named("MainSettings"))
 
@@ -66,10 +68,12 @@ class NotificationsFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel.getMyAdverts()
+        viewModel.getMyOrders()
         //applyInitialData()
 
         viewModel.profileFlow.collectWithLifecycle(viewLifecycleOwner){
-            if (it?.bussiness!="ACTIVE"){
+            println(it)
+            if (it?.bussiness?.contains("ACTIVE") == false){
                 userEmail = it?.email.toString()
                 val popup = PopupWindow(requireContext()).apply {
                     val menuB = PopupMessageBinding.inflate(layoutInflater)
@@ -113,14 +117,46 @@ class NotificationsFragment : Fragment() {
         b.notificationsRV.adapter = adapter
         viewModel.cachedAdvertsSF.collectWithLifecycle(viewLifecycleOwner){
             adverts = it
-            if (it.isNotEmpty())
+            if (it.isNotEmpty()&&ReadyToloadflag)
                 viewModel.getNotice()
+            else
+                ReadyToloadflag = true
+        }
+        viewModel.cachedOrdersSF.collectWithLifecycle(viewLifecycleOwner){
+            orders = it
+            if (it.isNotEmpty()&&ReadyToloadflag)
+                viewModel.getNotice()
+            else
+                ReadyToloadflag = true
         }
         viewModel.cachedNotifications.collectWithLifecycle(viewLifecycleOwner){ it ->
             val notifications : ArrayList<Notification> = ArrayList()
             it.forEach{ entryNotificarion->
-                notifications.add(Notification(entryNotificarion.key.toLong(), entryNotificarion.value.type, "пользователь ${entryNotificarion.value.userId} оставил отклик на ваше объявление ${((adverts.find { it.id.toString() == entryNotificarion.value.dataId})?.title)==null?:"-удалено-"}", entryNotificarion.key.toInt()<=lastCheckedNotificationID!!.toInt()))
-                lastCheckedNotificationID = entryNotificarion.key
+                when(entryNotificarion.value.type)
+                {
+                    "ORDER"-> {
+                        notifications.add(
+                            Notification(
+                                entryNotificarion.key.toLong(),
+                                entryNotificarion.value.type,
+                                "пользователь ${entryNotificarion.value.userId} оставил отклик на ваше объявление ${((adverts.find { it.id.toString() == entryNotificarion.value.dataId })?.title) == null ?: "-удалено-"}",
+                                entryNotificarion.key.toInt() <= lastCheckedNotificationID!!.toInt()
+                            )
+                        )
+                        lastCheckedNotificationID = entryNotificarion.key
+                    }
+                    "ADVERT"->{
+                        notifications.add(
+                            Notification(
+                                entryNotificarion.key.toLong(),
+                                "Новый заказ",
+                                "новый заказ в вашей категории: ",//${((adverts.find { it.id.toString() == entryNotificarion.value.dataId })?.title) ?: "-удалено-"}",
+                                entryNotificarion.key.toInt() <= lastCheckedNotificationID!!.toInt()
+                            )
+                        )
+                        lastCheckedNotificationID = entryNotificarion.key
+                    }
+                }
             }
 
             if (notifications.isEmpty())

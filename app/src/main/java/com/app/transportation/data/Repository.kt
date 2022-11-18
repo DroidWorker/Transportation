@@ -3,6 +3,7 @@ package com.app.transportation.data
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import androidx.lifecycle.ViewModel
 import com.app.transportation.data.api.*
 import com.app.transportation.data.database.MainDao
 import com.app.transportation.data.database.entities.AdvertisementCategory
@@ -104,7 +105,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         email: String = "",
         cityArea: String = "",
         paymentCard: String = "",
-        avatar: List<String>
+        avatar: List<String>?
     ) = kotlin.runCatching {
         val token = authToken ?: return@runCatching
         client.submitForm(
@@ -115,7 +116,9 @@ class Repository(private val dao: MainDao) : KoinComponent {
                 if(email!="") append("email", email)
                 if(paymentCard!="") append("card", paymentCard)
                 if(cityArea!="") append("location", cityArea)
-                if(avatar.isNotEmpty()) append("avatar", "[${avatar.joinToString()}]")
+                if (avatar != null) {
+                    if(avatar?.isNotEmpty()) append("avatar", "[${avatar.joinToString()}]")
+                }
                 //append("status", name)
             }
         ) {
@@ -344,7 +347,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it fav alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                val emty : Map<String, PingAdvertDTO> = mutableMapOf("empty" to PingAdvertDTO("","","","","","","","", "", "", emptyMap(), emptyList()))
+                val emty : Map<String, PingAdvertDTO> = mutableMapOf("empty" to PingAdvertDTO("","", "","","","","","","", "", "", emptyMap(), emptyList()))
                 AdvertPingResponse.Success(emty)
             }
             json.decodeFromString<AdvertPingResponse.Failure>(responseBody)
@@ -374,6 +377,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                 OrderPingResponse.Success(emty)
             }
             else {
+                println("jjjjjjjjj"+responseBody)
                 json.decodeFromString<OrderPingResponse.Failure>(responseBody)
             }
         }
@@ -450,6 +454,28 @@ class Repository(private val dao: MainDao) : KoinComponent {
     }.getOrElse {
         IntIntResponce.Failure(it.stackTraceToString())
     }
+    suspend fun resetOrderCountNews(id: String): InfoMessageResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
+        val response: HttpResponse =
+            client.submitForm(
+                url = "http://api-transport.mvp-pro.top/api/v1/order_count_news_reset",
+                formParameters = Parameters.build {
+                    append("category_id", id)
+                }
+            ) {
+                headers { append("X-Access-Token", token) }
+            }
+        var responseBody: String = response.receive()
+        val json = Json.Default
+
+        kotlin.runCatching {
+            InfoMessageResponse(responseBody)
+        }.getOrElse {
+                InfoMessageResponse(responseBody)
+        }
+    }.getOrElse {
+        InfoMessageResponse(it.stackTraceToString())
+    }
 
     suspend fun getBussinessLast(): businessLastResponce = kotlin.runCatching {
         val response: HttpResponse =
@@ -471,11 +497,10 @@ class Repository(private val dao: MainDao) : KoinComponent {
             }
         }
     }.getOrElse {
-        println("aaaaa1"+it.message)
         businessLastResponce.Failure(it.stackTraceToString())
     }
 
-    suspend fun addAdvertToFavorite(orderId: String): AddFavoriteResponsee = kotlin.runCatching {
+    suspend fun addOrderToFavorite(orderId: String): AddFavoriteResponsee = kotlin.runCatching {
         val token = authToken ?: return@runCatching AddFavoriteResponsee.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
@@ -491,7 +516,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
 
         json.decodeFromString<AddFavoriteResponsee.Success>(responseBody)
     }.getOrElse { AddFavoriteResponsee.Failure(it.stackTraceToString()) }
-    suspend fun addOrderToFavorite(orderId: String): AddFavoriteResponsee = kotlin.runCatching {
+    suspend fun addAdvertToFavorite(orderId: String): AddFavoriteResponsee = kotlin.runCatching {
         val token = authToken ?: return@runCatching AddFavoriteResponsee.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
@@ -526,16 +551,16 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<Map<String, FavAdvertDTO>>(responseBody)
             AdvertFavResponse.Success(map)
         }.getOrElse {
-            println("it fav alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                val emty : Map<String, FavAdvertDTO> = mutableMapOf("empty" to FavAdvertDTO("","","","","","","", "", "", emptyMap()))
+                val emty : Map<String, FavAdvertDTO> = mutableMapOf("empty" to FavAdvertDTO("","","","","","","", "", "", "",emptyMap()))
                 AdvertFavResponse.Success(emty)
             }
+            if (responseBody.contains("header")) authToken = null
             json.decodeFromString<AdvertFavResponse.Failure>(responseBody)
         }
     }.getOrElse {
         if (it.stackTraceToString().contains("Object not found")){
-            val emty : Map<String, FavAdvertDTO> = mutableMapOf("empty" to FavAdvertDTO("","","","","","","", "", "", emptyMap()))
+            val emty : Map<String, FavAdvertDTO> = mutableMapOf("empty" to FavAdvertDTO("","","","","","","", "", "", "",emptyMap()))
             AdvertFavResponse.Success(emty)
          }
         else
@@ -545,7 +570,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching OrderFavResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_get_favorite",
+                url = "http://api-transport.mvp-pro.top/api/v1/order_get_favorite",
             ) {
                 headers { append("X-Access-Token", token) }
             }
@@ -559,10 +584,13 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<Map<String, FavOrderDTO>>(responseBody)
             OrderFavResponse.Success(map)
         }.getOrElse {
-            println("it fav alllllllll = $it")
             if (responseBody.contains("Object not found")){
                 val emty : Map<String, FavOrderDTO> = mutableMapOf("empty" to FavOrderDTO("","","","","","","", "","","","","", "",  "","","","","", emptyMap()))
                 OrderFavResponse.Success(emty)
+            }
+            else if (responseBody.contains("header")) {
+                authToken = null
+                json.decodeFromString<OrderFavResponse.Failure>(responseBody)
             }
             else {
                 json.decodeFromString<OrderFavResponse.Failure>(responseBody)
@@ -572,6 +600,10 @@ class Repository(private val dao: MainDao) : KoinComponent {
         if (it.stackTraceToString().contains("Object not found")){
             val emty : Map<String, FavOrderDTO> = mutableMapOf("empty" to FavOrderDTO("","","","","","","", "","","","","","","","","","","", emptyMap()))
             OrderFavResponse.Success(emty)
+        }
+        else if (it.stackTraceToString().contains("header")) {
+            authToken = null
+            OrderFavResponse.Failure(it.stackTraceToString())
         }
         else
             OrderFavResponse.Failure(it.stackTraceToString())
@@ -793,6 +825,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
     suspend fun createAdvert(ctx: Context? = null,
         title: String,
         price: String,
+                             city: String,
         description: String,
         categoryId: String,
         photos: List<String>,
@@ -806,6 +839,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                 formParameters = Parameters.build {
                     append("title", title)
                     append("price", price)
+                    append("city", city)
                     append("description", description)
                     append("category", categoryId)
                     append("image", "[${photos.joinToString()}]")
@@ -920,13 +954,13 @@ class Repository(private val dao: MainDao) : KoinComponent {
     }
 
     suspend fun getAdvertFullList(): AdvertFullListResponse = kotlin.runCatching {
-        val token = authToken ?: return@runCatching AdvertFullListResponse.Failure("token is null")
+        //val token = authToken ?: return@runCatching AdvertFullListResponse.Failure("token is null")
         val response: HttpResponse =
-            client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_list_common",
-            ) {
+            client.get(
+                "http://api-transport.mvp-pro.top/api/v1/advert_list_common",
+            ) /*{
                 headers { append("X-Access-Token", token) }
-            }
+            }*/
         var responseBody: String = response.receive()
         if (responseBody.contains(",\"photo\":[]")) {
             responseBody = responseBody.replace(",\"photo\":[]", ",\"photo\":{}")
@@ -939,7 +973,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             println("it alllllllll = $it")
             if (responseBody.contains("Object not found")){
-                var emty : Map<String, AdvertFullDTO> = mutableMapOf("empty" to AdvertFullDTO("", "","","","","","","", "", emptyMap(), emptyList(), "NO_ACTIVE", ""))
+                var emty : Map<String, AdvertFullDTO> = mutableMapOf("empty" to AdvertFullDTO("", "","","","","", "","","", "", emptyMap(), emptyList(), "NO_ACTIVE", ""))
                 AdvertFullListResponse.Success(emty)
             }
             json.decodeFromString<AdvertFullListResponse.Failure>(responseBody)
@@ -947,13 +981,13 @@ class Repository(private val dao: MainDao) : KoinComponent {
     }.getOrElse { AdvertFullListResponse.Failure(it.stackTraceToString()) }
 
     suspend fun getOrderFullList(): OrderFullListResponse = kotlin.runCatching {
-        val token = authToken ?: return@runCatching OrderFullListResponse.Failure("token is null")
+        //val token = authToken ?: return@runCatching OrderFullListResponse.Failure("token is null")
         val response: HttpResponse =
-            client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_list_common",
-            ) {
+            client.get(
+                "http://api-transport.mvp-pro.top/api/v1/order_list_common",
+            ) /*{
                 headers { append("X-Access-Token", token) }
-            }
+            }*/
         var responseBody: String = response.receive()
         if (responseBody.contains(",\"photo\":[]")) {
             responseBody = responseBody.replace(",\"photo\":[]", ",\"photo\":{}")
@@ -971,7 +1005,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
             }
             json.decodeFromString<OrderFullListResponse.Failure>(responseBody)
         }
-    }.getOrElse { OrderFullListResponse.Failure(it.stackTraceToString()) }
+    }.getOrElse {  OrderFullListResponse.Failure(it.stackTraceToString()) }
 
     suspend fun getAdvertInfo(id: String): AdvertInfoResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AdvertInfoResponse.Failure("token is null")
