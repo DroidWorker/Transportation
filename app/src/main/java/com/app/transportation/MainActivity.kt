@@ -1,14 +1,13 @@
 package com.app.transportation
 
 import android.Manifest
-import android.app.AlarmManager
-import android.app.NotificationChannel
-import android.app.NotificationManager
-import android.app.PendingIntent
+import android.app.*
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.media.AudioAttributes
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -22,15 +21,13 @@ import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
-import androidx.core.app.ActivityCompat.*
+import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.fragment.NavHostFragment.Companion.findNavController
-import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.app.transportation.core.AlarmReceiver
 import com.app.transportation.core.collectWithLifecycle
@@ -57,7 +54,6 @@ import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
-import java.util.*
 import kotlin.math.roundToInt
 
 
@@ -96,6 +92,14 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
             requestPermissions(this,
                 arrayOf(Manifest.permission.CALL_PHONE),
+                1)
+        }
+        if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_NOTIFICATION_POLICY)
+            != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_NOTIFICATION_POLICY),
                 1)
         }
 
@@ -142,7 +146,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0)
 
         alarmManager.setInexactRepeating(
-            AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 1000, pendingIntent
+            AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 3000, pendingIntent
         )
     }
 
@@ -152,7 +156,15 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             val description = "chaneel for repeater"
             val importance = NotificationManager.IMPORTANCE_HIGH
             val channel = NotificationChannel("trnsp", name, importance)
+            val audioAttributes = AudioAttributes.Builder()
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .build()
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             channel.description = description
+            channel.enableLights(true);
+            channel.enableVibration(true);
+            channel.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION), audioAttributes);
             val notificationManager = getSystemService(NotificationManager::class.java)
             notificationManager.createNotificationChannel(channel)
         }
@@ -392,7 +404,6 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
             val callback = object : VKAuthCallback {
                 override fun onLogin(token: VKAccessToken) {
                     makeSnackbar("авторизация успешна")
-                    println("success")
                     vm.VkAuthToken = token.toString()
 
                     val vkRequest: VKRequest<JSONObject> =

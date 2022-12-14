@@ -11,6 +11,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
@@ -21,6 +22,7 @@ import com.app.transportation.databinding.FragmentFeedbacksRequestsBinding
 import com.app.transportation.ui.adapters.FeedbacksRequestsAdapter
 import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
+
 
 class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -115,14 +117,14 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
         //var list : List<FeedbackRequest>? = listOf()
                 if (feedbacksRequestsActiveTab == "requests") {
                         var arrlist : ArrayList<FeedbackRequest> = ArrayList()
-                        viewModel.cachedOrderPing.collectWithLifecycle(viewLifecycleOwner){
+                    if(view!=null)viewModel.cachedOrderPing.collectWithLifecycle(viewLifecycleOwner){
                             it.toList().forEach{ order ->
                                 if (order.profile.firstOrNull()?.userId==myId)
                                     arrlist.add(FeedbackRequest((order.id.toString()+order.profile.firstOrNull()?.userId).toLong(), order.id,order.profile[0].status?: "",0, order.description, order.toCity+" "+order.toRegion+" "+order.toPlace, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), 0))
                             }
                             adapter.submitList(arrlist.toList())
                         }
-                    viewModel.cachedAdvertPing.collectWithLifecycle(viewLifecycleOwner){
+                    if(view!=null)viewModel.cachedAdvertPing.collectWithLifecycle(viewLifecycleOwner){
                         it.toList().forEach{ order ->
                             if (order.profile.firstOrNull()?.userId==myId)
                                 arrlist.add(FeedbackRequest((order.id.toString()+order.profile.firstOrNull()?.userId).toLong(), order.id, order.profile[0].status?: "",1, order.description, order.category, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
@@ -133,14 +135,14 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
                 }
                 else{
                     var arrlist : ArrayList<FeedbackRequest> = ArrayList()
-                    viewModel.cachedAdvertFeedbackPing.collectWithLifecycle(viewLifecycleOwner){
+                    if(view!=null)viewModel.cachedAdvertFeedbackPing.collectWithLifecycle(viewLifecycleOwner){
                         it.toList().forEach{ order ->
                             if (order.ping.entries.firstOrNull()?.value!="REJECTED"&&order.ping.entries.firstOrNull()?.value!="DONE")
                                 arrlist.add(FeedbackRequest((order.id.toString()+order.ping.entries.firstOrNull()?.key).toLong(), order.id, order.ping.entries.firstOrNull()?.value?: "", 2, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
                         }
                         adapter.submitList(arrlist.toList())
                     }
-                    viewModel.cachedOrderFeedbackPing.collectWithLifecycle(viewLifecycleOwner){
+                    if(view!=null) viewModel.cachedOrderFeedbackPing.collectWithLifecycle(viewLifecycleOwner){
                         it.toList().forEach{ order ->
                             if (order.ping.entries.firstOrNull()?.value!="REJECTED"&&order.ping.entries.firstOrNull()?.value!="DONE")
                                 arrlist.add(FeedbackRequest((order.id.toString()+order.ping.entries.firstOrNull()?.key).toLong(), order.id, order.ping.entries.firstOrNull()?.value?: "",2, order.title, order.description, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
@@ -158,23 +160,6 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
 
         b.requestsTab.setOnClickListener { feedbacksRequestsActiveTab = "requests" }
         b.feedbacksTab.setOnClickListener { feedbacksRequestsActiveTab = "feedbacks" }
-
-        /*b.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                when (tab?.position) {
-                    0 -> feedbacksRequestsActiveTab = "requests"
-                    1 -> feedbacksRequestsActiveTab = "feedbacks"
-                }
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
-
-        })*/
-        /*b.addOfficeItems.setOnClickListener {
-            findNavController().navigate(R.id.serviceListFragment)
-        }*/
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -191,5 +176,6 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
         binding = null
         //popupWindow = null
     }
+
 
 }

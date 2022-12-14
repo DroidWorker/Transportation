@@ -38,9 +38,8 @@ class NotificationRepository (ctx : Context){
             NoticeResponce.Success(map)
         }.getOrElse {
             if (responseBody.contains("message\":\"Empty")){
-                return@getOrElse NoticeResponce.Success(mapOf("0" to NoticeDTO("0","empty", "empty", "empty", "0")))
+                return@getOrElse NoticeResponce.Success(mapOf("0" to NoticeDTO("0","empty", "empty", "empty","", "0")))
             }
-            println("notice = $it")
             json.decodeFromString<NoticeResponce.Failure>(responseBody)
         }
     }.getOrElse {
@@ -61,7 +60,6 @@ class NotificationRepository (ctx : Context){
             val map = json.decodeFromString<OrderDTO>(responseBody)
             OrderInfoResponse.Success(map)
         }.getOrElse {
-            println("orderNotice = $it")
             json.decodeFromString<OrderInfoResponse.Failure>(responseBody)
         }
     }.getOrElse {

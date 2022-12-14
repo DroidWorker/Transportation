@@ -86,11 +86,10 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
                         photo.setBackgroundDrawable(BitmapDrawable(blurred))
                     }
                     catch (ex : Exception){
-                        println("Error: "+ex.message.toString())
                     }
                 }
                 item.options.forEach{
-                    if(it.option_id=="2")
+                    if(it.option_id=="2"&&it.status=="ACTIVE")
                         backLayout.setBackgroundResource(R.drawable.card_gradient)
                 }
                 Unit
@@ -112,15 +111,13 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
                 horizontalBias = if (price.isVisible) 0.5F else 1F
             }
             price.text = item.price.toString()
-            if(date.text == "null"&& time.text == "null"){
-                date.visibility = View.GONE
-                time.visibility = View.GONE
-            }
             if (price.text == "-1") price.visibility = View.GONE
             item.options.forEach{
-                if(it.option_id=="2")
+                if(it.option_id=="2"&&it.status=="ACTIVE")
                     backLayout.setBackgroundResource(R.drawable.card_gradient)
             }
+            if (date.text=="null") date.visibility=View.GONE
+            if (time.text=="null") time.visibility=View.GONE
         }
 
     }

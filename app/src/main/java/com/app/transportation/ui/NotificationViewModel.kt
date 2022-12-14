@@ -1,25 +1,16 @@
 package com.app.transportation.ui
 
 import android.content.Context
-import android.content.SharedPreferences
-import android.widget.Toast
 import androidx.core.content.edit
-import androidx.lifecycle.viewModelScope
 import com.app.transportation.data.NotificationRepository
 import com.app.transportation.data.api.NoticeResponce
 import com.app.transportation.data.api.OrderDTO
 import com.app.transportation.data.api.OrderInfoResponse
-import com.app.transportation.data.database.entities.Advert
 import com.app.transportation.data.database.entities.Notification
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
-import org.koin.core.component.inject
-import org.koin.core.qualifier.named
-import org.koin.java.KoinJavaComponent.inject
-import java.util.stream.Collectors.toList
 
 class NotificationViewModel(ctx : Context) {
     private val repository = NotificationRepository(ctx)
@@ -48,8 +39,8 @@ class NotificationViewModel(ctx : Context) {
                                 "новая заявка на ваше объявление"
                             }
                             "ADVERT" -> {
-                                description = "был опубликован новый заказ в вашей категории: #${it.value.dataId}"
-                                "новый заказ в вашей категории"
+                                description = it.value.text
+                                "Transportation"
                             }
                             else -> "новое уведомление"
                         }
@@ -74,7 +65,6 @@ class NotificationViewModel(ctx : Context) {
     private suspend fun getOrder(id: String){
         val answer = repository.getOrderInfo(id)
         if (answer is OrderInfoResponse.Success){
-            println("nooootifOK002")
             cachedOrder.tryEmit(listOf(answer.order))
         }
     }

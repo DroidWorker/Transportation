@@ -25,7 +25,8 @@ import com.google.android.material.snackbar.Snackbar
 
 class FavouritesAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffCallback()) {
 
-    var onClick: (Advert.() -> Unit)? = null
+    var onDelClick: (Advert.() -> Unit)? = null
+    var onClick: (Advert.() -> Unit)?  = null
 
     lateinit var ctx: Context
 
@@ -69,7 +70,8 @@ class FavouritesAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffCallb
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: Advert) = with(binding) {
-            root.setOnClickListener { onClick?.invoke(item) }
+            addToFavourites3.setOnClickListener { onDelClick?.invoke(item) }
+            root.setOnClickListener{ onClick?.invoke(item)}
 
             addToFavourites3.visibility = View.VISIBLE
             title.text = item.title
@@ -89,7 +91,6 @@ class FavouritesAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffCallb
                     photo.setBackgroundDrawable(BitmapDrawable(blurred))
                 }
                 catch (ex : Exception){
-                    println("Error: "+ex.message.toString())
                 }
             }
             Unit
@@ -101,7 +102,8 @@ class FavouritesAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffCallb
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: Advert) = with(binding) {
-            root.setOnClickListener { onClick?.invoke(item) }
+            addToFavourites4.setOnClickListener { onDelClick?.invoke(item) }
+            root.setOnClickListener{ onClick?.invoke(item)}
 
             addToFavourites4.visibility = View.VISIBLE
             title.text = item.title

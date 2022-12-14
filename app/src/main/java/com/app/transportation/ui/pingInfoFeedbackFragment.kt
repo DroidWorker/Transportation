@@ -8,7 +8,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
-import android.widget.Toast
 import androidx.core.content.edit
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -17,11 +16,8 @@ import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
 import com.app.transportation.core.collectWithLifecycle
-import com.app.transportation.databinding.FragmentOrderDetailsBinding
 import com.app.transportation.databinding.FragmentPingInfoFeedbackBinding
-import com.app.transportation.databinding.FragmentPingInfoRequestsBinding
 import org.koin.android.ext.android.inject
-import org.koin.core.component.inject
 import org.koin.core.qualifier.named
 
 class pingInfoFeedbackFragment : Fragment() {
@@ -147,6 +143,7 @@ class pingInfoFeedbackFragment : Fragment() {
                             b.accept.visibility = View.GONE
                             b.done.visibility = View.VISIBLE
                         }
+                        viewModel.getUserAdvertByCategory(advert.categoryId.toString(), pingOwnerId)
                     }
                     return@collectWithLifecycle
                 }
@@ -163,6 +160,9 @@ class pingInfoFeedbackFragment : Fragment() {
     }
 
     private fun applyListeners() {
+        b.comment3.setOnClickListener{
+            findNavController().navigate(R.id.advertDetailsFragment)
+        }
         b.cancel.setOnClickListener{
             if (isAdvert)
                 viewModel.setPingStatus( pingOwnerId, null, resetStatusOrderId, "REJECTED")

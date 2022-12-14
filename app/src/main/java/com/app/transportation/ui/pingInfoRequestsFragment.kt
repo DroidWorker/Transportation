@@ -3,11 +3,9 @@ package com.app.transportation.ui
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.PopupWindow
-import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -15,8 +13,8 @@ import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
 import com.app.transportation.core.collectWithLifecycle
-import com.app.transportation.databinding.FragmentOrderDetailsBinding
 import com.app.transportation.databinding.FragmentPingInfoRequestsBinding
+import com.app.transportation.databinding.PopupAcceptBinding
 
 class pingInfoRequestsFragment : Fragment() {
 
@@ -28,6 +26,7 @@ class pingInfoRequestsFragment : Fragment() {
     private var popupWindow: PopupWindow? = null
 
     private val id by lazy { arguments?.getInt("id") ?: 0L }
+    private var orderId = 0;
 
 
     override fun onCreateView(
@@ -63,6 +62,7 @@ class pingInfoRequestsFragment : Fragment() {
                 if (advert.id.toString()+advert.profile.firstOrNull()?.userId==id.toString()) {
                     //viewModel.getProfile(advert.userId)
                     advert.apply {
+                        orderId = this.id
                         (activity as? MainActivity)?.apply {
                             b.title.text = advert.category
                         }
@@ -89,7 +89,9 @@ class pingInfoRequestsFragment : Fragment() {
             adverts.forEach{ advert->
                 if (advert.id.toString()+advert.profile.firstOrNull()?.userId==id.toString()) {
                     viewModel.getProfile(advert.userId)
+
                     advert.apply {
+                        orderId = id
                         (activity as? MainActivity)?.apply {
                             b.title.text = advert.category
                         }
@@ -114,7 +116,31 @@ class pingInfoRequestsFragment : Fragment() {
 
     private fun applyListeners() {
         b.cancel.setOnClickListener{
-            findNavController().navigateUp()
+            val popup = PopupWindow(requireContext()).apply {
+                val menuB = PopupAcceptBinding.inflate(layoutInflater)
+                contentView = menuB.root
+                menuB.root.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED)
+
+                setBackgroundDrawable(
+                    ContextCompat.getDrawable(requireContext(), R.drawable.menu_background)
+                )
+
+                menuB.pmButton.setOnClickListener{
+                    viewModel.deleteAdvertPing(orderId)
+                    dismiss()
+                    findNavController().navigateUp()
+                }
+                isOutsideTouchable = true
+                setTouchInterceptor { v, event ->
+                    v.performClick()
+                    return@setTouchInterceptor if (event.action == MotionEvent.ACTION_OUTSIDE) {
+                        dismiss()
+                        true
+                    } else
+                        false
+                }
+                showAtLocation(b.comment3, Gravity.CENTER, 0, 0)
+            }
         }
         b.telNumber3.setOnClickListener{
             val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${b.telNumber3.text}"))

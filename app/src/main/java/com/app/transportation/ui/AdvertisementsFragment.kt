@@ -135,10 +135,11 @@ class AdvertisementsFragment : Fragment() {
             b.servicesRV.adapter = adapter
 
             adapter.onClick = {
-                /*if (viewModel.isCustomer.value == true) {
-                    viewModel.cachedAdvert.tryEmit(this)
+                //if (viewModel.isCustomer.value == true) {
+                    //viewModel.cachedAdvert.tryEmit(this)
+                viewModel.getAdvertById(this.id.toString())
                     findNavController().navigate(R.id.advertDetailsFragment)//not use here
-                } else {
+                /*} else {
                     viewModel.cachedOrder.tryEmit(this)
                     findNavController().navigate(R.id.orderDetailsFragment)
                 }*/
@@ -147,14 +148,12 @@ class AdvertisementsFragment : Fragment() {
         else {//if customer
             b.servicesRV.adapter = adapter1
             adapter1.mode=4
-            println("cuuuucustomer")
 
             adapter1.onClick = { i: Int, i1: Int ->
                 var ParentId: Int = i
                 var ItemId: Int = i1
 
                 if (adapter1.parentIds.contains(i1)) {
-                    println("cuuuuu4level")
                     findNavController().navigate(R.id.createOrderCategorySelectorFragment, bundleOf("id" to ItemId, "mode" to 2))
                 }
                 else{

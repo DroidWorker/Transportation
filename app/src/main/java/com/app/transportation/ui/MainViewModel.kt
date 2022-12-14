@@ -65,6 +65,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     val cachedSearchResult = MutableStateFlow(emptyList<Advert>())
 
+    val cachedTarif = MutableStateFlow(emptyList<TarifDTO>())
+
     val cachedAdvertsSF = MutableStateFlow(emptyList<Advert>())
     val cachedOrdersSF = MutableStateFlow(emptyList<Advert>())
     val cachedFilterCategoriesSF = MutableStateFlow(emptyList<ServiceType>())
@@ -119,7 +121,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             response.resMap.map { entry ->
                 Advert(
                     id = entry.key.toInt(),
-                    viewType = 0,
+                    viewType = 1,
                     categoryId = 0,
                     category = entry.value.category,
                     subcategoryId = 0,
@@ -137,7 +139,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         str: String = ""
     ) = viewModelScope.launch(Dispatchers.IO) {
         val list = getSearched(str) ?: return@launch
-        println("sresult = $list")
 
         if (updateCache)
             cachedSearchResult.tryEmit(list)
@@ -193,6 +194,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         updateFilterThirdLevelCategories(categoryId)
     }
 
+    fun getUserAdvertByCategory(categoryId: String, userId: String) = viewModelScope.launch(Dispatchers.IO) {
+        updateCategoryAdvertsUC(true, categoryId, userId)
+    }
+
     fun getAllCategoryAdverts(categoryId: Int) = viewModelScope.launch(Dispatchers.IO) {
         updateCategoryAdvertsFull(true, categoryId)
         updateFilterThirdLevelCategories(categoryId)
@@ -232,7 +237,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
             is AddFavoriteResponsee.Failure -> {
                 messageEvent.tryEmit("Ошибка! " + result.message)
-                println(result.message)
             }
         }
     }
@@ -250,7 +254,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
             is AddFavoriteResponsee.Failure -> {
                 messageEvent.tryEmit("Ошибка! " + result.message)
-                println(result.message + orderId)
             }
         }
     }
@@ -313,12 +316,11 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         )
         when (result) {
             is AddPingResponse.Success -> {
-                if (result.message == "Success"||result.message == "Not change")
-                    messageEvent.tryEmit(status)
+                //if (result.message == "Success"||result.message == "Not change")
+                    //messageEvent.tryEmit(status)
             }
             is AddPingResponse.Failure -> {
                 messageEvent.tryEmit("Ошибка! "+result.message)
-                println(result.message)
             }
         }
     }
@@ -336,7 +338,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
             is AddPingResponse.Failure -> {
                 messageEvent.tryEmit("Ошибка! "+result.message)
-                println(result.message)
             }
         }
     }
@@ -354,7 +355,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             }
             is AddPingResponse.Failure -> {
                 messageEvent.tryEmit("Ошибка! "+result.message)
-                println(result.message)
             }
         }
     }
@@ -464,7 +464,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     }
                     Advert(
                         id = entry.value.advert_id.toInt(),
-                        viewType = 0,
+                        viewType = if (photoList.size>0) 0 else 1,
                         categoryId = advertCategoriesFlow.value.find {
                             it.id == entry.value.categoryId.toInt()
                         }?.parentId ?: 4,
@@ -474,6 +474,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                         date = entry.value.date,
                         time = entry.value.time,
                         price = entry.value.price,
+                        payment = "advert",
                         photo = photoList.toList()
                     )
                 }
@@ -659,8 +660,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             messageEvent.tryEmit("401")
         }
 
-        println("adverts Favorite fuuuuuuuuuuul = $list")
-
         if (list != null) {
             cachedAdvertFavorite.tryEmit(list)
         }
@@ -690,7 +689,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 photo = emptyList())))
                 return@launch
         }
-        println("fuuuuuuuul"+list)
         if (list != null) {
             cachedOrderFavorite.tryEmit(list)
         }
@@ -698,22 +696,32 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
     private suspend fun updatePingAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
         val list = getAdvertsPingFull()
+        var isInProgress = false
 
         var reslist : ArrayList<Advert> = ArrayList()
+        list?.forEach{
+            it.profile.forEach{p->
+                if (p.status=="PROGRESS") isInProgress=true
+            }
+        }
         list?.forEach{item->
             if (item.profile.size>1){
                 for (i in 0 until item.profile.size){
                     var advert: Advert = item.copy()
                     advert.profile = emptyList()
                     advert.profile= listOf(item.profile[i])
+                    if (item.profile[i].status!="PROGRESS"&&isInProgress) {
+                        advert.profile.firstOrNull()?.firstName = ""
+                        advert.profile.firstOrNull()?.lastName = ""
+                        advert.profile.firstOrNull()?.phone = ""
+                    }
                     //advert.id = (item.id.toString()+""+i.toString()).toInt()
                     reslist.add(advert)
-                }
+                    }
             }
             else
                 reslist.add(item)
         }
-        //println("adverts ping fuuuuuuuuuuul = $list")
 
         cachedAdvertPing.tryEmit(reslist)
     }
@@ -734,9 +742,20 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             else
                 reslist.add(item)
         }
-        //println("orders ping fuuuuuuuuuuul = $list")
 
         cachedOrderPing.tryEmit(reslist)
+    }
+
+    private suspend fun updateCategoryAdvertsUC(
+    updateCache: Boolean = false,
+    categoryId: String = "0",
+    userId: String = "0"
+    ) = viewModelScope.launch(Dispatchers.IO) {
+        val list = getAdvertsFull() ?: return@launch
+
+        cachedAdvert.tryEmit((list.filter {
+            it.categoryId.toString()==categoryId&&it.userId==userId
+        }).firstOrNull())
     }
 
     private suspend fun updateCategoryAdvertsFull(
@@ -745,7 +764,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         advertId: String? = null
     ) = viewModelScope.launch(Dispatchers.IO) {
         val list = getAdvertsFull() ?: return@launch
-        println("adverts fuuuuuuuuuuul = $list")
 
         advertsSF.tryEmit(list)
         if (updateCache) {
@@ -768,9 +786,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         categoryId: Int = -1
     ) = viewModelScope.launch(Dispatchers.IO) {
         if (categoryId==-1){
-            println("steeeep1")
             val list = getOrdersFull() ?: return@launch
-            println("steeep2")
             getChildrenID(cachedAdvertCategories.value).collect{ ids->
                 cachedOrdersSF.tryEmit(list.filter {
                     ids.contains(it.categoryId) || ids.contains(it.subcategoryId)//categoryId == it.subcategoryId || categoryId == it.categoryId
@@ -832,7 +848,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         advertId: String? = null
     ) = viewModelScope.launch(Dispatchers.IO) {
         val list = getAdverts() ?: return@launch
-        //println("adverts = $list")
         advertsSF.tryEmit(list)
 
         if (updateCache) {
@@ -843,9 +858,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     else list
                 )
             } else {
-                println("iiiiiidi"+advertId)
                 val adv = list.filter { it.id.toString()==advertId}
-                println("iiiiiid"+adv)
+
                 cachedAdvert.tryEmit(adv.firstOrNull())
             }
         }
@@ -922,7 +936,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         categoryId: Int = -1
     ) = viewModelScope.launch(Dispatchers.IO) {
         val list = getOrders() ?: return@launch
-        println("orders = $list")
         ordersSF.tryEmit(list)
 
         if (updateCache)
@@ -1108,7 +1121,6 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
             var index = 0L
             val oders = getOrders()
             val adverts = getAdverts()
-            //getOrdersMessagefailure()?.let { it1 -> messageEvent.tryEmit("MVM865"/*+it1*/) }
             firstLevelCatsDeferred.await().forEach {
                 list.add(
                     ProfileRvItem(
@@ -1197,22 +1209,16 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
 
 
     fun updateProfile() = viewModelScope.launch(Dispatchers.IO) {
-        //messageEvent.tryEmit("Обновление профиля...")
         when (val result = repository.updateProfile()) {
             is UpdateProfileResponse.Success -> Unit
-                /*messageEvent.tryEmit("Профиль обновлен!")*/
             is UpdateProfileResponse.Failure -> {
-                when (result.message) {
-                    "Authorization header not found" -> {
-                        messageEvent.tryEmit(
-                            "Ошибка!" + app.getString(R.string.user_not_found)
-                        )
-                        logout()
-                    }
-                    "Authorization header is expired" -> messageEvent.tryEmit(
-                        "Ошибка! Сессия авторизации истекла!"
+                if (result.message.contains("Authorization header not found")) {
+                    messageEvent.tryEmit(
+                        "401"//"Ошибка!" + app.getString(R.string.user_not_found)
                     )
-                }
+                    logout()
+                } else if (result.message.contains("Authorization header is expired"))
+                    "Ошибка! Сессия авторизации истекла!"
                 //TODO need to re-authorize to obtain token
             }
         }
@@ -1248,6 +1254,17 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         logoutSF.tryEmit("")
     }
 
+    private suspend fun getTarif(){
+        (repository.getTarif() as? TarifResponce.Success)?.let { response ->
+            var listt : ArrayList<TarifDTO> = ArrayList()
+            response.tarif.forEach{
+                listt.add(it.value)
+            }
+            cachedTarif.tryEmit(listt.toList())
+            listt
+        }
+    }
+
     private suspend fun getNotification(){
         (repository.getNotice() as? NoticeResponce.Success)?.let { response ->
             cachedNotifications.tryEmit(response.notice)
@@ -1263,6 +1280,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 else -> messageEvent.tryEmit("Ошибка при удалении оповещения!")
             }
         }
+
+    fun getTarifs() = viewModelScope.launch (Dispatchers.IO){
+        getTarif()
+    }
 
     fun getNotice() = viewModelScope.launch(Dispatchers.IO) {
         getNotification()
@@ -1416,9 +1437,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     title: String,
                    price: String,
                    description: String,
-                   photos: List<String>)=
+                   photos: List<String>,
+                    options: List<String>)=
         viewModelScope.launch(Dispatchers.IO) {
-            when (val result = repository.editAdvert(id, title, price, description, photos)) {
+            when (val result = repository.editAdvert(id, title, price, description, photos, options)) {
                 is AdvertCreateResponse.Success -> {
                         messageEvent.tryEmit("Объявление изменено!")
                 }

@@ -64,7 +64,6 @@ class CreateOrderCategorySelectorFragment : Fragment() {
     private fun applyAdapters() {
         b.rv.adapter = adapter
         adapter.onscrollBottom = {
-            println("gggggggg")
             b.rv.scrollTo(0, b.rv.height)
         }
 

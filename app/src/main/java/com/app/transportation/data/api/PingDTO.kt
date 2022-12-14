@@ -6,8 +6,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class PingDTO (
     @SerialName("user_id")val userId: String,
-    @SerialName("first_name")val firstName: String,
-    @SerialName("last_name")val lastName: String,
-    @SerialName("phone")val phone: String,
+    @SerialName("first_name")var firstName: String,
+    @SerialName("last_name")var lastName: String,
+    @SerialName("phone")var phone: String,
     @SerialName("status")val status: String?
 )

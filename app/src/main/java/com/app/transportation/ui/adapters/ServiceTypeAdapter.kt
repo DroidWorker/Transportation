@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -12,6 +13,7 @@ import com.app.transportation.data.database.entities.AdvertisementCategory
 import com.app.transportation.data.database.entities.ServiceType
 import com.app.transportation.databinding.ItemServiceTypeBinding
 import com.app.transportation.main.core.selection.ItemDetailsLookup
+import com.app.transportation.ui.MainViewModel
 
 class ServiceTypeAdapter : ListAdapter<AdvertisementCategory, ServiceTypeAdapter.ViewHolder>(DiffCallback()) {
 
@@ -19,7 +21,7 @@ class ServiceTypeAdapter : ListAdapter<AdvertisementCategory, ServiceTypeAdapter
 
     var lastCheckedCategoryId = 0
 
-    var newsCount : Map<Int, Int> = emptyMap()
+    var newsCount : MutableMap<Int, Int> = emptyMap<Int, Int>().toMutableMap()
 
     init {
         setHasStableIds(true)
@@ -53,7 +55,11 @@ class ServiceTypeAdapter : ListAdapter<AdvertisementCategory, ServiceTypeAdapter
                         ContextCompat.getColor(itemView.context, R.color.service_type_background)
                 )
 
-                root.setOnClickListener { onClick?.invoke(item.id) }
+                root.setOnClickListener {
+                    newsCount[item.id] = 0
+                    onClick?.invoke(item.id)
+
+                }
                 //root.setOnClickListener{                }
 
                 serviceType.text = item.name

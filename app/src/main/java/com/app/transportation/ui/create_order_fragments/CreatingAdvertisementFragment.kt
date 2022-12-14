@@ -168,6 +168,10 @@ class CreatingAdvertisementFragment : Fragment() {
                         viewModel.messageEvent.tryEmit("Не заполнено поле с ценой")
                         return@setOnClickListener
                     }
+                    b.description.text.isBlank() ->{
+                        viewModel.messageEvent.tryEmit("Не заполнено описание")
+                        return@setOnClickListener
+                    }
                 }
                 val photos = mutableListOf<String>()
                 viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
@@ -268,13 +272,36 @@ class CreatingAdvertisementFragment : Fragment() {
                         photos.add("'data:image/jpg;base64,$base64String'")
                     }
                 }
+                var optionList: ArrayList<String> = ArrayList()
+                var summ: Int = 0
+                if (b.photoInShowcaseCB.isChecked) {
+                    optionList.add("1")
+                    summ+=5000
+                }
+                if (b.colorHighlightingCB.isChecked) {
+                    optionList.add("2")
+                    summ+=3000
+                }
+                if (b.newOrderNotificationCB.isChecked) {
+                    optionList.add("3")
+                    summ+=5000
+                }
                 viewModel.editAdvert(
                     id = EditCatId.toString(),
                     title = b.advertTitle.text.toString(),
                     price = b.price.text.toString(),
                     description = b.description.text.toString(),
-                    photos = photos
+                    photos = photos,
+                    optionList.toList()
                 )
+                if (summ>0) {
+                    val payIntent = Intent(activity, PaymentActivity::class.java)
+                    payIntent.putExtra("summ", summ);
+                    payIntent.putExtra("mode", 2)
+                    payIntent.putExtra("id", userId?.toInt())
+                    payIntent.putExtra("email", userEmail)
+                    startActivity(payIntent)
+                }
                 findNavController().navigateUp()
             }
         }

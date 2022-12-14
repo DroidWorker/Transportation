@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
 import com.app.transportation.core.collectWithLifecycle
@@ -93,7 +94,7 @@ class favouritesFragment : Fragment() {
     }
 
     private fun applyListeners() {
-        adapter.onClick = {
+        adapter.onDelClick = {
             if (this.description.isNotBlank())
                 viewModel.deleteAdvertFavorite(this.id)
             else
@@ -102,6 +103,16 @@ class favouritesFragment : Fragment() {
             viewModel.cachedOrderFavorite.tryEmit(emptyList())
             viewModel.getAdvertsFavorite()
             viewModel.getOrdersFavorite()
+        }
+        adapter.onClick = {
+            if (payment=="advert") {
+                viewModel.getAdvertById(id.toString())
+                findNavController().navigate(R.id.advertDetailsFragment)
+            }
+            else{
+                viewModel.cachedOrder.tryEmit(this)
+                findNavController().navigate(R.id.orderDetailsFragment)
+            }
         }
     }
 

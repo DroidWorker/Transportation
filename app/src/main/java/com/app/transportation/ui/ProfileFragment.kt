@@ -60,6 +60,8 @@ class ProfileFragment : Fragment() {
     lateinit var ctx : Context
     var photoFlag = false
 
+    var businessPrice = -1
+
     private val id by lazy { arguments?.getLong("id") ?: 0L }
 
     private val prefs: SharedPreferences by inject(named("MainSettings"))
@@ -92,6 +94,7 @@ class ProfileFragment : Fragment() {
         }
         viewModel.updateMainFragmentData()
         viewModel.updateProfile()
+        viewModel.getTarifs()
         ctx = requireActivity()
         bview = view
         super.onViewCreated(view, savedInstanceState)
@@ -166,6 +169,9 @@ class ProfileFragment : Fragment() {
                         b.paymentCardLayout.visibility = View.GONE
                     }
                 }
+                else{
+                    b.payment.text = "Aктивировать бизнес аккаунт"
+                }
 
                 b.nameET.setText(name)
                 if (telNumber.contains("0000000")) {
@@ -204,6 +210,17 @@ class ProfileFragment : Fragment() {
             profileAdapter.currentList.toMutableList().let {
                 it.removeAt(position)
                 profileAdapter.submitList(it)
+            }
+        }
+        viewModel.cachedTarif.collect(this){
+            try {
+                if (it.isNotEmpty()&&!b.payment.text.contains("тариф")) {
+                    businessPrice = it.first().amount.toInt()
+                    b.payment.text = "активировать бизнесс аккаунт - $businessPrice p"
+                }
+            }
+            catch (ex : java.lang.Exception){
+                viewModel.messageEvent.tryEmit("Error: Invalid PriceList")
             }
         }
     }
@@ -307,6 +324,10 @@ class ProfileFragment : Fragment() {
         }
 
         b.payment.setOnClickListener{
+            if (businessPrice==-1){
+                viewModel.messageEvent.tryEmit("Пожалуйста, дождитесь загрузки цен!")
+                return@setOnClickListener
+            }
             if (userEmail.isEmpty() || userId?.toInt()==0)
                 return@setOnClickListener
             val intent = Intent(activity, PaymentActivity::class.java)
@@ -336,7 +357,6 @@ class ProfileFragment : Fragment() {
 
     private fun importViaSystemFE() {
         photoFlag = true
-        println("taaaag1"+b.avatar.tag)
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT)
             .addCategory(Intent.CATEGORY_OPENABLE)
             .setType("*/*")

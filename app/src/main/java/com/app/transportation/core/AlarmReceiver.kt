@@ -4,17 +4,21 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Color
+import android.media.RingtoneManager
 import android.os.Build
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.graphics.alpha
+import androidx.core.graphics.blue
+import androidx.core.graphics.green
+import androidx.core.graphics.red
 import com.app.transportation.MainActivity
 import com.app.transportation.R
 import com.app.transportation.ui.NotificationViewModel
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -26,7 +30,6 @@ class AlarmReceiver : BroadcastReceiver() {
         var notif : com.app.transportation.data.database.entities.Notification
 
         val notificationVM = NotificationViewModel(context!!)
-        println("noooooooot getNotice")
         notificationVM.getNotice()
         CoroutineScope(Dispatchers.Main).launch{
             notificationVM.cachedNotifications.collect{
@@ -53,23 +56,27 @@ class AlarmReceiver : BroadcastReceiver() {
                     }
 
                     val builder = NotificationCompat.Builder(context!!, "trnsp")
-                        .setSmallIcon(R.drawable.ic_done)
-                        .setContentTitle(notif.title)
+                        .setSmallIcon(R.drawable.ic_notif)
+                        .setLargeIcon(
+                            BitmapFactory.decodeResource(context.resources,
+                            R.drawable.logo))
+                        .setColor(Color.argb(255, 235, 127, 0))//(Color.argb(R.color.primary_color.alpha, R.color.primary_color.red, R.color.primary_color.green, R.color.primary_color.blue))
+                        .setContentTitle("Transportation")
                         .setContentText(notif.description)
                         .setAutoCancel(true)
+                        .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                         .setDefaults(NotificationCompat.DEFAULT_ALL)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
+                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                         .setContentIntent(pendingIntent)
+                        .setStyle(NotificationCompat.BigTextStyle().bigText(notif.description))
 
                     val notificationManager = NotificationManagerCompat.from(context)
                     notificationManager.notify(123, builder.build())
-                    println("noooooooot"+notif)
-                    Toast.makeText(context, notif.toString(), Toast.LENGTH_LONG).show()
                 }
             }
 
             notificationVM.cachedOrder.collect{
-                println("noooooooot unreach")
                 if (it.isNotEmpty()){
                     notif.description=it.first().description
 

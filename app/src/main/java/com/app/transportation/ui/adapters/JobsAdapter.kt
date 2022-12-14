@@ -75,7 +75,6 @@ class JobsAdapter : ListAdapter<BusinessLastItemDTO, JobsAdapter.ViewHolder>(Dif
                     }
                 }
                 catch (ex : Exception){
-                    println("Error: "+ex.message.toString())
                 }
                 title.text = item.category
                 price.text = item.price+" p"

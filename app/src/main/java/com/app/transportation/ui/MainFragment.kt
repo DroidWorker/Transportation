@@ -121,7 +121,7 @@ class MainFragment : Fragment() {
         b.serviceTypesRV.adapter = serviceTypeAdapter
         serviceTypeAdapter.lastCheckedCategoryId = lastCheckedCategoryId
         viewModel.cachedOrderNews.collectWithLifecycle(viewLifecycleOwner){
-            serviceTypeAdapter.newsCount = it
+            serviceTypeAdapter.newsCount = it.toMutableMap()
         }
         serviceTypeAdapter.onClick = {
             //TODO some refresh things in this fragment
@@ -131,7 +131,7 @@ class MainFragment : Fragment() {
             serviceTypeAdapter.notifyDataSetChanged()
             findNavController().navigate(R.id.advertisementsFragment,
                 bundleOf("categoryId" to lastCheckedCategoryId, "type" to 0, "clickedItemId" to this))
-            //viewModel.serviceTypeClicked(this)
+            viewModel.cachedOrderNews.tryEmit(serviceTypeAdapter.newsCount)
         }
     }
 

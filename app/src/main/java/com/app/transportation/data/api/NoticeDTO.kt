@@ -9,5 +9,6 @@ data class NoticeDTO (
     @SerialName("user_name") val userName: String,
     @SerialName("data_id") val dataId: String,
     @SerialName("type") val type: String,
+    @SerialName("text") val text: String,
     @SerialName("date") val date: String
 )

@@ -91,10 +91,8 @@ class Repository(private val dao: MainDao) : KoinComponent {
             ) {
                 headers { append("X-Access-Token", token) }
             }
-        println("asd3")
         val responseBody: String = response.receive()
         val json = Json.Default
-        println("setOptionStatus"+responseBody)
 
         json.decodeFromString(responseBody)
     }.getOrElse { InfoMessageResponse(it.stackTraceToString()) }
@@ -154,7 +152,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
                         bussiness = "$bussiness|$bussiness_update"
                     )
                     dao.insert(profile)
-                    println("profileResponse = $this")
                 }
         }.getOrElse {
             json.decodeFromString<UpdateProfileResponse.Failure>(responseBody)
@@ -175,11 +172,29 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<ProfileShortDTO>(responseBody)
             ProfileShortResponse.Success(map)
         }.getOrElse {
-            println("profile = $it")
             json.decodeFromString<ProfileShortResponse.Failure>(responseBody)
         }
     }.getOrElse {
             ProfileShortResponse.Failure(it.stackTraceToString())
+    }
+
+    suspend fun getTarif(): TarifResponce = kotlin.runCatching {
+        val token = authToken ?: return@runCatching TarifResponce.Failure("token is null")
+        val response: HttpResponse =
+            client.get("http://api-transport.mvp-pro.top/api/v1/datas_tarif") {
+                headers { append("X-Access-Token", token) }
+            }
+        val responseBody: String = response.receive()
+        val json = Json.Default
+
+        kotlin.runCatching {
+            val map = json.decodeFromString<Map<String, TarifDTO>>(responseBody)
+            TarifResponce.Success(map)
+        }.getOrElse {
+            json.decodeFromString<TarifResponce.Failure>(responseBody)
+        }
+    }.getOrElse {
+        TarifResponce.Failure(it.stackTraceToString())
     }
 
     suspend fun getNotice(): NoticeResponce = kotlin.runCatching {
@@ -195,7 +210,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<Map<String, NoticeDTO>>(responseBody)
             NoticeResponce.Success(map)
         }.getOrElse {
-            println("notice = $it")
             json.decodeFromString<NoticeResponce.Failure>(responseBody)
         }
     }.getOrElse {
@@ -254,7 +268,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
 
         json.decodeFromString<AddPingResponse.Success>(responseBody)
     }.getOrElse {
-        println("pingErrror"+it.stackTraceToString())
         AddPingResponse.Failure(it.stackTraceToString()) }
 
     suspend fun addOrderPing(orderId: String): AddPingResponse = kotlin.runCatching {
@@ -273,7 +286,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
 
         json.decodeFromString<AddPingResponse.Success>(responseBody)
     }.getOrElse {
-        println("pingErrror"+it.stackTraceToString())
         AddPingResponse.Failure(it.stackTraceToString()) }
     suspend fun addAdvertPing(orderId: String): AddPingResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AddPingResponse.Failure("token is null")
@@ -291,7 +303,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
 
         json.decodeFromString<AddPingResponse.Success>(responseBody)
     }.getOrElse {
-        println("pingErrror"+it.stackTraceToString())
         AddPingResponse.Failure(it.stackTraceToString()) }
 
     suspend fun deleteAdvertPing(id: String): InfoMessageResponse = kotlin.runCatching {
@@ -345,7 +356,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<Map<String, PingAdvertDTO>>(responseBody)
             AdvertPingResponse.Success(map)
         }.getOrElse {
-            println("it fav alllllllll = $it")
             if (responseBody.contains("Object not found")){
                 val emty : Map<String, PingAdvertDTO> = mutableMapOf("empty" to PingAdvertDTO("","", "","","","","","","", "", "", emptyMap(), emptyList()))
                 AdvertPingResponse.Success(emty)
@@ -371,13 +381,11 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<Map<String, PingOrderDTO>>(responseBody)
             OrderPingResponse.Success(map)
         }.getOrElse {
-            println("it ping alllllllll = $it")
             if (responseBody.contains("Object not found")){
                 val emty : Map<String, PingOrderDTO> = mutableMapOf("empty" to PingOrderDTO("","","","","","","","", "","","","","","","","","", "", "",emptyMap(), emptyList()))
                 OrderPingResponse.Success(emty)
             }
             else {
-                println("jjjjjjjjj"+responseBody)
                 json.decodeFromString<OrderPingResponse.Failure>(responseBody)
             }
         }
@@ -394,7 +402,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
         var responseBody: String = response.receive()
 
         kotlin.runCatching {
-            println("asssa"+responseBody)
             val array : List<String>
             if (responseBody.contains("|"))  {
                 responseBody = responseBody.split(":")[1]
@@ -657,7 +664,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<Map<String, SResultDTO>>(responseBody)
             SearchResponse.Success(map)
         }.getOrElse {
-            println("searched = $it")
             json.decodeFromString<SearchResponse.Failure>(responseBody)
         }
         }.getOrElse { SearchResponse.Failure(it.stackTraceToString()) }
@@ -669,7 +675,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
         kotlin.runCatching {
             json.decodeFromString<StaticDateResponse.Success>(responseBody)
         }.getOrElse {
-            println("Static data = $it")
             json.decodeFromString<StaticDateResponse.Failure>(responseBody)
         }
     }.getOrElse {
@@ -852,8 +857,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val responseBody: String = response.receive()
         val json = Json.Default
 
-        println("responseBody = $responseBody")
-
         json.decodeFromString<AdvertCreateResponse.Success>(responseBody)
     }.getOrElse { AdvertCreateResponse.Failure(it.stackTraceToString()) }.also { println("it= $it") }
 
@@ -862,7 +865,8 @@ class Repository(private val dao: MainDao) : KoinComponent {
         title: String,
         price: String,
         description: String,
-        photos: List<String>
+        photos: List<String>,
+        options: List<String>
     ): AdvertCreateResponse = kotlin.runCatching {
         if (authToken == null) logout()
         val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
@@ -875,16 +879,14 @@ class Repository(private val dao: MainDao) : KoinComponent {
                     if (price!=null)append("price", price)
                     if (description!=null)append("description", description)
                     //if (photos!=null)append("image", "[${photos.joinToString()}]")
+                    if (!options.isNullOrEmpty())append("options", "[${options.joinToString()}]")
                 }
             ) {
                 headers { append("X-Access-Token", token) }
             }
 
         val responseBody: String = response.receive()
-        println("updaaaaate "+responseBody)
         val json = Json.Default
-
-        println("responseBody = $responseBody")
 
         json.decodeFromString<AdvertCreateResponse.Success>(responseBody)
     }.getOrElse { AdvertCreateResponse.Failure(it.stackTraceToString()) }.also { println("it= $it") }
@@ -945,11 +947,9 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<Map<String, OrderDTO>>(responseBody)
             OrderListResponse.Success(map)
         }.getOrElse {
-            println("orderlistFailure"+it.stackTraceToString())
             json.decodeFromString<OrderListResponse.Failure>(responseBody)
         }
     }.getOrElse {
-        println("error: "+it.stackTraceToString())
         OrderListResponse.Failure(it.stackTraceToString())
     }
 
@@ -971,7 +971,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<Map<String, AdvertFullDTO>>(responseBody)
             AdvertFullListResponse.Success(map)
         }.getOrElse {
-            println("it alllllllll = $it")
             if (responseBody.contains("Object not found")){
                 var emty : Map<String, AdvertFullDTO> = mutableMapOf("empty" to AdvertFullDTO("", "","","","","", "","","", "", emptyMap(), emptyList(), "NO_ACTIVE", ""))
                 AdvertFullListResponse.Success(emty)
@@ -998,7 +997,6 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<Map<String, OrderFullDTO>>(responseBody)
             OrderFullListResponse.Success(map)
         }.getOrElse {
-            println("it alllllllll = $it")
             if (responseBody.contains("Object not found")){
                 var emty : Map<String, OrderFullDTO> = mutableMapOf("empty" to OrderFullDTO("", "","","","","","","","","","","","","","","","","", emptyMap(), "NO_ACTIVE", ""))
                 OrderFullListResponse.Success(emty)
