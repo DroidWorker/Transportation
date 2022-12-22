@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Transportation</string>
     <string name="continue_without_registration"><u>Продолжить без регистрации</u></string>
+    <string name="open_settings"><u>измените эти настройки</u></string>
+    <string name="changeMode"><u>или смените режим оптимизации</u></string>
     <string name="expand_text"><u>Читать полностью</u></string>
     <string name="collapse_text"><u>Свернуть</u></string>
     <string name="successful_registration">Регистрация прошла успешно! Можете авторизоваться!</string>

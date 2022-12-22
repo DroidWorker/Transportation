@@ -115,6 +115,7 @@ class AdvertisementsFragment : Fragment() {
             b.filter.visibility = View.GONE
         }
         if (type == 1||type==2) {//if seller
+            b.city.visibility = View.VISIBLE
             b.servicesRV.adapter = adapter
 
             adapter.onClick = {
@@ -207,6 +208,10 @@ class AdvertisementsFragment : Fragment() {
         else if (type==2) {
             viewModel.cachedAdvertsSF.collectWithLifecycle(viewLifecycleOwner) {
                 adapter.submitList(it)
+                viewModel.profileFlow.collectWithLifecycle(viewLifecycleOwner){ p->
+                    defaultCity = p?.cityArea?.split(",")?.firstOrNull()?:""
+                    filterAdverts(defaultCity)
+                }
                 if (it.isEmpty()) {
                     var filler: ArrayList<Advert> = ArrayList()
                     filler.add(

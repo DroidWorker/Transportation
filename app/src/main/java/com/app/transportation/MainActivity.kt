@@ -3,6 +3,7 @@ package com.app.transportation
 import android.Manifest
 import android.app.*
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
@@ -11,6 +12,8 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.text.Html
 import android.view.Gravity
 import android.view.MotionEvent
@@ -35,6 +38,7 @@ import com.app.transportation.core.isLightTheme
 import com.app.transportation.data.upButtonSF
 import com.app.transportation.databinding.ActivityMainBinding
 import com.app.transportation.databinding.PopupMenuMainBinding
+import com.app.transportation.service.NotificationService
 import com.app.transportation.ui.MainViewModel
 import com.app.transportation.ui.login.LoginViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
@@ -102,6 +106,17 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 arrayOf(Manifest.permission.ACCESS_NOTIFICATION_POLICY),
                 1)
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val intent = Intent()
+            val packageName: String = this.packageName
+            val pm: PowerManager = this.getSystemService(POWER_SERVICE) as PowerManager
+            if (!pm.isIgnoringBatteryOptimizations(packageName)
+            ) {
+                intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                intent.data = Uri.parse("package:" + "YOUR_PACKAGE_NAME")
+                this.startActivity(intent)
+            }
+        }
 
         applyTheme()
 
@@ -119,8 +134,11 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
 
         createNotificationChannel()
 
-        cancelAlarm()
-        setAlarm()
+        /*cancelAlarm()
+        setAlarm()*/
+        if (!isServiceRunning(NotificationService::class.java)) {
+            startService(Intent(this, NotificationService::class.java))
+        }
     }
 
 
@@ -148,6 +166,16 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         alarmManager.setInexactRepeating(
             AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 3000, pendingIntent
         )
+    }
+
+    fun isServiceRunning(serviceClass: Class<*>): Boolean {
+        val manager : ActivityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        for (service in manager.getRunningServices(Int.MAX_VALUE)) {
+            if (serviceClass.name == service.service.className) {
+                return true
+            }
+        }
+        return false
     }
 
     private fun createNotificationChannel() {

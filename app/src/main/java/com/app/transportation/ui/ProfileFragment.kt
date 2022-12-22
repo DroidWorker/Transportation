@@ -53,6 +53,9 @@ class ProfileFragment : Fragment() {
     private var telNumberListener: MaskedTextChangedListener? = null
     private var paymentCardListener: MaskedTextChangedListener? = null
 
+    private var advertCount = 999
+    private var advertLimit = 0//лимит на публикацию объявлений
+
     //private var popupWindow: PopupWindow? = null
 
     var bview : View? = null
@@ -138,10 +141,18 @@ class ProfileFragment : Fragment() {
                 viewModel.deleteAdvert(isOrder, id, position)
             }
             onAddItemClick = {
-                findNavController().navigate(
-                    R.id.createOrderCategorySelectorFragment,
-                    bundleOf("id" to this)
-                )
+                if (advertCount==999){
+                    viewModel.messageEvent.tryEmit("данные не загружены! Пожалуйста, подождите")
+                }
+                else if (advertCount>advertLimit&& viewModel.isCustomer.value == false){
+                    viewModel.messageEvent.tryEmit("превышен лимит объявлений для вашего тарифа!")
+                }
+                else {
+                    findNavController().navigate(
+                        R.id.createOrderCategorySelectorFragment,
+                        bundleOf("id" to this)
+                    )
+                }
             }
         }
     }
@@ -204,6 +215,12 @@ class ProfileFragment : Fragment() {
         }
         viewModel.ctx = context
         viewModel.profileAdvertsFlow.collect(this) {
+            advertCount = 0
+            it.forEach{item ->
+                if(item.viewType == 2&&!item.title.contains("(заказ)")){
+                    advertCount++
+                    }
+            }
             profileAdapter.submitList(it)
         }
         viewModel.deletedAdvertPosition.collect(this) { position ->

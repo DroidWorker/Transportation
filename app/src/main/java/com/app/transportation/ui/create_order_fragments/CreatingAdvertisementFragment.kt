@@ -60,6 +60,7 @@ class CreatingAdvertisementFragment : Fragment() {
 
     private var catsID : HashMap<String, String> = HashMap<String, String>()
     private var selectedCat : String = ""
+    private var spinnerPosition = 0
 
     private val obtainPhotoUriLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -381,6 +382,7 @@ class CreatingAdvertisementFragment : Fragment() {
                 val adapter: ArrayAdapter<String> = ArrayAdapter<String>(ctx!!, android.R.layout.simple_spinner_item, data)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 b.spinnerSelectCategory.adapter = adapter
+                if(selectedCat.isNotBlank()) b.spinnerSelectCategory.setSelection(spinnerPosition)
 
                 if (data.size>1) {
                     b.spinnerSelectCategory.visibility = View.VISIBLE
@@ -390,8 +392,10 @@ class CreatingAdvertisementFragment : Fragment() {
                         }
 
                         override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                            if (position!=0)
+                            if (position!=0) {
                                 selectedCat = b.spinnerSelectCategory.getItemAtPosition(position).toString()
+                                spinnerPosition = position
+                            }
                         }
 
                     }

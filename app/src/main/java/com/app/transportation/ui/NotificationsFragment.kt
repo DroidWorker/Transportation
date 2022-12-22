@@ -1,10 +1,16 @@
 package com.app.transportation.ui
 
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
 import android.view.*
 import android.widget.PopupWindow
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.view.isVisible
@@ -17,11 +23,11 @@ import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.data.database.entities.Advert
 import com.app.transportation.data.database.entities.Notification
 import com.app.transportation.databinding.FragmentNotificationsBinding
-import com.app.transportation.databinding.PopupMenuServicesFilterBinding
 import com.app.transportation.databinding.PopupMessageBinding
 import com.app.transportation.ui.adapters.NotificationsAdapter
 import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
+
 
 class NotificationsFragment : Fragment() {
 
@@ -128,8 +134,8 @@ class NotificationsFragment : Fragment() {
                         notifications.add(
                             Notification(
                                 entryNotificarion.key.toLong(),
-                                entryNotificarion.value.type,
-                                "пользователь ${entryNotificarion.value.userId} оставил отклик на ваше объявление ${((adverts.find { it.id.toString() == entryNotificarion.value.dataId })?.title) == null ?: "-удалено-"}",
+                                "Новое уведомление",
+                                entryNotificarion.value.text,
                                 entryNotificarion.key.toInt() <= lastCheckedNotificationID!!.toInt()
                             )
                         )
@@ -167,7 +173,52 @@ class NotificationsFragment : Fragment() {
                 viewModel.getMyAdverts()
             }
         }
-    }
+        b.setOpen.setOnClickListener(View.OnClickListener {
+            val notificationSettingsIntent = Intent()
+            notificationSettingsIntent.action = "android.settings.APP_NOTIFICATION_SETTINGS"
+            notificationSettingsIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                notificationSettingsIntent.putExtra(
+                    "android.provider.extra.APP_PACKAGE",
+                    requireActivity().packageName
+                )
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                notificationSettingsIntent.putExtra(
+                    "app_package",
+                    requireActivity().packageName
+                )
+                notificationSettingsIntent.putExtra(
+                    "app_uid",
+                    requireActivity().applicationInfo.uid
+                )
+            }
+            requireActivity().startActivityForResult(
+                notificationSettingsIntent,
+                9009
+            )
+        })
+        b.modeOpen.setOnClickListener(View.OnClickListener {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                val intent = Intent()
+                val packageName = requireActivity().packageName
+                val pm = requireActivity().getSystemService(Context.POWER_SERVICE) as PowerManager
+                if (pm.isIgnoringBatteryOptimizations(packageName)) intent.action =
+                    Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS else {
+                    intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                    intent.data = Uri.parse("package:$packageName")
+                }
+                requireActivity().startActivity(intent)
+            }
+
+        })
+        b.floatingActionButton.bringToFront()
+        b.floatingActionButton.setOnClickListener(View.OnClickListener {
+            b.textView.visibility = View.VISIBLE
+            b.setOpen.visibility = View.VISIBLE
+            b.modeOpen.visibility = View.VISIBLE
+            b.floatingActionButton.visibility = View.GONE
+        })}
 
     override fun onDestroyView() {
         super.onDestroyView()
