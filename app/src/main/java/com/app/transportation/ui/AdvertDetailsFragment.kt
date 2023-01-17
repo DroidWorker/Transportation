@@ -60,14 +60,16 @@ class AdvertDetailsFragment : Fragment() {
 
     private fun applyObservers() = viewLifecycleOwner.repeatOnLifecycle {
         viewModel.cachedAdvert.collect(this) { advert ->
-            if (advert!=null) viewModel.getProfile(advert?.userId ?: "")
+            if (advert!=null) {
+                viewModel.getProfile(advert?.userId ?: "")
+            }
             advert?.apply {
                 b.progressBar4.visibility = View.GONE
                 b.title.text = title
                 b.addToFavourites.setColorFilter(0)
                 b.addToFavourites.tag = id
-                b.name.text = "Какое-то имя"
-                b.telNumber.text = "Какой-то номер"
+                //b.name.text = "Какое-то имя"
+                //b.telNumber.text = "Какой-то номер"
                 b.location.text = fromCity
                 b.imageNumber.text = ""
                 b.price.text = price
@@ -85,7 +87,7 @@ class AdvertDetailsFragment : Fragment() {
         }
         viewModel.cachedProfile.collect(this){
             b.name.text = it.firstName
-            //b.location.text = it.location
+            if(b.location.text.length<2)b.location.text = it.location
             b.telNumber.text = it.phone
         }
         viewModel.adfTempPhotoUris.collect(this) {

@@ -40,7 +40,7 @@ class NotificationViewModel(ctx : Context) {
                             }
                             "ADVERT" -> {
                                 description = it.value.text
-                                "Transportation"
+                                "Sabbatum"
                             }
                             else -> "новое уведомление"
                         }

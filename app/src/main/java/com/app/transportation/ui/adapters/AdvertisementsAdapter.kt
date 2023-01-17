@@ -27,6 +27,7 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
 
     var onClick: (Advert.() -> Unit)? = null
     lateinit var ctx : Context
+    var iscustomer = false
 
     init {
         setHasStableIds(true)
@@ -77,19 +78,22 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
                     horizontalBias = if (price.isVisible) 0.5F else 1F
                 }
                 price.text = item.price.toString()
-                item.photo.firstOrNull()?.let { base64String ->
-                    try {
-                        val byteArray = Base64.decode(base64String, Base64.DEFAULT)
-                        val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-                        photo.setImageBitmap(bitmap)
-                        val blurred: Bitmap? = blurRenderScript(ctx, bitmap, 25)//second parametre is radius//second parametre is radius
-                        photo.setBackgroundDrawable(BitmapDrawable(blurred))
+
+                    item.photo.firstOrNull()?.let { base64String ->
+                        try {
+                            val byteArray = Base64.decode(base64String, Base64.DEFAULT)
+                            val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                            photo.setImageBitmap(bitmap)
+                            val blurred: Bitmap? = blurRenderScript(ctx, bitmap, 25)//second parametre is radius//second parametre is radius
+                            photo.setBackgroundDrawable(BitmapDrawable(blurred))
+                        }
+                        catch (ex : Exception){
+                        }
                     }
-                    catch (ex : Exception){
-                    }
-                }
+
+
                 item.options.forEach{
-                    if(it.option_id=="2"&&it.status=="ACTIVE")
+                    if(it.option_id=="2"&&it.status=="ON")
                         backLayout.setBackgroundResource(R.drawable.card_gradient)
                 }
                 Unit
@@ -113,7 +117,7 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
             price.text = item.price.toString()
             if (price.text == "-1") price.visibility = View.GONE
             item.options.forEach{
-                if(it.option_id=="2"&&it.status=="ACTIVE")
+                if(it.option_id=="2"&&it.status=="ON")
                     backLayout.setBackgroundResource(R.drawable.card_gradient)
             }
             if (date.text=="null") date.visibility=View.GONE

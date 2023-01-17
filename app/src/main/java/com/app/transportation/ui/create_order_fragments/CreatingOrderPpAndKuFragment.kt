@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import androidx.core.view.isVisible
+import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -32,6 +33,7 @@ class CreatingOrderPpAndKuFragment : Fragment() {
     private val isEdit by lazy {arguments?.getInt("isEdit", 0) ?: 0}
     private var catsID : HashMap<String, String> = HashMap<String, String>()
     var selectedCat: String = ""
+    var selectedCatId = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -60,6 +62,7 @@ class CreatingOrderPpAndKuFragment : Fragment() {
             viewModel.cachedOrdersSF.collectWithLifecycle(viewLifecycleOwner) {
                 it.forEach { item ->
                     if (item.id==categoryId) {
+                        viewModel.dateTime = ""
                         b.fromCity.setText(item.fromCity)
                         b.fromArea.setText(item.fromRegion)
                         b.fromPlace.setText(item.fromPlace)
@@ -159,6 +162,7 @@ class CreatingOrderPpAndKuFragment : Fragment() {
                     ArrayAdapter<String>(ctx!!, android.R.layout.simple_spinner_item, data)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 b.spinnerSelectCategory5.adapter = adapter
+                if(b.spinnerSelectCategory5.count>selectedCatId)b.spinnerSelectCategory5.setSelection(selectedCatId)
 
                 if (data.size > 1) {
                     b.spinnerSelectCategory5.visibility = View.VISIBLE
@@ -175,6 +179,7 @@ class CreatingOrderPpAndKuFragment : Fragment() {
                                 id: Long
                             ) {
                                 if (position != 0)
+                                    selectedCatId = position
                                     selectedCat =
                                         b.spinnerSelectCategory5.getItemAtPosition(position)
                                             .toString()

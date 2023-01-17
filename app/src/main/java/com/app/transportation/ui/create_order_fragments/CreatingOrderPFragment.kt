@@ -3,6 +3,8 @@ package com.app.transportation.ui.create_order_fragments
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.os.Bundle
 import android.util.Base64
 import android.view.LayoutInflater
@@ -13,6 +15,7 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
+import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -46,6 +49,7 @@ class CreatingOrderPFragment : Fragment() {
         }
     private var catsID: HashMap<String, String> = HashMap<String, String>()
     var selectedCat: String = ""
+    var selectedCatId = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -74,11 +78,31 @@ class CreatingOrderPFragment : Fragment() {
             viewModel.cachedOrdersSF.collectWithLifecycle(this) {
                 it.forEach { item ->
                     if (item.id==categoryId) {
+                        viewModel.dateTime = ""
+                            b.serviceTitle.setText(item.title)
                         b.toCity.setText(item.toCity)
                         b.toArea.setText(item.toRegion)
                         b.toPlace.setText(item.toPlace)
                         b.comment.setText(item.description)
-                        b.selectDateTime.setText(item.time)
+                        b.selectDateTime.setText(item.date + " "+ item.time)
+                        item.photo.firstOrNull()?.let { base64String ->
+                            try {
+                                val byteArray = Base64.decode(base64String, Base64.DEFAULT)
+                                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                                b.photo.setImageBitmap(bitmap)
+                                val blurred: Bitmap? = blurRenderScript(ctx, bitmap, 25)//second parametre is radius//second parametre is radius
+                                b.photo.setBackgroundDrawable(BitmapDrawable(blurred))
+                            }
+                            catch (ex : Exception){
+                                println("Error: "+ex.message.toString())
+                            }
+                        }
+                            val p = when(item.payment){
+                                "cash"-> 1
+                                "card"-> 2
+                                else-> 0
+                            }
+                            b.paymentMethod.setSelection(p)
                     }
                 }
             }
@@ -169,7 +193,11 @@ class CreatingOrderPFragment : Fragment() {
                     toPlace = b.toPlace.text.toString(),
                     name = b.toName.text.toString(),
                     phone = b.toTelNumber.text.toString(),
-                    payment = paymentMethod,
+                    payment  = when(b.paymentMethod.selectedItemPosition) {
+                        1 -> "cash"
+                        2 -> "card"
+                        else -> "cash"
+                    },
                     photos = photos
                 )
             }
@@ -216,6 +244,7 @@ class CreatingOrderPFragment : Fragment() {
                 val adapter: ArrayAdapter<String> = ArrayAdapter<String>(ctx!!, android.R.layout.simple_spinner_item, data)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 b.spinnerSelectCategory2.adapter = adapter
+                if(b.spinnerSelectCategory2.count>selectedCatId)b.spinnerSelectCategory2.setSelection(selectedCatId)
 
                 if (data.size>1) {
                     b.spinnerSelectCategory2.visibility = View.VISIBLE
@@ -232,6 +261,7 @@ class CreatingOrderPFragment : Fragment() {
                                 id: Long
                             ) {
                                 if (position != 0)
+                                    selectedCatId=position
                                     selectedCat =
                                         b.spinnerSelectCategory2.getItemAtPosition(position)
                                             .toString()

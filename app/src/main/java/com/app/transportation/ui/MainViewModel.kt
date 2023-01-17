@@ -236,7 +236,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     messageEvent.tryEmit("добавлено в избранное!")
             }
             is AddFavoriteResponsee.Failure -> {
-                messageEvent.tryEmit("Ошибка! " + result.message)
+                if(result.message.contains("Bussiness limit"))
+                    messageEvent.tryEmit("Невозможно добавить в избранное!")
+                else
+                    messageEvent.tryEmit("Ошибка! " + result.message)
             }
         }
     }
@@ -253,7 +256,10 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     messageEvent.tryEmit("добавлено в избранное!")
             }
             is AddFavoriteResponsee.Failure -> {
-                messageEvent.tryEmit("Ошибка! " + result.message)
+                if(result.message.contains("Bussiness limit"))
+                    messageEvent.tryEmit("Невозможно добавить в избранное!")
+                else
+                    messageEvent.tryEmit("Ошибка! " + result.message)
             }
         }
     }
@@ -818,10 +824,16 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     isActiveBussiness = true
                 }
                 val l = listOf<optionDTO>(optionDTO("-1", "bussiness", "0", "ACTIVE"))
+                var isPhotoActive = false
+                entry.value.options.forEach{
+                    if(it.option_id=="1"&&it.status=="ON"){
+                        isPhotoActive=true
+                    }
+                }
                 Advert(
                     id = entry.key.toInt(),
                     userId = entry.value.userId,
-                    viewType = if(photoList.size==0) 1 else 0,
+                    viewType = if(photoList.size==0||(!isPhotoActive&&!isActiveBussiness)) 1 else 0,
                     categoryId = advertCategoriesFlow.value.find {
                         it.id == entry.value.categoryId.toInt()
                     }?.parentId ?: 4,
@@ -1041,8 +1053,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     category = entry.value.category,
                     subcategoryId = entry.value.categoryId.toInt(),
                     title = entry.value.description,
-                    date = entry.value.date,
-                    time = entry.value.time,
+                    date = entry.value.fromDate?:"",
+                    time = entry.value.fromTime?:"",
                     fromCity = "${entry.value.fromCity}",
                     fromRegion = "${entry.value.fromRegion}",
                     fromPlace = "${entry.value.fromPlace}",
@@ -1212,7 +1224,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         when (val result = repository.updateProfile()) {
             is UpdateProfileResponse.Success -> Unit
             is UpdateProfileResponse.Failure -> {
-                if (result.message.contains("Authorization header not found")) {
+                if (result.message.contains("Authorization header")) {
                     messageEvent.tryEmit(
                         "401"//"Ошибка!" + app.getString(R.string.user_not_found)
                     )
@@ -1340,6 +1352,18 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         return id
     }
 
+    fun getSecondLevelParentID(categoryId: Int) : Int {
+        var id: Int = categoryId
+        val list = advertCategoriesFlow.value
+        while (id !in arrayOf(4, 8, 12, 13, 14, 24) ){
+            list.forEach{
+                if (it.id==id) {
+                    id = it.parentId
+                }
+            }
+        }
+        return id
+    }
 
     fun addAdvertScreenCategoriesFlow(categoryId: Int) = channelFlow {
         advertCategoriesFlow.collectLatest { advertCats ->
@@ -1526,7 +1550,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         when (result) {
             is AdvertCreateResponse.Success -> {
                 if (result.id != null)
-                    messageEvent.tryEmit("Объявление добавлено!")
+                    messageEvent.tryEmit("Объявление !")
             }
             is AdvertCreateResponse.Failure -> {
                 messageEvent.tryEmit("Ошибка при создании объявления!")

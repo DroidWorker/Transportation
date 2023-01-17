@@ -61,7 +61,7 @@ class AlarmReceiver : BroadcastReceiver() {
                             BitmapFactory.decodeResource(context.resources,
                             R.drawable.logo))
                         .setColor(Color.argb(255, 235, 127, 0))//(Color.argb(R.color.primary_color.alpha, R.color.primary_color.red, R.color.primary_color.green, R.color.primary_color.blue))
-                        .setContentTitle("Transportation")
+                        .setContentTitle("Sabbatum")
                         .setContentText(notif.description)
                         .setAutoCancel(true)
                         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))

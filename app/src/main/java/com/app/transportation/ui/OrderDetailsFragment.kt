@@ -96,8 +96,13 @@ class OrderDetailsFragment : Fragment() {
             if (b.time.text=="") b.time.visibility = View.GONE
         }
         viewModel.cachedProfile.collectWithLifecycle(viewLifecycleOwner){
-            b.name.text = it.firstName
-            b.telNumber.text = it.phone
+            if(!b.orderName.text.contains("(В работе)")) {
+                b.name.text = it.firstName
+                b.telNumber.text = it.phone
+            }else{
+                b.name.text = "имя скрыто"
+                b.telNumber.visibility = View.GONE
+            }
         }
         viewModel.adfTempPhotoUris.collectWithLifecycle(this) {
             it.second.getOrNull(it.first)?.let { bitmap ->

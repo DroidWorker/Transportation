@@ -120,6 +120,7 @@ class NotificationsFragment : Fragment() {
         b.notificationsRV.adapter = adapter
         viewModel.cachedAdvertsSF.collectWithLifecycle(viewLifecycleOwner){
             adverts = it
+            viewModel.getNotice()
             if (it.isNotEmpty()&&ReadyToloadflag)
                 viewModel.getNotice()
             else

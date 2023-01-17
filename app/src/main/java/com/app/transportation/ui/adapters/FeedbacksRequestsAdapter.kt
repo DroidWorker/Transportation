@@ -4,13 +4,16 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.app.transportation.R
 import com.app.transportation.core.dateToString
 import com.app.transportation.data.database.entities.FeedbackRequest
 import com.app.transportation.databinding.ItemFeedbackBinding
 import com.app.transportation.databinding.ItemRequestBinding
+import kotlin.coroutines.coroutineContext
 
 class FeedbacksRequestsAdapter :
     ListAdapter<FeedbackRequest, RecyclerView.ViewHolder>(DiffCallback()) {
@@ -65,7 +68,7 @@ class FeedbacksRequestsAdapter :
             if (item.status=="PROGRESS"){
                 status.visibility = View.VISIBLE
                 status.text = "В работе"
-                root.setBackgroundColor(Color.DKGRAY)
+                root.setBackgroundColor(ContextCompat.getColor(root.context, R.color.edittext_field_color))
             }
         }
 

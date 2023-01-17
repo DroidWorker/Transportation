@@ -115,8 +115,8 @@ class CreatingAdvertisementFragment : Fragment() {
                             try {
                                 val byteArray = Base64.decode(base64String, Base64.DEFAULT)
                                 val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-                                b.photo.setImageBitmap(bitmap)
                                 b.photo.tag = 1
+                                b.photo.setImageBitmap(bitmap)
                                 val blurred: Bitmap? = blurRenderScript(ctx, bitmap, 25)//second parametre is radius//second parametre is radius
                                 b.photo.setBackgroundDrawable(BitmapDrawable(blurred))
                             }
@@ -229,7 +229,8 @@ class CreatingAdvertisementFragment : Fragment() {
                     payIntent.putExtra("email", userEmail)
                     startActivity(payIntent)
                 }
-                findNavController().navigateUp()
+                //findNavController().navigateUp()
+                findNavController().popBackStack(R.id.mainFragment, false)
             }
             else{
                 when {
@@ -354,10 +355,11 @@ class CreatingAdvertisementFragment : Fragment() {
                 b.photo.setImageURI(uri)
                 b.photo.tag = 1
             } ?: kotlin.run {
-                if (b.photo.tag!=1)
-                b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
-                b.photo.setImageResource(R.drawable.ic_photo)
-                b.photo.tag = 1
+                if (b.photo.tag!=1){
+                    b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
+                    b.photo.setImageResource(R.drawable.ic_photo)
+                    b.photo.tag = 1
+                }
             }
             b.imageNumber.text =
                 if (it.second.size > 1) {
@@ -382,7 +384,7 @@ class CreatingAdvertisementFragment : Fragment() {
                 val adapter: ArrayAdapter<String> = ArrayAdapter<String>(ctx!!, android.R.layout.simple_spinner_item, data)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 b.spinnerSelectCategory.adapter = adapter
-                if(selectedCat.isNotBlank()) b.spinnerSelectCategory.setSelection(spinnerPosition)
+                if(selectedCat.isNotBlank()&&b.spinnerSelectCategory.count>spinnerPosition) b.spinnerSelectCategory.setSelection(spinnerPosition)
 
                 if (data.size>1) {
                     b.spinnerSelectCategory.visibility = View.VISIBLE

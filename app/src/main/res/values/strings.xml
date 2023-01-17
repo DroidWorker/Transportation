@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Transportation</string>
+    <string name="app_name">Sabbatum</string>
     <string name="continue_without_registration"><u>Продолжить без регистрации</u></string>
     <string name="open_settings"><u>измените эти настройки</u></string>
     <string name="changeMode"><u>или смените режим оптимизации</u></string>

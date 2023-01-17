@@ -878,7 +878,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                     if (title!=null)append("title", title)
                     if (price!=null)append("price", price)
                     if (description!=null)append("description", description)
-                    //if (photos!=null)append("image", "[${photos.joinToString()}]")
+                    if (photos!=null)append("image", "[${photos.joinToString()}]")
                     if (!options.isNullOrEmpty())append("options", "[${options.joinToString()}]")
                 }
             ) {
@@ -1107,6 +1107,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
     ): AdvertCreateResponse = kotlin.runCatching {
         if (authToken == null) logout()
         val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
+        val date = fromDateTime?.replace('/', '.')?.replace(' ', 'T')
         val response: HttpResponse =
             client.submitForm(
                 url = "http://api-transport.mvp-pro.top/api/v1/order_update",
@@ -1116,7 +1117,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                     if(fromCity!=null)append("from_city", fromCity)
                     if(fromRegion!=null)append("from_region", fromRegion)
                     if(fromPlace!=null)append("from_place", fromPlace)
-                    if(fromDateTime!=null)append("from_datetime", fromDateTime)
+                    if(date!=null)append("from_datetime", date)
                     if(toCity!=null)append("to_city", toCity)
                     if(toRegion!=null)append("to_region", toRegion)
                     if(toPlace!=null)append("to_place", toPlace)

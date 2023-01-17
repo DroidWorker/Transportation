@@ -18,6 +18,7 @@ import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
+import com.app.transportation.core.collect
 import com.app.transportation.core.collectWithLifecycle
 import com.app.transportation.core.repeatOnLifecycle
 import com.app.transportation.data.database.entities.Advert
@@ -51,6 +52,8 @@ class AdvertisementsFragment : Fragment() {
     private var cityFrom = ""
     private var cityTo = ""
 
+    private var advertCount = 999
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -69,6 +72,8 @@ class AdvertisementsFragment : Fragment() {
         adapter1.onscrollBottom = {
             b.servicesRV.smoothScrollToPosition(adapter1.itemCount)//scrollToPosition(it+2)
         }
+
+        adapter.iscustomer = viewModel.isCustomer.value == true
 
         (activity as? MainActivity)?.apply {
             /*b.title.text =
@@ -101,6 +106,7 @@ class AdvertisementsFragment : Fragment() {
         }
 
         viewModel.updateProfile()
+        //viewModel.updateMainFragmentData()
 
         applyRVAdapter()
 
@@ -127,7 +133,7 @@ class AdvertisementsFragment : Fragment() {
                     findNavController().navigate(R.id.orderDetailsFragment)
                 }
             }
-            if (adapter.itemCount == 0&&type==1)
+            if (adapter.itemCount == 0&&type==1&&advertCount<1)
                     b.beSeller.visibility = View.VISIBLE
             else if(type == 2)
                 b.createOrder.visibility = View.VISIBLE
@@ -167,6 +173,16 @@ class AdvertisementsFragment : Fragment() {
     }
 
     private fun applyObservers() = viewLifecycleOwner.repeatOnLifecycle {
+        viewModel.profileAdvertsFlow.collect(this) {
+            if(it.size>0)advertCount = 0
+            it.forEach{item ->
+                if(item.viewType == 2&&!item.title.contains("(заказ)")){
+                    advertCount++
+                }
+            }
+            if (adapter.itemCount == 0&&type==1/*&&advertCount<1*/)
+                b.beSeller.visibility = View.VISIBLE
+        }
         if(type==1){
             viewModel.cachedOrdersSF.collectWithLifecycle(viewLifecycleOwner) {
                 adapter.submitList(it)
@@ -304,7 +320,17 @@ class AdvertisementsFragment : Fragment() {
     private fun applyListeners() {
         var city : String? = null
         b.beSeller.setOnClickListener{
-            findNavController().navigate(R.id.createOrderCategorySelectorFragment, bundleOf("id" to 0, "mode" to 3))
+            if(advertCount==999){
+                viewModel.messageEvent.tryEmit("данные не загружены! Пожалуйста подождите")
+            }else if (advertCount>0){
+                viewModel.messageEvent.tryEmit("достигнут лимит объявлений!")
+            }
+            else {
+                findNavController().navigate(
+                    R.id.createOrderCategorySelectorFragment,
+                    bundleOf("id" to 0, "mode" to 3)
+                )
+            }
         }
         b.createOrder.setOnClickListener{
             findNavController().navigate(R.id.createOrderCategorySelectorFragment, bundleOf("id" to 0, "mode" to 3))

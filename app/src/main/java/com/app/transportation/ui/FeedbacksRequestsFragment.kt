@@ -119,14 +119,14 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
                         var arrlist : ArrayList<FeedbackRequest> = ArrayList()
                     if(view!=null)viewModel.cachedOrderPing.collectWithLifecycle(viewLifecycleOwner){
                             it.toList().forEach{ order ->
-                                if (order.profile.firstOrNull()?.userId==myId)
+                                if (order.profile.firstOrNull()?.userId==myId&&order.profile[0].status=="PROGRESS")
                                     arrlist.add(FeedbackRequest((order.id.toString()+order.profile.firstOrNull()?.userId).toLong(), order.id,order.profile[0].status?: "",0, order.description, order.toCity+" "+order.toRegion+" "+order.toPlace, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), 0))
                             }
                             adapter.submitList(arrlist.toList())
                         }
                     if(view!=null)viewModel.cachedAdvertPing.collectWithLifecycle(viewLifecycleOwner){
                         it.toList().forEach{ order ->
-                            if (order.profile.firstOrNull()?.userId==myId)
+                            if (order.profile.firstOrNull()?.userId==myId&&order.profile[0].status=="PROGRESS")
                                 arrlist.add(FeedbackRequest((order.id.toString()+order.profile.firstOrNull()?.userId).toLong(), order.id, order.profile[0].status?: "",1, order.description, order.category, (order.date+" "+order.time).stringToDate("dd.mm.yyyy HH:MM"), Integer.parseInt(order.price)))
                         }
                         adapter.submitList(arrlist.toList())

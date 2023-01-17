@@ -16,6 +16,7 @@ import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
+import androidx.core.view.size
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
@@ -45,6 +46,7 @@ class CreatingOrderAtFragment : Fragment() {
 
     private var catsID : HashMap<String, String> = HashMap<String, String>()
     var selectedCat: String = ""
+    var selectedCatId = 0
 
     private val obtainPhotoUriLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -78,7 +80,9 @@ class CreatingOrderAtFragment : Fragment() {
             viewModel.cachedOrdersSF.collectWithLifecycle(this) {
                 it.forEach { item ->
                     if (item.id==categoryId) {
-                        b.selectDateTime.setText(item.time)
+                        viewModel.dateTime = ""
+                        b.serviceTitle.setText(item.title)
+                        b.selectDateTime.text = item.time
                         b.toCity.setText(item.toCity)
                         b.toArea.setText(item.toRegion)
                         b.toPlace.setText(item.toPlace)
@@ -94,6 +98,14 @@ class CreatingOrderAtFragment : Fragment() {
                             catch (ex : Exception){
                                 println("Error: "+ex.message.toString())
                             }
+                        }
+                        if (b.paymentMethod.size>1){
+                            val p = when(item.payment){
+                                "cash"-> 1
+                                "card"-> 2
+                                else-> 0
+                            }
+                            b.paymentMethod.setSelection(p)
                         }
                     }
                 }
@@ -182,7 +194,11 @@ class CreatingOrderAtFragment : Fragment() {
                     toPlace = b.toPlace.text.toString(),
                     name = b.toName.text.toString(),
                     phone = b.toTelNumber.text.toString(),
-                    payment = paymentMethod,
+                    payment = when(b.paymentMethod.selectedItemPosition) {
+                        0 -> "cash"
+                        1 -> "card"
+                        else -> "cash"
+                    },
                     photos = photos
                 )
             }
@@ -229,6 +245,7 @@ class CreatingOrderAtFragment : Fragment() {
                 val adapter: ArrayAdapter<String> = ArrayAdapter<String>(ctx!!, android.R.layout.simple_spinner_item, data)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 b.spinnerSelectCategory2.adapter = adapter
+                if(b.spinnerSelectCategory2.count>selectedCatId)b.spinnerSelectCategory2.setSelection(selectedCatId)
 
                 if (data.size>1) {
                     b.spinnerSelectCategory2.visibility = View.VISIBLE
@@ -245,6 +262,7 @@ class CreatingOrderAtFragment : Fragment() {
                                 id: Long
                             ) {
                                 if (position != 0)
+                                    selectedCatId=position
                                     selectedCat =
                                         b.spinnerSelectCategory2.getItemAtPosition(position)
                                             .toString()

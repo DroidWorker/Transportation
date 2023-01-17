@@ -119,18 +119,22 @@ class ProfileFragment : Fragment() {
                 if (!title.contains("(заказ)")) {
                     destinationRes = R.id.creatingAdvertisementFragment
                 } else {
+                    val slID = viewModel.getSecondLevelParentID(categoryId)
                     viewModel.getParentID(categoryId).collectWithLifecycle(viewLifecycleOwner) {
-                        when (it) {
-                            12, 13 -> destinationRes = R.id.creatingOrderFragment
+                        val tlID = if(slID==it) categoryId else it
+                        when (slID) {
+                            12 -> destinationRes = R.id.creatingOrderFragment
+                            13 -> destinationRes = R.id.creatingOrderFragment
                             4 -> {
-                                if (categoryId == 5)
+                                if (tlID == 5)
                                     destinationRes = R.id.creatingOrderFragment
-                                else if (categoryId == 6 || categoryId == 7 || categoryId == 37 || categoryId == 38 || categoryId == 39 || categoryId == 40 || categoryId == 41)
+                                else if (tlID == 6 || tlID == 7 || tlID == 37 || tlID == 38 || tlID == 39 || tlID == 40 || tlID == 41)
                                     destinationRes = R.id.creatingOrderAtFragment
-                                else if (categoryId == 45 || categoryId == 44)
+                                else if (tlID == 45 || tlID == 44)
                                     destinationRes = R.id.creatingOrderPFragment
                             }
-                            24,8 -> destinationRes = R.id.creatingOrderPFragment
+                            24 -> destinationRes = R.id.creatingOrderPFragment
+                            8 -> destinationRes = R.id.creatingOrderPFragment
                             14 -> destinationRes = R.id.creatingOrderRisFragment
                         }
                     }
@@ -139,6 +143,7 @@ class ProfileFragment : Fragment() {
             }
             onDeleteClick = { isOrder: Boolean, id: Int, position: Int ->
                 viewModel.deleteAdvert(isOrder, id, position)
+                if(!isOrder){advertCount--}
             }
             onAddItemClick = {
                 if (advertCount==999){
@@ -345,8 +350,10 @@ class ProfileFragment : Fragment() {
                 viewModel.messageEvent.tryEmit("Пожалуйста, дождитесь загрузки цен!")
                 return@setOnClickListener
             }
-            if (userEmail.isEmpty() || userId?.toInt()==0)
+            if (userEmail.isEmpty() || userId?.toInt()==0) {
+                viewModel.messageEvent.tryEmit("не указан email, либо профиль еще не загружен")
                 return@setOnClickListener
+            }
             val intent = Intent(activity, PaymentActivity::class.java)
             intent.putExtra("summ", 35000)
             intent.putExtra("mode", 1)

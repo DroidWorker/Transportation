@@ -67,7 +67,6 @@ class ProfileAdapter :  ListAdapter<ProfileRvItem, RecyclerView.ViewHolder>(Diff
 
         fun bind(item: ProfileRvItem) = with(binding) {
             title.text = item.title
-
             root.setOnClickListener { item.realId?.let { id -> onClick?.invoke(id) } }
             edit.setOnClickListener { item.realId?.let { id -> onEditClick?.invoke(item.title, item.realId, item.categoryId!!) } }
             delete.setOnClickListener {
