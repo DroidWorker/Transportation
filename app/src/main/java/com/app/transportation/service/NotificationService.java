@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.IBinder;
 
 import androidx.annotation.Nullable;
@@ -17,7 +18,16 @@ public class NotificationService  extends Service {
         private void serviceMessageStart() {
 
             Intent alarmIntent = new Intent(NotificationService.this, AlarmReceiver.class);
-            pendingIntent = PendingIntent.getBroadcast(NotificationService.this, 0, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                pendingIntent = PendingIntent.getBroadcast(
+                        NotificationService.this,
+                        0,
+                        alarmIntent,
+                        PendingIntent.FLAG_MUTABLE
+                );
+            } else {
+                pendingIntent = PendingIntent.getBroadcast(NotificationService.this, 0, alarmIntent, PendingIntent.FLAG_CANCEL_CURRENT);
+            }
 
             if (pendingIntent != null) {
                 AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);

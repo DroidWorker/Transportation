@@ -3,10 +3,11 @@ package com.app.transportation.ui
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
-import android.net.Uri
+import android.provider.Settings
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -238,6 +239,7 @@ class ProfileFragment : Fragment() {
             try {
                 if (it.isNotEmpty()&&!b.payment.text.contains("тариф")) {
                     businessPrice = it.first().amount.toInt()
+                    prefs.edit{putString("businessPrice", businessPrice.toString())}
                     b.payment.text = "активировать бизнесс аккаунт - $businessPrice p"
                 }
             }
@@ -355,7 +357,7 @@ class ProfileFragment : Fragment() {
                 return@setOnClickListener
             }
             val intent = Intent(activity, PaymentActivity::class.java)
-            intent.putExtra("summ", 35000)
+            intent.putExtra("summ", (prefs.getString("businessPrice", "30000"))?.toInt())
             intent.putExtra("mode", 1)
             intent.putExtra("id", userId?.toInt())
             intent.putExtra("email", userEmail)

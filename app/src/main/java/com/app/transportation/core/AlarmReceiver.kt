@@ -38,7 +38,7 @@ class AlarmReceiver : BroadcastReceiver() {
                     notif = it.first()
                     val i = Intent(context, MainActivity::class.java)
                     intent!!.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                    var pendingIntent = PendingIntent.getActivity(context, 0, i, 0)
+                    var pendingIntent = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_MUTABLE)
                     pendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                         PendingIntent.getActivity(
                             context,

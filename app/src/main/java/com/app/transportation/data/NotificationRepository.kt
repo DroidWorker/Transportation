@@ -27,7 +27,7 @@ class NotificationRepository (ctx : Context){
     suspend fun getNotice(): NoticeResponce = kotlin.runCatching {
         val token = authToken ?: return@runCatching NoticeResponce.Failure("token is null")
         val response: HttpResponse =
-            client.get("http://api-transport.mvp-pro.top/api/v1/notice") {
+            client.get("http://www.sabbatum.ru/api/v1/notice") {
                 headers { append("X-Access-Token", token) }
             }
         var responseBody: String = response.receive()
@@ -49,7 +49,7 @@ class NotificationRepository (ctx : Context){
     suspend fun getOrderInfo(id : String): OrderInfoResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching OrderInfoResponse.Failure("token is null")
         val response: HttpResponse =
-            client.get("http://api-transport.mvp-pro.top/api/v1/order_info") {
+            client.get("http://www.sabbatum.ru/api/v1/order_info") {
                 parameter("id", id)
                 headers { append("X-Access-Token", token) }
             }

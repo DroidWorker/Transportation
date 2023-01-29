@@ -48,7 +48,7 @@ class LoginRepository : KoinComponent {
         login: String,
         password: String
     ): AuthResponse = kotlin.runCatching {
-        val response: HttpResponse = client.get("http://api-transport.mvp-pro.top/api/v1/sign_in") {
+        val response: HttpResponse = client.get("http://www.sabbatum.ru/api/v1/sign_in") {
             parameter("login", login)
             parameter("password", password)
         }
@@ -71,7 +71,7 @@ class LoginRepository : KoinComponent {
         name: String
     ): RegisterResponse = kotlin.runCatching {
         val response: HttpResponse = client.submitForm(
-            url = "http://api-transport.mvp-pro.top/api/v1/sign_up",
+            url = "http://www.sabbatum.ru/api/v1/sign_up",
             formParameters = Parameters.build {
                 append("login", login)
                 append("password", password)
@@ -90,7 +90,7 @@ class LoginRepository : KoinComponent {
 
     suspend fun requestSmsCode(login: String): SmsCodeResponse = kotlin.runCatching {
         val response: HttpResponse = client.submitForm(
-            url = "http://api-transport.mvp-pro.top/api/v1/password_restore",
+            url = "http://www.sabbatum.ru/api/v1/password_restore",
             formParameters = Parameters.build {
                 append("login", login)
             }
@@ -106,7 +106,7 @@ class LoginRepository : KoinComponent {
 
     suspend fun sendSmsCode(login: String, code: String): String = kotlin.runCatching {
         val response: HttpResponse = client.submitForm(
-            url = "http://api-transport.mvp-pro.top/api/v1/password_code",
+            url = "http://www.sabbatum.ru/api/v1/password_code",
             formParameters = Parameters.build {
                 append("login", login)
                 append("code", code)
@@ -122,7 +122,7 @@ class LoginRepository : KoinComponent {
 
     suspend fun sendNewPassword(login: String, password: String): String = kotlin.runCatching {
         val response: HttpResponse = client.submitForm(
-            url = "http://api-transport.mvp-pro.top/api/v1/password_save",
+            url = "http://www.sabbatum.ru/api/v1/password_save",
             formParameters = Parameters.build {
                 append("login", login)
                 append("value", password)

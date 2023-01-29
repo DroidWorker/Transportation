@@ -91,7 +91,7 @@ class NotificationsFragment : Fragment() {
                         if (userEmail.isEmpty() || userId?.toInt()==0)
                             return@setOnClickListener
                         val intent = Intent(activity, PaymentActivity::class.java)
-                        intent.putExtra("summ", 35000)
+                        intent.putExtra("summ", (prefs.getString("businessPrice", "30000"))?.toInt())
                         intent.putExtra("mode", 1)
                         intent.putExtra("id", userId?.toInt())
                         intent.putExtra("email", userEmail)

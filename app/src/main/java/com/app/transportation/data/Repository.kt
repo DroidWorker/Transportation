@@ -64,7 +64,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/bussiness",
+                url = "http://www.sabbatum.ru/api/v1/bussiness",
                 formParameters = Parameters.build {
                     append("id", id)
                     append("bussiness", stsus)
@@ -83,7 +83,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_update_options",
+                url = "http://www.sabbatum.ru/api/v1/advert_update_options",
                 formParameters = Parameters.build {
                     append("advert_id", idAdvert)
                     append("option_status", status)
@@ -107,7 +107,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
     ) = kotlin.runCatching {
         val token = authToken ?: return@runCatching
         client.submitForm(
-            url = "http://api-transport.mvp-pro.top/api/v1/profile",
+            url = "http://www.sabbatum.ru/api/v1/profile",
             formParameters = Parameters.build {
                 if(name!="") append("first_name", name)
                 if(telNumber!="") append("phone", telNumber)
@@ -127,7 +127,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
 
     suspend fun updateProfile(): UpdateProfileResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching UpdateProfileResponse.Failure("token is null")
-        val response: HttpResponse = client.get("http://api-transport.mvp-pro.top/api/v1/profile") {
+        val response: HttpResponse = client.get("http://www.sabbatum.ru/api/v1/profile") {
             headers {
                 append("X-Access-Token", token)
             }
@@ -162,7 +162,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
     suspend fun getProfile(id: String): ProfileShortResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching ProfileShortResponse.Failure("token is null")
         val response: HttpResponse =
-            client.get("http://api-transport.mvp-pro.top/api/v1/profile_short?id=$id") {
+            client.get("http://www.sabbatum.ru/api/v1/profile_short?id=$id") {
                 headers { append("X-Access-Token", token) }
             }
         val responseBody: String = response.receive()
@@ -181,7 +181,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
     suspend fun getTarif(): TarifResponce = kotlin.runCatching {
         val token = authToken ?: return@runCatching TarifResponce.Failure("token is null")
         val response: HttpResponse =
-            client.get("http://api-transport.mvp-pro.top/api/v1/datas_tarif") {
+            client.get("http://www.sabbatum.ru/api/v1/datas_tarif") {
                 headers { append("X-Access-Token", token) }
             }
         val responseBody: String = response.receive()
@@ -200,7 +200,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
     suspend fun getNotice(): NoticeResponce = kotlin.runCatching {
         val token = authToken ?: return@runCatching NoticeResponce.Failure("token is null")
         val response: HttpResponse =
-            client.get("http://api-transport.mvp-pro.top/api/v1/notice") {
+            client.get("http://www.sabbatum.ru/api/v1/notice") {
                 headers { append("X-Access-Token", token) }
             }
         val responseBody: String = response.receive()
@@ -219,7 +219,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/notice_delete",
+                url = "http://www.sabbatum.ru/api/v1/notice_delete",
                 formParameters = Parameters.build {
                     append("id", id)
                 }
@@ -238,7 +238,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
 
         kotlin.runCatching {
             val authToken = authToken ?: return@runCatching
-            client.get("http://api-transport.mvp-pro.top/api/v1/logout") {
+            client.get("http://www.sabbatum.ru/api/v1/logout") {
                 headers {
                     append("X-Access-Token", authToken)
                 }
@@ -253,7 +253,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching AddPingResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/set_ping",
+                url = "http://www.sabbatum.ru/api/v1/set_ping",
                 formParameters = Parameters.build {
                     append("user_id", userId)
                     if (orderId!=null) append("order_id", orderId)
@@ -274,7 +274,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching AddPingResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_ping_set",
+                url = "http://www.sabbatum.ru/api/v1/advert_ping_set",
                 formParameters = Parameters.build {
                     append("ping_user_id", orderId)
                 }
@@ -291,7 +291,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching AddPingResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_ping_set",
+                url = "http://www.sabbatum.ru/api/v1/order_ping_set",
                 formParameters = Parameters.build {
                     append("ping_user_id", orderId)
                 }
@@ -309,7 +309,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_ping_delete",
+                url = "http://www.sabbatum.ru/api/v1/advert_ping_delete",
                 formParameters = Parameters.build {
                     append("ping_user_id", id)
                 }
@@ -325,7 +325,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_ping_delete",
+                url = "http://www.sabbatum.ru/api/v1/order_ping_delete",
                 formParameters = Parameters.build {
                     append("ping_user_id", id)
                 }
@@ -342,7 +342,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching AdvertPingResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_ping_get",
+                url = "http://www.sabbatum.ru/api/v1/order_ping_get",
             ) {
                 headers { append("X-Access-Token", token) }
             }
@@ -367,7 +367,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching OrderPingResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_ping_get",
+                url = "http://www.sabbatum.ru/api/v1/advert_ping_get",
             ) {
                 headers { append("X-Access-Token", token) }
             }
@@ -395,7 +395,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching StringResponce.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_category_list",
+                url = "http://www.sabbatum.ru/api/v1/advert_category_list",
             ) {
                 headers { append("X-Access-Token", token) }
             }
@@ -434,7 +434,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching IntIntResponce.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_count_news",
+                url = "http://www.sabbatum.ru/api/v1/order_count_news",
             ) {
                 headers { append("X-Access-Token", token) }
             }
@@ -465,7 +465,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_count_news_reset",
+                url = "http://www.sabbatum.ru/api/v1/order_count_news_reset",
                 formParameters = Parameters.build {
                     append("category_id", id)
                 }
@@ -486,7 +486,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
 
     suspend fun getBussinessLast(): businessLastResponce = kotlin.runCatching {
         val response: HttpResponse =
-            client.get("http://api-transport.mvp-pro.top/api/v1/bussiness_last")
+            client.get("http://www.sabbatum.ru/api/v1/bussiness_last")
         var responseBody: String = response.receive()
         val json = Json.Default
 
@@ -511,7 +511,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching AddFavoriteResponsee.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_set_favorite",
+                url = "http://www.sabbatum.ru/api/v1/advert_set_favorite",
                 formParameters = Parameters.build {
                     append("order_id", orderId)
                 }
@@ -527,7 +527,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching AddFavoriteResponsee.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_set_favorite",
+                url = "http://www.sabbatum.ru/api/v1/order_set_favorite",
                 formParameters = Parameters.build {
                     append("advert_id", orderId)
                 }
@@ -544,7 +544,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching AdvertFavResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_get_favorite",
+                url = "http://www.sabbatum.ru/api/v1/advert_get_favorite",
             ) {
                 headers { append("X-Access-Token", token) }
             }
@@ -577,7 +577,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching OrderFavResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_get_favorite",
+                url = "http://www.sabbatum.ru/api/v1/order_get_favorite",
             ) {
                 headers { append("X-Access-Token", token) }
             }
@@ -620,7 +620,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_delete_favorite",
+                url = "http://www.sabbatum.ru/api/v1/advert_delete_favorite",
                 formParameters = Parameters.build {
                     append("order_id", id)
                 }
@@ -636,7 +636,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_delete_favorite",
+                url = "http://www.sabbatum.ru/api/v1/order_delete_favorite",
                 formParameters = Parameters.build {
                     append("advert_id", id)
                 }
@@ -651,7 +651,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
 
     suspend fun search(str : String): SearchResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching SearchResponse.Failure("token is null")
-        val response: HttpResponse = client.submitForm(url = "http://api-transport.mvp-pro.top/api/v1/search",
+        val response: HttpResponse = client.submitForm(url = "http://www.sabbatum.ru/api/v1/search",
             formParameters = Parameters.build {
                 append("q", str)
             }
@@ -669,7 +669,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse { SearchResponse.Failure(it.stackTraceToString()) }
 
     suspend fun getStaticData(type : String): StaticDateResponse = kotlin.runCatching {
-        val response: HttpResponse = client.submitForm(url = "http://api-transport.mvp-pro.top/api/v1/datas_text?type=$type")
+        val response: HttpResponse = client.submitForm(url = "http://www.sabbatum.ru/api/v1/datas_text?type=$type")
         val responseBody: String = response.receive()
         val json = Json.Default
         kotlin.runCatching {
@@ -684,7 +684,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
     fun advertCategoriesFlow() = dao.advertCategoriesFlow().map { list -> list.sortedBy { it.id } }
 
     private suspend fun categoriesRequest(token: String, type: String, id: String = "0"): String =
-        client.get<HttpResponse>("http://api-transport.mvp-pro.top/api/v1/datas_category") {
+        client.get<HttpResponse>("http://www.sabbatum.ru/api/v1/datas_category") {
             parameter("type", type)
             parameter("id", id)
             headers {
@@ -810,7 +810,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         kotlin.runCatching {
             val token = authToken ?: return@runCatching AdvertDataResponse.Failure("token is null")
             val response: HttpResponse =
-                client.get("http://api-transport.mvp-pro.top/api/v1/datas_category") {
+                client.get("http://www.sabbatum.ru/api/v1/datas_category") {
                     parameter("type", type)
                     parameter("id", id)
                     headers {
@@ -840,7 +840,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_create",
+                url = "http://www.sabbatum.ru/api/v1/advert_create",
                 formParameters = Parameters.build {
                     append("title", title)
                     append("price", price)
@@ -872,7 +872,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching AdvertCreateResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_update",
+                url = "http://www.sabbatum.ru/api/v1/advert_update",
                 formParameters = Parameters.build {
                     if (id!=null)append("id", id)
                     if (title!=null)append("title", title)
@@ -896,7 +896,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching AdvertListResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_list",
+                url = "http://www.sabbatum.ru/api/v1/advert_list",
                 formParameters = Parameters.build {
                     if (category != null)
                         append("category", category)
@@ -927,7 +927,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching OrderListResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_list",
+                url = "http://www.sabbatum.ru/api/v1/order_list",
                 formParameters = Parameters.build {
                     if (category != null)
                         append("category", category)
@@ -957,7 +957,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         //val token = authToken ?: return@runCatching AdvertFullListResponse.Failure("token is null")
         val response: HttpResponse =
             client.get(
-                "http://api-transport.mvp-pro.top/api/v1/advert_list_common",
+                "http://www.sabbatum.ru/api/v1/advert_list_common",
             ) /*{
                 headers { append("X-Access-Token", token) }
             }*/
@@ -977,13 +977,14 @@ class Repository(private val dao: MainDao) : KoinComponent {
             }
             json.decodeFromString<AdvertFullListResponse.Failure>(responseBody)
         }
-    }.getOrElse { AdvertFullListResponse.Failure(it.stackTraceToString()) }
+    }.getOrElse {
+        AdvertFullListResponse.Failure(it.stackTraceToString()) }
 
     suspend fun getOrderFullList(): OrderFullListResponse = kotlin.runCatching {
         //val token = authToken ?: return@runCatching OrderFullListResponse.Failure("token is null")
         val response: HttpResponse =
             client.get(
-                "http://api-transport.mvp-pro.top/api/v1/order_list_common",
+                "http://www.sabbatum.ru/api/v1/order_list_common",
             ) /*{
                 headers { append("X-Access-Token", token) }
             }*/
@@ -1009,7 +1010,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val token = authToken ?: return@runCatching AdvertInfoResponse.Failure("token is null")
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/advert_info",
+                url = "http://www.sabbatum.ru/api/v1/advert_info",
                 formParameters = Parameters.build {
                     append("id", id)
                 }
@@ -1032,7 +1033,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val urlPart = if (isOrder) "order" else "advert"
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/${urlPart}_delete",
+                url = "http://www.sabbatum.ru/api/v1/${urlPart}_delete",
                 formParameters = Parameters.build {
                     append("id", id)
                 }
@@ -1065,7 +1066,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val date = fromDateTime.replace('/', '.').replace(' ', 'T')
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_create",
+                url = "http://www.sabbatum.ru/api/v1/order_create",
                 formParameters = Parameters.build {
                     append("category", category)
                     append("from_city", fromCity)
@@ -1110,7 +1111,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val date = fromDateTime?.replace('/', '.')?.replace(' ', 'T')
         val response: HttpResponse =
             client.submitForm(
-                url = "http://api-transport.mvp-pro.top/api/v1/order_update",
+                url = "http://www.sabbatum.ru/api/v1/order_update",
                 formParameters = Parameters.build {
                     append("id", orderId)
                     if(category!=null)append("category", category)

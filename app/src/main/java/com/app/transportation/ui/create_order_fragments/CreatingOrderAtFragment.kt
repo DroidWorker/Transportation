@@ -261,11 +261,12 @@ class CreatingOrderAtFragment : Fragment() {
                                 position: Int,
                                 id: Long
                             ) {
-                                if (position != 0)
-                                    selectedCatId=position
+                                if (position != 0) {
+                                    selectedCatId = position
                                     selectedCat =
                                         b.spinnerSelectCategory2.getItemAtPosition(position)
                                             .toString()
+                                }
                             }
 
                         }
@@ -274,6 +275,7 @@ class CreatingOrderAtFragment : Fragment() {
     }
 
     private fun allFieldsFilled(): Int {
+        val isSpinnerSelected = !(b.spinnerSelectCategory2.visibility==View.VISIBLE&&selectedCat.isBlank())
         val isFromDateTime = viewModel.dateTime.isNotBlank()
         val isToCityPresent = b.toCity.text.isNotBlank()
         val isToAreaPresent = b.toArea.text.isNotBlank()
@@ -282,7 +284,7 @@ class CreatingOrderAtFragment : Fragment() {
         val isToTelNumberPresent = b.toTelNumber.text.isNotBlank()
         val isPhotoSet =  b.photo.tag==1
 
-        return if(isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
+        return if(isSpinnerSelected && isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
             isToNamePresent && isToTelNumberPresent && isPhotoSet){
             0
         } else if (!isPhotoSet){

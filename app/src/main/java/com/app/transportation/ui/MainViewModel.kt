@@ -770,7 +770,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         advertId: String? = null
     ) = viewModelScope.launch(Dispatchers.IO) {
         val list = getAdvertsFull() ?: return@launch
-
+println("dsdsdsdsd"+advertId+"|||"+list.toString())
         advertsSF.tryEmit(list)
         if (updateCache) {
             if (advertId == null) {

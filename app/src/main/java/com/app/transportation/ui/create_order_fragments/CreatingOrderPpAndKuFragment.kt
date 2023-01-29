@@ -178,11 +178,12 @@ class CreatingOrderPpAndKuFragment : Fragment() {
                                 position: Int,
                                 id: Long
                             ) {
-                                if (position != 0)
+                                if (position != 0) {
                                     selectedCatId = position
                                     selectedCat =
                                         b.spinnerSelectCategory5.getItemAtPosition(position)
                                             .toString()
+                                }
                             }
 
                         }
@@ -191,6 +192,7 @@ class CreatingOrderPpAndKuFragment : Fragment() {
     }
 
     private fun allFieldsFilled(): Int {
+        val isSpinnerSelected = !(b.spinnerSelectCategory5.visibility==View.VISIBLE&&selectedCat.isBlank())
         val isCommentPresent = b.comment.text.isNotBlank()
         val isFromCityPresent = b.fromCity.text.isNotBlank()
         val isFromAreaPresent = b.fromArea.text.isNotBlank()
@@ -202,7 +204,7 @@ class CreatingOrderPpAndKuFragment : Fragment() {
         val isToNamePresent = b.toName.text.isNotBlank()
         val isToTelNumberPresent = b.toTelNumber.text.isNotBlank()
 
-        return if(isCommentPresent && isFromCityPresent && isFromAreaPresent && isFromPlacePresent &&
+        return if(isSpinnerSelected && isCommentPresent && isFromCityPresent && isFromAreaPresent && isFromPlacePresent &&
             isToCityPresent && isToAreaPresent && isToPlacePresent && isFromDateTime &&
             isToNamePresent && isToTelNumberPresent){
             0
