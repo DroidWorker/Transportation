@@ -1,12 +1,15 @@
 package com.app.transportation.ui
 
 import android.content.SharedPreferences
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.core.os.bundleOf
@@ -84,6 +87,8 @@ class MainFragment : Fragment() {
         }
         viewModel.getAdvertCatsList()
         viewModel.getBusinessLast()
+        println("steeeep1")
+        viewModel.geetNews()
         viewModel.getOrderCountNews()
 
         applyVPAdapter()
@@ -124,7 +129,6 @@ class MainFragment : Fragment() {
             serviceTypeAdapter.newsCount = it.toMutableMap()
         }
         serviceTypeAdapter.onClick = {
-            //TODO some refresh things in this fragment
             viewModel.resetOrderCountNews(this.toString())
             lastCheckedCategoryId = this
             serviceTypeAdapter.lastCheckedCategoryId = this
@@ -143,12 +147,6 @@ class MainFragment : Fragment() {
             "dark"->mainAdvertisementsAdapter.mode=true
         }
         b.advertisementsVP.adapter = mainAdvertisementsAdapter
-        mainAdvertisementsAdapter.submitList(
-            listOf(
-                Advertisement(0, "50%", "Скидка на оформление бизнес-аккаунта", "С 7 по 12 декабря"),
-                Advertisement(1, "60%", "Скидка на оформление бизнес-аккаунта", "С 7 по 12 декабря")
-            )
-        )
     }
 
     private fun applyObservers() {
@@ -158,6 +156,24 @@ class MainFragment : Fragment() {
 
         viewModel.cachedBussinessLast.collectWithLifecycle(viewLifecycleOwner){
             jobsAdapter.submitList(it)
+        }
+
+        viewModel.cachedNews.collectWithLifecycle(viewLifecycleOwner){
+            var l: ArrayList<Advertisement> = ArrayList()
+            var index = 0
+            try {
+                it.forEach {
+                    val b64 = it.backImage.replace("data:image/jpeg;base64,", "")
+                    val byteArray = Base64.decode(b64, Base64.DEFAULT)
+                    val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                    l.add(Advertisement(index.toLong(), it.title, it.subtitle, bitmap))
+                    index++
+                }
+            }
+            catch (ex : Exception){viewModel.messageEvent.tryEmit("can't load news")}
+            mainAdvertisementsAdapter.submitList(
+                l.toList()
+            )
         }
 
         viewModel.isCustomer.filterNotNull().collectWithLifecycle(viewLifecycleOwner) {
@@ -225,6 +241,7 @@ class MainFragment : Fragment() {
                 //viewModel.getSearchResult("ер")
                 findNavController().navigate(R.id.advertisementsFragment,
                     bundleOf("categoryId" to lastCheckedCategoryId, "type" to 3, "searchText" to b.search.text.toString()))
+                b.search.setText("")
                 true
             } else {
                 false

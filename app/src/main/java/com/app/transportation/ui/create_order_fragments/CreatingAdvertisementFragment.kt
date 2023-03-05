@@ -1,13 +1,16 @@
 package com.app.transportation.ui.create_order_fragments
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.ImageDecoder
 import android.graphics.drawable.BitmapDrawable
+import android.os.Build
 import android.os.Bundle
-import android.provider.Settings.Global.putInt
+import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Base64
 import android.view.LayoutInflater
@@ -18,7 +21,6 @@ import android.widget.ArrayAdapter
 import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
-import androidx.core.view.get
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -36,6 +38,19 @@ import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
 import java.io.ByteArrayOutputStream
 import java.io.File
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.MutableList
+import kotlin.collections.emptyList
+import kotlin.collections.firstOrNull
+import kotlin.collections.forEach
+import kotlin.collections.getOrNull
+import kotlin.collections.getValue
+import kotlin.collections.isNotEmpty
+import kotlin.collections.mutableListOf
+import kotlin.collections.set
+import kotlin.collections.toList
+import kotlin.collections.toMutableList
 
 
 class CreatingAdvertisementFragment : Fragment() {
@@ -61,6 +76,9 @@ class CreatingAdvertisementFragment : Fragment() {
     private var catsID : HashMap<String, String> = HashMap<String, String>()
     private var selectedCat : String = ""
     private var spinnerPosition = 0
+
+    private var flagDataLoaded = false
+    private var newImagesCount = 0//use for switch internal/external photo
 
     private val obtainPhotoUriLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -88,7 +106,10 @@ class CreatingAdvertisementFragment : Fragment() {
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
 
-        viewModel.getMyAdverts()
+        if (!flagDataLoaded) {
+            viewModel.getMyAdverts()
+            viewModel.adfTempPhotoUris.value = 0 to mutableListOf()
+        }
 
         super.onViewCreated(view, savedInstanceState)
 
@@ -98,8 +119,16 @@ class CreatingAdvertisementFragment : Fragment() {
         if (isEdit==1) {
             b.addAdvert.text = "Применить"
             b.addToFavourites.visibility = View.GONE
+            b.photoInShowcase.visibility = View.GONE
+            b.photoInShowcaseCB.visibility = View.GONE
+            b.colorHighlighting.visibility = View.GONE
+            b.colorHighlightingCB.visibility = View.GONE
+            b.newOrderNotification.visibility = View.GONE
+            b.newOrderNotificationCB.visibility = View.GONE
 
             viewModel.cachedAdvertsSF.collectWithLifecycle(this) {
+                if (flagDataLoaded) return@collectWithLifecycle
+                else if(it.isNotEmpty())flagDataLoaded = true
                 it.forEach { item ->
                     if (item.id==categoryId) {
                         EditCatId = item.id
@@ -111,11 +140,21 @@ class CreatingAdvertisementFragment : Fragment() {
                             b.addDescription.isVisible = item.description.isBlank()
                             b.description.text = item.description
                         }
+                        if (item.photo.size>1){
+                            val plist: MutableList<Bitmap> = emptyList<Bitmap>().toMutableList()
+                            item.photo.forEach{
+                                val byteArray = Base64.decode(it, Base64.DEFAULT)
+                                val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
+                                plist.add(bitmap)
+                            }
+                            viewModel.adfTempPhotoUris.tryEmit(Pair(1, plist.toMutableList()))
+                        }else{
                         item.photo.firstOrNull()?.let { base64String ->
                             try {
                                 val byteArray = Base64.decode(base64String, Base64.DEFAULT)
                                 val bitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
-                                b.photo.tag = 1
+                                b.photo.tag = 0
+                                b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
                                 b.photo.setImageBitmap(bitmap)
                                 val blurred: Bitmap? = blurRenderScript(ctx, bitmap, 25)//second parametre is radius//second parametre is radius
                                 b.photo.setBackgroundDrawable(BitmapDrawable(blurred))
@@ -123,7 +162,7 @@ class CreatingAdvertisementFragment : Fragment() {
                             catch (ex : Exception){
                                 println("Error: "+ex.message.toString())
                             }
-                        }
+                        }}
                     }
                 }
             }
@@ -175,13 +214,13 @@ class CreatingAdvertisementFragment : Fragment() {
                     }
                 }
                 val photos = mutableListOf<String>()
-                viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
+                /*viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
                     val contentResolver = requireContext().applicationContext.contentResolver
                     contentResolver.openInputStream(it)?.use {
                         val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
                         File(requireContext().cacheDir.path + "/ttt.txt").writeText(base64String)
                     }
-                }
+                }*/
                 viewModel.cafTempPhotoUris.value.second.forEach { uri ->
                     val contentResolver = requireContext().applicationContext.contentResolver
                     contentResolver.openInputStream(uri)?.use {
@@ -190,7 +229,7 @@ class CreatingAdvertisementFragment : Fragment() {
                         resultBitmap?.compress(Bitmap.CompressFormat.JPEG, 70, byteArrayOutputStream)
                         val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
                         val base64String = Base64.encodeToString(byteArray, Base64.DEFAULT)
-                        photos.add("'data:image/jpg;base64,$base64String'")
+                        photos.add("${photos.size}:'data:image/jpg;base64,$base64String'")
                     }
                 }
                 var optionList: ArrayList<String> = ArrayList()
@@ -259,21 +298,28 @@ class CreatingAdvertisementFragment : Fragment() {
                         return@setOnClickListener
                     }
                 }
-                val photos = mutableListOf<String>()
-                viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
-                    val contentResolver = requireContext().applicationContext.contentResolver
-                    contentResolver.openInputStream(it)?.use {
-                        val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
-                        File(requireContext().cacheDir.path + "/ttt.txt").writeText(base64String)
+                var photos : MutableList<String>? = mutableListOf<String>()
+                if(b.photo.tag==1) {
+                    viewModel.cafTempPhotoUris.value.second.firstOrNull()?.let {
+                        val contentResolver = requireContext().applicationContext.contentResolver
+                        contentResolver.openInputStream(it)?.use {
+                            val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
+                            File(requireContext().cacheDir.path + "/ttt.txt").writeText(base64String)
+                        }
                     }
-                }
-                viewModel.cafTempPhotoUris.value.second.forEach { uri ->
-                    val contentResolver = requireContext().applicationContext.contentResolver
-                    contentResolver.openInputStream(uri)?.use {
-                        val base64String = Base64.encodeToString(it.readBytes(), Base64.DEFAULT)
-                        photos.add("'data:image/jpg;base64,$base64String'")
+                    viewModel.cafTempPhotoUris.value.second.forEach { uri ->
+                        val contentResolver = requireContext().applicationContext.contentResolver
+                        contentResolver.openInputStream(uri)?.use {
+                            var resultBitmap : Bitmap? = decodeSampledBitmapFromResource(it.readBytes(), 300, 200)
+                            val byteArrayOutputStream = ByteArrayOutputStream()
+                            resultBitmap?.compress(Bitmap.CompressFormat.JPEG, 40, byteArrayOutputStream)
+                            val byteArray: ByteArray = byteArrayOutputStream.toByteArray()
+                            val base64String = Base64.encodeToString(byteArray, Base64.DEFAULT)
+                            photos?.add("${photos?.size}:'data:image/jpg;base64,$base64String'")
+                        }
                     }
-                }
+                    if (photos?.size==0) photos = null
+                }else photos = null
                 var optionList: ArrayList<String> = ArrayList()
                 var summ: Int = 0
                 if (b.photoInShowcaseCB.isChecked) {
@@ -332,15 +378,19 @@ class CreatingAdvertisementFragment : Fragment() {
                     .setPositiveButton("Да") { _, _ ->
                         viewModel.cafRemoveCurrentPhoto()
                     }
-                    .setNegativeButton("Нет") { _, _ -> }
+                    .setNegativeButton("Нет") { _, _ ->
+                        importViaSystemFE()
+                    }
                     .show()
             } ?: importViaSystemFE()
         }
         b.prevPhoto.setOnClickListener {
             viewModel.cafPrevPhoto()
+            if (isEdit == 1)viewModel.adfPrevPhoto()
         }
         b.nextPhoto.setOnClickListener {
             viewModel.cafNextPhoto()
+            if (isEdit == 1)viewModel.adfNextPhoto()
         }
     }
 
@@ -350,15 +400,57 @@ class CreatingAdvertisementFragment : Fragment() {
         }
 
         viewModel.cafTempPhotoUris.collect(this) {
+            if (newImagesCount==0&& it.second.size==0)return@collect
             it.second.getOrNull(it.first)?.let { uri ->
-                b.photo.scaleType = ImageView.ScaleType.FIT_XY
+                b.photo.scaleType = ImageView.ScaleType.FIT_CENTER
                 b.photo.setImageURI(uri)
+                var bitmap: Bitmap? = null
+                val contentResolver: ContentResolver? = ctx?.contentResolver
+                try {
+                    bitmap = if (Build.VERSION.SDK_INT < 28) {
+                        MediaStore.Images.Media.getBitmap(contentResolver, uri)
+                    } else {
+                        val source: ImageDecoder.Source =
+                            ImageDecoder.createSource(contentResolver!!, uri)
+                        ImageDecoder.decodeBitmap(source)
+                    }
+                    val blurred: Bitmap? = blurRenderScript(ctx, bitmap!!, 25)//second parametre is radius//second parametre is radius
+                    b.photo.setBackgroundDrawable(BitmapDrawable(blurred))
+                } catch (e: java.lang.Exception) {
+                    e.printStackTrace()
+                }
                 b.photo.tag = 1
             } ?: kotlin.run {
-                if (b.photo.tag!=1){
+                if (b.photo.tag!=1&&isEdit==0){
                     b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
                     b.photo.setImageResource(R.drawable.ic_photo)
-                    b.photo.tag = 1
+                    b.photo.tag = 0
+                }
+            }
+            b.imageNumber.text =
+                if (it.second.size > 1) {
+                    if (it.first != it.second.size)
+                        "${it.first+1}/${it.second.size}"
+                    else
+                        "${it.first}/${it.second.size}"
+                }
+                else ""
+            b.prevPhoto.isVisible = it.first > 0
+            b.nextPhoto.isGone = it.first+1 >= it.second.size
+            newImagesCount = it.second.size
+        }
+        if(isEdit==1&&newImagesCount==0)viewModel.adfTempPhotoUris.collect(this) {
+            it.second.getOrNull(it.first)?.let { bmp ->
+                b.photo.scaleType = ImageView.ScaleType.FIT_CENTER
+                b.photo.setImageBitmap(bmp)
+                val blurred: Bitmap? = blurRenderScript(ctx, bmp, 25)//second parametre is radius//second parametre is radius
+                b.photo.setBackgroundDrawable(BitmapDrawable(blurred))
+                b.photo.tag = 1
+            } ?: kotlin.run {
+                if (b.photo.tag!=1&&isEdit==0){
+                    b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
+                    b.photo.setImageResource(R.drawable.ic_photo)
+                    b.photo.tag = 0
                 }
             }
             b.imageNumber.text =
@@ -432,6 +524,7 @@ class CreatingAdvertisementFragment : Fragment() {
 
     override fun onDestroy() {
         super.onDestroy()
+        flagDataLoaded = false
         viewModel.cafTempPhotoUris.value = 0 to mutableListOf()
     }
 

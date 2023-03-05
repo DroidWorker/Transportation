@@ -83,6 +83,18 @@
             app:layout_constraintEnd_toEndOf="@+id/cardView"
             app:layout_constraintTop_toTopOf="@+id/cardView" />
 
+        <TextView
+            android:id="@+id/imageNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:fontFamily="@font/montserrat"
+            android:textColor="@color/white"
+            app:layout_constraintBottom_toBottomOf="@+id/cardView"
+            app:layout_constraintEnd_toEndOf="@+id/cardView"
+            app:layout_constraintStart_toStartOf="@+id/cardView"
+            tools:text="1/5" />
+
         <ImageView
             android:id="@+id/addToFavourites"
             android:layout_width="wrap_content"
@@ -138,18 +150,6 @@
             app:autoSizeTextType="uniform"
             app:drawableStartCompat="@drawable/ic_call"
             tools:text="8 964 854 6332" />
-
-        <TextView
-            android:id="@+id/imageNumber"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="10dp"
-            android:fontFamily="@font/montserrat"
-            android:textColor="@color/white"
-            app:layout_constraintBottom_toBottomOf="@+id/cardView"
-            app:layout_constraintEnd_toEndOf="@+id/cardView"
-            app:layout_constraintStart_toStartOf="@+id/cardView"
-            tools:text="1/5" />
 
         <TextView
             android:id="@+id/location"

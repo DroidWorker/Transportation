@@ -66,6 +66,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     val cachedSearchResult = MutableStateFlow(emptyList<Advert>())
 
     val cachedTarif = MutableStateFlow(emptyList<TarifDTO>())
+    val cachedNews = MutableStateFlow(emptyList<NewsDTO>())
 
     val cachedAdvertsSF = MutableStateFlow(emptyList<Advert>())
     val cachedOrdersSF = MutableStateFlow(emptyList<Advert>())
@@ -1086,7 +1087,7 @@ println("dsdsdsdsd"+advertId+"|||"+list.toString())
                                 }?.parentId ?: 4,
                                 category = entry.value.category,
                                 subcategoryId = entry.value.categoryId.toInt(),
-                                title = entry.value.description,
+                                title = "Отклик #"+entry.key+it.key,//entry.value.description,
                                 date = entry.value.date,
                                 time = entry.value.time,
                                 fromCity = "${entry.value.fromCity}",
@@ -1096,7 +1097,7 @@ println("dsdsdsdsd"+advertId+"|||"+list.toString())
                                 toRegion = "${entry.value.toRegion}",
                                 toPlace = "${entry.value.toPlace}",
                                 payment = entry.value.payment,
-                                description = "Запрс на исполнение вашей заявки в категории " + entry.value.category,
+                                description = "Запрс на исполнение вашей заявки "+entry.value.description+" в категории " + entry.value.category,
                                 photo = emptyList(),//photoList.toList()
                                 ping = mapOf(it.toPair())
                             ))
@@ -1276,6 +1277,16 @@ println("dsdsdsdsd"+advertId+"|||"+list.toString())
             listt
         }
     }
+    private suspend fun getNews(){
+        (repository.getNews() as? NewsResponse.Success)?.let { response ->
+            var listt : ArrayList<NewsDTO> = ArrayList()
+            response.tarif.forEach{
+                listt.add(it)
+            }
+            cachedNews.tryEmit(listt.toList())
+            listt
+        }
+    }
 
     private suspend fun getNotification(){
         (repository.getNotice() as? NoticeResponce.Success)?.let { response ->
@@ -1295,6 +1306,10 @@ println("dsdsdsdsd"+advertId+"|||"+list.toString())
 
     fun getTarifs() = viewModelScope.launch (Dispatchers.IO){
         getTarif()
+    }
+
+    fun geetNews() = viewModelScope.launch (Dispatchers.IO){
+        getNews()
     }
 
     fun getNotice() = viewModelScope.launch(Dispatchers.IO) {
@@ -1461,7 +1476,7 @@ println("dsdsdsdsd"+advertId+"|||"+list.toString())
                     title: String,
                    price: String,
                    description: String,
-                   photos: List<String>,
+                   photos: List<String>?,
                     options: List<String>)=
         viewModelScope.launch(Dispatchers.IO) {
             when (val result = repository.editAdvert(id, title, price, description, photos, options)) {
@@ -1563,7 +1578,7 @@ println("dsdsdsdsd"+advertId+"|||"+list.toString())
             when (repository.deleteAdvert(isOrder, id.toString()).message) {
                 "Success deleted." -> {
                     messageEvent.tryEmit("Объявление успешно удалено!")
-                    deletedAdvertPosition.tryEmit(position)
+                    if(position>=0) deletedAdvertPosition.tryEmit(position)
                     /*if (isOrder)
                     updateOrders()
                 else
@@ -1575,10 +1590,13 @@ println("dsdsdsdsd"+advertId+"|||"+list.toString())
 
     fun cafApplyPhotoByUri(uri: Uri) = viewModelScope.launch(Dispatchers.IO) {
         val newValue = cafTempPhotoUris.value.run {
-            Pair(
-                first,
-                second.toMutableList().apply { add(uri) }
-            )
+            if (this.second.size<=5) {
+                Pair(
+                    first,
+                    second.toMutableList().apply { add(uri) }
+                )
+            }else
+                this
         }
         cafTempPhotoUris.tryEmit(newValue)
     }

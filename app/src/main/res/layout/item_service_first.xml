@@ -65,8 +65,6 @@
         android:textColor="@color/secondary_color"
         android:textSize="16sp"
         app:drawableStartCompat="@drawable/ic_calendar"
-        app:layout_constraintEnd_toStartOf="@+id/time"
-        app:layout_constraintHorizontal_bias="0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/title"
         tools:text="01/12/2022" />
@@ -82,8 +80,8 @@
         android:textColor="@color/secondary_color"
         android:textSize="16sp"
         app:drawableStartCompat="@drawable/ic_time"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/price"
+        app:layout_constraintStart_toEndOf="@+id/date"
         app:layout_constraintTop_toBottomOf="@+id/title"
         tools:text="12:30" />
 
@@ -99,8 +97,6 @@
         android:textSize="16sp"
         app:drawableStartCompat="@drawable/ic_ruble"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1"
-        app:layout_constraintStart_toEndOf="@+id/time"
         app:layout_constraintTop_toBottomOf="@+id/title"
         tools:text="1000 руб" />
 

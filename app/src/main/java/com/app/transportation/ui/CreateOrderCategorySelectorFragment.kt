@@ -30,6 +30,7 @@ class CreateOrderCategorySelectorFragment : Fragment() {
 
     private val categoryId by lazy { arguments?.getInt("id", 1) ?: 1 }
     private val mode by lazy { arguments?.getInt("mode", 0) ?: 0 }//0-standart 1-select executor 2-open 4level category
+private val isOrder by lazy { arguments?.getInt("isOrder", -1)?: -1 }//if 0 = false | 1 = true
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -131,7 +132,7 @@ class CreateOrderCategorySelectorFragment : Fragment() {
 
                 var destinationRes = R.id.creatingOrderFragment
 
-                if (viewModel.isCustomer.value == false) {
+                if ((isOrder==-1&&viewModel.isCustomer.value == false)||isOrder==0) {
                     destinationRes = R.id.creatingAdvertisementFragment
                 } else {
                     when (ParentId) {

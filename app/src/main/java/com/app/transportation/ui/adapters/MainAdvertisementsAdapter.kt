@@ -43,9 +43,6 @@ class MainAdvertisementsAdapter :
 
             fun bind(item: Advertisement) {
                 with(binding) {
-                    if(!mode){
-                        cardfilter.setImageResource(R.drawable.full_card_gradient)
-                    }
                     if (bindingAdapterPosition == 0) {
                         root.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                             marginStart = itemView.context.dpToPx(25)
@@ -59,9 +56,8 @@ class MainAdvertisementsAdapter :
                         title2.text = item.title2
                         title2.isVisible = true
                     }
-                    if (item.title3.isNotBlank()) {
-                        title3.text = item.title3
-                        title3.isVisible = true
+                    if (item.iamge!=null) {
+                        catimage.setImageBitmap(item.iamge)
                     }
 
                     selectionTracker?.isSelected(item.id)?.let { root.isActivated = it }

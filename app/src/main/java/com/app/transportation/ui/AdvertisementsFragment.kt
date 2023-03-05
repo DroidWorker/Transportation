@@ -53,6 +53,7 @@ class AdvertisementsFragment : Fragment() {
     private var cityTo = ""
 
     private var advertCount = 999
+    private var isOrder = -1
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -84,13 +85,13 @@ class AdvertisementsFragment : Fragment() {
             else
                 b.title.text = "я исполнитель"
             if (type == 0) b.title.text = "я заказчик"
+            else if (type==3) b.title.text = "результаты поиска"
             b.toolbars.isVisible = true
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
 
         viewModel.getAdvertCatsList()
 
-        super.onViewCreated(view, savedInstanceState)
         when (type) {
             1 -> {
                 viewModel.cachedOrdersSF.tryEmit(emptyList())
@@ -102,8 +103,12 @@ class AdvertisementsFragment : Fragment() {
                 viewModel.getAllCategoryAdverts(categoryId)
             }
             0 -> viewModel.getCategoryAdverts(categoryId)
-            else -> viewModel.getSearchResult(searchText)
+            else -> {
+                viewModel.getSearchResult(searchText)
+            }
         }
+
+        super.onViewCreated(view, savedInstanceState)
 
         viewModel.updateProfile()
         //viewModel.updateMainFragmentData()
@@ -135,8 +140,10 @@ class AdvertisementsFragment : Fragment() {
             }
             if (adapter.itemCount == 0&&type==1&&advertCount<1)
                     b.beSeller.visibility = View.VISIBLE
-            else if(type == 2)
+            else if(type == 2) {
                 b.createOrder.visibility = View.VISIBLE
+                isOrder = 1
+            }
 
         } else if(type==3) {
             b.servicesRV.adapter = adapter
@@ -167,7 +174,7 @@ class AdvertisementsFragment : Fragment() {
                     findNavController().navigate(R.id.advertisementsFragment, bundleOf("categoryId" to ItemId, "type" to 2))
                 }
             }
-            b.createOrder.visibility = View.VISIBLE
+            //b.createOrder.visibility = View.VISIBLE
         }
 
     }
@@ -257,6 +264,7 @@ class AdvertisementsFragment : Fragment() {
                     )
                     adapter.submitList(filler.toList())
                 }
+
                 if (adapter.itemCount!=0&&type==2)
                     b.createOrder.visibility = View.GONE
                 /*if (adapter1.getItemCount() == 0) {
@@ -267,6 +275,7 @@ class AdvertisementsFragment : Fragment() {
             }
         }else if(type==3){
             viewModel.cachedSearchResult.collectWithLifecycle(viewLifecycleOwner) {
+                adapter.isSearchResult = true
                 adapter.submitList(it)
                 if (adapter.itemCount==0) {
                     var filler: ArrayList<Advert> = ArrayList()
@@ -309,8 +318,10 @@ class AdvertisementsFragment : Fragment() {
                     }
                     adapter1.submitList(list.toList())
                 }
-                else
+                else {
                     adapter1.submitList(it)
+                    //b.createOrder.visibility = View.VISIBLE
+                }
             }
             b.createOrder.visibility = View.VISIBLE
         }
@@ -333,7 +344,8 @@ class AdvertisementsFragment : Fragment() {
             }
         }
         b.createOrder.setOnClickListener{
-            findNavController().navigate(R.id.createOrderCategorySelectorFragment, bundleOf("id" to 0, "mode" to 3))
+            isOrder=1
+            findNavController().navigate(R.id.createOrderCategorySelectorFragment, bundleOf("id" to 0, "mode" to 3, "isOrder" to isOrder))
         }
         b.city.setOnClickListener {
             findNavController().navigate(R.id.addCityDF, bundleOf("city" to defaultCity))

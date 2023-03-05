@@ -183,7 +183,8 @@ class pingInfoFeedbackFragment : Fragment() {
             if (isAdvert)
                 viewModel.setPingStatus( pingOwnerId, null, resetStatusOrderId, "DONE")
             else
-                viewModel.setPingStatus( pingOwnerId, resetStatusOrderId, null, "DONE")
+                viewModel.deleteAdvert(!isAdvert, resetStatusOrderId.toInt(), -1)
+                //viewModel.setPingStatus( pingOwnerId, resetStatusOrderId, null, "DONE")
             findNavController().navigateUp()
         }
         b.telNumber3.setOnClickListener{

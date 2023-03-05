@@ -12,10 +12,10 @@ sealed class UpdateProfileResponse {
         @SerialName("last_name") val lastName: String,
         val phone: String,
         val email: String,
-        val card: String,
+        val card: String?,
         val location: String,
-        val avatar: String,
-        val status: String,
+        val avatar: String?,
+        val status: String?,
         @SerialName("bussiness") val bussiness: String,
         @SerialName("bussiness_update") val bussiness_update: String?
     ) : UpdateProfileResponse()

@@ -17,10 +17,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.app.transportation.R
 import com.app.transportation.core.blurRenderScript
 import com.app.transportation.data.database.entities.Advert
-import com.app.transportation.databinding.ItemAdvertCategoryTextItemBinding
-import com.app.transportation.databinding.ItemNoadvertsFillerBinding
-import com.app.transportation.databinding.ItemServiceFirstBinding
-import com.app.transportation.databinding.ItemServiceSecondBinding
+import com.app.transportation.databinding.*
 import com.google.android.material.snackbar.Snackbar
 
 class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffCallback()) {
@@ -28,6 +25,7 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
     var onClick: (Advert.() -> Unit)? = null
     lateinit var ctx : Context
     var iscustomer = false
+    var isSearchResult = false
 
     init {
         setHasStableIds(true)
@@ -37,7 +35,9 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         ctx = parent.context
         val layoutInflater = LayoutInflater.from(parent.context)
-        return if (viewType == 0)
+        return if(isSearchResult)
+            SearchResultViewHolder(ItemServiceSearchBinding.inflate(layoutInflater, parent, false))
+        else if (viewType == 0)
             FirstViewHolder(ItemServiceFirstBinding.inflate(layoutInflater, parent, false))
         else if(viewType == 1)
             SecondViewHolder(ItemServiceSecondBinding.inflate(layoutInflater, parent, false))
@@ -47,7 +47,9 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) =
         with(getItem(position)) {
-            if (viewType == 0)
+            if(isSearchResult)
+                (holder as SearchResultViewHolder).bind(this)
+            else if (viewType == 0)
                 (holder as FirstViewHolder).bind(this)
             else if(viewType == 1)
                 (holder as SecondViewHolder).bind(this)
@@ -125,6 +127,20 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
         }
 
     }
+
+    inner class SearchResultViewHolder(private val binding: ItemServiceSearchBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(item: Advert) = with(binding) {
+            root.setOnClickListener { onClick?.invoke(item) }
+            title.text = item.title
+            price.isVisible = item.price != null && item.price != "null"
+            price.text = item.price.toString()
+            if (price.text == "-1") price.visibility = View.GONE
+        }
+
+    }
+
 
     inner class fillerViewHolder (private val binding: ItemNoadvertsFillerBinding) ://call if list empty
     RecyclerView.ViewHolder(binding.root){

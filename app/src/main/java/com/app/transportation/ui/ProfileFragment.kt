@@ -166,6 +166,7 @@ class ProfileFragment : Fragment() {
     private fun applyObservers() = viewLifecycleOwner.repeatOnLifecycle {
         viewModel.profileFlow.collect(this) { profile ->
             profile?.apply {
+                println("prrroooof"+this)
                 userEmail = email
                 b.name.text = name
                 b.login.text = login

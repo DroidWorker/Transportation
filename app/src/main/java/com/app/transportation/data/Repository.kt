@@ -106,7 +106,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         avatar: List<String>?
     ) = kotlin.runCatching {
         val token = authToken ?: return@runCatching
-        client.submitForm(
+        val response: HttpResponse = client.submitForm(
             url = "http://www.sabbatum.ru/api/v1/profile",
             formParameters = Parameters.build {
                 if(name!="") append("first_name", name)
@@ -122,6 +122,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         ) {
             headers { append("X-Access-Token", token) }
         }
+        val responseBody: String = response.receive()
         //TODO status and avatar
     }
 
@@ -133,6 +134,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
             }
         }
         val responseBody: String = response.receive()
+        println("bjbjbbbj"+responseBody)
         val json = Json.Default
         kotlin.runCatching {
             json.decodeFromString<UpdateProfileResponse.Success>(responseBody)
@@ -145,12 +147,13 @@ class Repository(private val dao: MainDao) : KoinComponent {
                         name = firstName,
                         telNumber = phone.takeIf { it.isNotBlank() } ?: oldProfile?.telNumber ?: "",
                         email = email.takeIf { it.isNotBlank() } ?: oldProfile?.email ?: "",
-                        paymentCard = card,
+                        paymentCard = card?: "null",
                         cityArea = location,
-                        specialization = status,
-                        avatar = avatar,
+                        specialization = status?:"null",
+                        avatar = avatar?:"",
                         bussiness = "$bussiness|$bussiness_update"
                     )
+                    println("daaaaaao"+profile)
                     dao.insert(profile)
                 }
         }.getOrElse {
@@ -195,6 +198,24 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }
     }.getOrElse {
         TarifResponce.Failure(it.stackTraceToString())
+    }
+
+    suspend fun getNews(): NewsResponse = kotlin.runCatching {
+        val token = authToken ?: return@runCatching NewsResponse.Failure("token is null")
+        val response: HttpResponse =
+            client.get("http://www.sabbatum.ru/api/v1/news_list"){
+                headers { append("X-Access-Token", token) }
+            }
+        var responseBody: String = response.receive()
+        val json = Json.Default
+        kotlin.runCatching {
+            val map = json.decodeFromString<List<NewsDTO>>(responseBody)
+            NewsResponse.Success(map)
+        }.getOrElse {
+            json.decodeFromString<NewsResponse.Failure>(responseBody)
+        }
+    }.getOrElse {
+        NewsResponse.Failure(it.stackTraceToString())
     }
 
     suspend fun getNotice(): NoticeResponce = kotlin.runCatching {
@@ -856,6 +877,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
 
         val responseBody: String = response.receive()
         val json = Json.Default
+        println("respoooo"+responseBody)
 
         json.decodeFromString<AdvertCreateResponse.Success>(responseBody)
     }.getOrElse { AdvertCreateResponse.Failure(it.stackTraceToString()) }.also { println("it= $it") }
@@ -865,7 +887,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
         title: String,
         price: String,
         description: String,
-        photos: List<String>,
+        photos: List<String>?,
         options: List<String>
     ): AdvertCreateResponse = kotlin.runCatching {
         if (authToken == null) logout()
@@ -887,6 +909,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
 
         val responseBody: String = response.receive()
         val json = Json.Default
+        println("respoooo"+responseBody)
 
         json.decodeFromString<AdvertCreateResponse.Success>(responseBody)
     }.getOrElse { AdvertCreateResponse.Failure(it.stackTraceToString()) }.also { println("it= $it") }
@@ -971,6 +994,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
             val map = json.decodeFromString<Map<String, AdvertFullDTO>>(responseBody)
             AdvertFullListResponse.Success(map)
         }.getOrElse {
+            println("alcccccccccc"+it.localizedMessage)
             if (responseBody.contains("Object not found")){
                 var emty : Map<String, AdvertFullDTO> = mutableMapOf("empty" to AdvertFullDTO("", "","","","","", "","","", "", emptyMap(), emptyList(), "NO_ACTIVE", ""))
                 AdvertFullListResponse.Success(emty)
@@ -978,6 +1002,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
             json.decodeFromString<AdvertFullListResponse.Failure>(responseBody)
         }
     }.getOrElse {
+        println("alcccccccccc"+it.localizedMessage)
         AdvertFullListResponse.Failure(it.stackTraceToString()) }
 
     suspend fun getOrderFullList(): OrderFullListResponse = kotlin.runCatching {
