@@ -153,7 +153,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                 logout()
             }
             is UnknownHostException -> {
-                messageEvent.tryEmit("Проблемы с интернетом или сервером")
+                messageEvent.tryEmit("Проблемы с интернетом")
             }
             else -> {
 
@@ -1281,7 +1281,7 @@ println("dsdsdsdsd"+advertId+"|||"+list.toString())
         (repository.getNews() as? NewsResponse.Success)?.let { response ->
             var listt : ArrayList<NewsDTO> = ArrayList()
             response.tarif.forEach{
-                listt.add(it)
+                listt.add(it.value)
             }
             cachedNews.tryEmit(listt.toList())
             listt

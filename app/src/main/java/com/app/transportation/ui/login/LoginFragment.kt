@@ -38,7 +38,10 @@ class LoginFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        var gso : GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build()
+        var gso : GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken("230726406535-spl43c9o2ue3c61na44a9ds4pvuedp0h.apps.googleusercontent.com")
+            .requestEmail()
+            .build()
         mGoogleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
         binding = FragmentLoginBinding.inflate(inflater, container, false)
         return b.root
@@ -126,11 +129,13 @@ class LoginFragment : Fragment() {
             setPasswordFieldBoxStrokeColor(false)
             if (viewModel.GmailLogin==null||viewModel.GmailPassword==null)
             {
+                println("stttttte11")
                 val signInIntent : Intent = mGoogleSignInClient!!.signInIntent
                 getActivity()?.startActivityForResult(signInIntent, RC_SIGN_IN)
             }
             else
             {
+                println("stttttte11")
                 viewModel.authorize(viewModel.GmailLogin!!, viewModel.GmailPassword!!)
             }
         }

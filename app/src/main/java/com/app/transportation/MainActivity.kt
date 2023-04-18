@@ -21,6 +21,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.PopupWindow
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate.*
@@ -312,7 +313,7 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 menuB.shareLayout.setOnClickListener {
                     val sharingIntent = Intent(Intent.ACTION_SEND)
                     sharingIntent.type = "text/plain"
-                    val shareBody = "Text to be shared"
+                    val shareBody = "https://apps.rustore.ru/app/com.app.transportation"
                     sharingIntent.putExtra(Intent.EXTRA_SUBJECT, "Subject")
                     sharingIntent.putExtra(Intent.EXTRA_TEXT, shareBody)
                     startActivity(Intent.createChooser(sharingIntent, "поделиться ..."))
@@ -379,24 +380,28 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
         }
     }
 
-    private fun handleSignInResult(task : Task<GoogleSignInAccount>){
+    private fun handleSignInResult(task : Task<GoogleSignInAccount>, isReg : Boolean = false){
         try {
             val account : GoogleSignInAccount = task.getResult(ApiException::class.java)
             if (account.email!=null&&account.displayName!=null&&account.givenName!=null) {
-                vm.register(
-                    account.email!!,
-                    "GmailAccount" + account.givenName,
-                    account.displayName!!
-                )
-                vm.GmailLogin = account.email
-                vm.GmailPassword = "GmailAccount" + account.givenName
-                makeSnackbar(account.displayName+", вы зарегистрированы")
-                vm.authorize(account.email!!, "GmailAccount" + account.givenName)
+                if (isReg||vm.GmailLogin==null||vm.GmailPassword==null) {
+                    vm.register(
+                        account.email!!,
+                        "GmailAccount" + account.givenName,
+                        account.displayName!!
+                    )
+                    vm.GmailLogin = account.email
+                    vm.GmailPassword = "GmailAccount" + account.givenName
+                    makeSnackbar(account.displayName + ", вы зарегистрированы")
+                }
+                vm.authorize(vm.GmailLogin!!, vm.GmailPassword!!)
                 navController.navigate(R.id.mainFragment)
             }
         }
         catch (ex : Exception){
             makeSnackbar("Ошибка Google аторизации")
+            Toast.makeText(this, ex.localizedMessage, Toast.LENGTH_SHORT).show()
+            println("errereereer"+ex.stackTraceToString())
         }
     }
 
@@ -425,6 +430,10 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode==RC_SIGN_IN){ //if gmailRegistration
+            val task : Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
+            handleSignInResult(task, true)
+        }
+        else if(requestCode==123){
             val task : Task<GoogleSignInAccount> = GoogleSignIn.getSignedInAccountFromIntent(data)
             handleSignInResult(task)
         }

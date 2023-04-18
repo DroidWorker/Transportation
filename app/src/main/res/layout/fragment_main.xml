@@ -96,10 +96,28 @@
         app:layout_constraintGuide_percent="0.8" />
 
     <Button
+        android:id="@+id/openMap"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:fontFamily="@font/montserrat"
+        android:text="КАРТА"
+        android:textColor="@color/button_text_color"
+        android:textSize="20sp"
+        app:backgroundTint="@color/primary_color"
+        app:cornerRadius="10dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imExecutor"
+        app:layout_constraintEnd_toStartOf="@+id/imCustomer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/imCustomer" />
+
+    <Button
         android:id="@+id/imCustomer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:layout_marginEnd="8dp"
         android:fontFamily="@font/montserrat"
         android:text="Я ЗАКАЗЧИК"
         android:textColor="@color/button_text_color"
@@ -107,15 +125,15 @@
         app:cornerRadius="10dp"
         app:layout_constraintBottom_toTopOf="@+id/imExecutor"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/guideline1"
         app:layout_constraintVertical_bias="0"
-        app:layout_constraintWidth_percent="0.8" />
+        app:layout_constraintWidth_percent="0.6" />
 
     <Button
         android:id="@+id/imExecutor"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
         android:layout_marginBottom="4dp"
         android:fontFamily="@font/montserrat"
         android:text="Я ИСПОЛНИТЕЛЬ"
@@ -124,9 +142,8 @@
         app:cornerRadius="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imCustomer"
         app:layout_constraintVertical_bias="0"
-        app:layout_constraintWidth_percent="0.8" />
+        app:layout_constraintWidth_percent="0.6" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

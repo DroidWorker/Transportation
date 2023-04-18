@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 sealed class NewsResponse {
     @Serializable
     data class Success(
-        val tarif: List<NewsDTO>
+        val tarif: Map<String, NewsDTO>
     ) : NewsResponse()
 
     @Serializable

@@ -1,15 +1,19 @@
 package com.app.transportation.data
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
+import android.widget.Toast
 import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import com.app.transportation.data.api.*
 import com.app.transportation.data.database.MainDao
 import com.app.transportation.data.database.entities.AdvertisementCategory
 import com.app.transportation.data.database.entities.Profile
+import com.app.transportation.ui.ErrorActivity
 import io.ktor.client.*
 import io.ktor.client.call.*
+import io.ktor.client.features.*
 import io.ktor.client.request.*
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.*
@@ -28,7 +32,16 @@ import org.koin.core.qualifier.named
 
 class Repository(private val dao: MainDao) : KoinComponent {
 
+    private val appContext by inject<Context>()
     private val client: HttpClient by inject()
+     init {
+         client.config {
+             install(HttpTimeout) {
+                 requestTimeoutMillis = 20000
+                 connectTimeoutMillis = 10000
+             }
+         }
+     }
 
     private val prefs: SharedPreferences by inject(named("MainSettings"))
 
@@ -115,7 +128,7 @@ class Repository(private val dao: MainDao) : KoinComponent {
                 if(paymentCard!="") append("card", paymentCard)
                 if(cityArea!="") append("location", cityArea)
                 if (avatar != null) {
-                    if(avatar?.isNotEmpty()) append("avatar", "[${avatar.joinToString()}]")
+                    if(avatar.isNotEmpty()) append("avatar", "[${avatar.joinToString()}]")
                 }
                 //append("status", name)
             }
@@ -160,7 +173,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
             json.decodeFromString<UpdateProfileResponse.Failure>(responseBody)
         }
     }.getOrElse {
-        UpdateProfileResponse.Failure(it.stackTraceToString()) }
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            UpdateProfileResponse.Failure(it.stackTraceToString())
+        } else UpdateProfileResponse.Failure(it.stackTraceToString()) }
 
     suspend fun getProfile(id: String): ProfileShortResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching ProfileShortResponse.Failure("token is null")
@@ -178,7 +196,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
             json.decodeFromString<ProfileShortResponse.Failure>(responseBody)
         }
     }.getOrElse {
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
             ProfileShortResponse.Failure(it.stackTraceToString())
+        } else ProfileShortResponse.Failure(it.stackTraceToString())
     }
 
     suspend fun getTarif(): TarifResponce = kotlin.runCatching {
@@ -209,13 +232,21 @@ class Repository(private val dao: MainDao) : KoinComponent {
         var responseBody: String = response.receive()
         val json = Json.Default
         kotlin.runCatching {
-            val map = json.decodeFromString<List<NewsDTO>>(responseBody)
+            val map = json.decodeFromString<Map<String, NewsDTO>>(responseBody)
             NewsResponse.Success(map)
         }.getOrElse {
+            Toast.makeText(appContext, it.localizedMessage, Toast.LENGTH_SHORT).show()
             json.decodeFromString<NewsResponse.Failure>(responseBody)
         }
     }.getOrElse {
-        NewsResponse.Failure(it.stackTraceToString())
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            NewsResponse.Failure(it.stackTraceToString())
+        } else {
+            NewsResponse.Failure(it.stackTraceToString())
+        }
     }
 
     suspend fun getNotice(): NoticeResponce = kotlin.runCatching {
@@ -234,7 +265,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
             json.decodeFromString<NoticeResponce.Failure>(responseBody)
         }
     }.getOrElse {
-        NoticeResponce.Failure(it.stackTraceToString())
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            NoticeResponce.Failure(it.stackTraceToString())
+        } else NoticeResponce.Failure(it.stackTraceToString())
     }
     suspend fun deleteNotice(id: String): InfoMessageResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
@@ -251,7 +287,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val json = Json.Default
 
         json.decodeFromString(responseBody)
-    }.getOrElse { InfoMessageResponse(it.stackTraceToString()) }
+    }.getOrElse { if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+        val intent = Intent(appContext, ErrorActivity::class.java)
+        intent.putExtra("errText", it.localizedMessage)
+        appContext?.startActivity(intent)
+        InfoMessageResponse(it.stackTraceToString())
+    } else InfoMessageResponse(it.stackTraceToString()) }
 
 
     suspend fun logout() = coroutineScope {
@@ -383,7 +424,14 @@ class Repository(private val dao: MainDao) : KoinComponent {
             }
             json.decodeFromString<AdvertPingResponse.Failure>(responseBody)
         }
-    }.getOrElse { AdvertPingResponse.Failure(it.stackTraceToString()) }
+    }.getOrElse {
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            AdvertPingResponse.Failure(it.stackTraceToString())
+        } else AdvertPingResponse.Failure(it.stackTraceToString())
+    }
     suspend fun getOrderPingList(): OrderPingResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching OrderPingResponse.Failure("token is null")
         val response: HttpResponse =
@@ -410,7 +458,14 @@ class Repository(private val dao: MainDao) : KoinComponent {
                 json.decodeFromString<OrderPingResponse.Failure>(responseBody)
             }
         }
-    }.getOrElse { OrderPingResponse.Failure(it.stackTraceToString()) }
+    }.getOrElse {
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            OrderPingResponse.Failure(it.stackTraceToString())
+        } else OrderPingResponse.Failure(it.stackTraceToString())
+    }
 
     suspend fun getAdvertCatgoryList(): StringResponce = kotlin.runCatching {
         val token = authToken ?: return@runCatching StringResponce.Failure("token is null")
@@ -448,7 +503,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
             }
         }
     }.getOrElse {
-        StringResponce.Failure(it.stackTraceToString())
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            StringResponce.Failure(it.stackTraceToString())
+        } else StringResponce.Failure(it.stackTraceToString())
     }
 
     suspend fun getOrderCountNews(): IntIntResponce = kotlin.runCatching {
@@ -480,7 +540,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
             }
         }
     }.getOrElse {
-        IntIntResponce.Failure(it.stackTraceToString())
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            IntIntResponce.Failure(it.stackTraceToString())
+        } else IntIntResponce.Failure(it.stackTraceToString())
     }
     suspend fun resetOrderCountNews(id: String): InfoMessageResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching InfoMessageResponse("token is null")
@@ -525,7 +590,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
             }
         }
     }.getOrElse {
-        businessLastResponce.Failure(it.stackTraceToString())
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            businessLastResponce.Failure(it.stackTraceToString())
+        } else businessLastResponce.Failure(it.stackTraceToString())
     }
 
     suspend fun addOrderToFavorite(orderId: String): AddFavoriteResponsee = kotlin.runCatching {
@@ -592,7 +662,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
             AdvertFavResponse.Success(emty)
          }
         else
-            AdvertFavResponse.Failure(it.stackTraceToString())
+            if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+                val intent = Intent(appContext, ErrorActivity::class.java)
+                intent.putExtra("errText", it.localizedMessage)
+                appContext?.startActivity(intent)
+                AdvertFavResponse.Failure(it.stackTraceToString())
+            } else AdvertFavResponse.Failure(it.stackTraceToString())
     }
     suspend fun getOrderFavoriteList(): OrderFavResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching OrderFavResponse.Failure("token is null")
@@ -634,7 +709,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
             OrderFavResponse.Failure(it.stackTraceToString())
         }
         else
-            OrderFavResponse.Failure(it.stackTraceToString())
+            if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+                val intent = Intent(appContext, ErrorActivity::class.java)
+                intent.putExtra("errText", it.localizedMessage)
+                appContext?.startActivity(intent)
+                OrderFavResponse.Failure(it.stackTraceToString())
+            } else OrderFavResponse.Failure(it.stackTraceToString())
     }
 
     suspend fun deleteAdvertFavorite(id: String): InfoMessageResponse = kotlin.runCatching {
@@ -687,7 +767,14 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }.getOrElse {
             json.decodeFromString<SearchResponse.Failure>(responseBody)
         }
-        }.getOrElse { SearchResponse.Failure(it.stackTraceToString()) }
+        }.getOrElse {
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            SearchResponse.Failure(it.stackTraceToString())
+        } else SearchResponse.Failure(it.stackTraceToString())
+        }
 
     suspend fun getStaticData(type : String): StaticDateResponse = kotlin.runCatching {
         val response: HttpResponse = client.submitForm(url = "http://www.sabbatum.ru/api/v1/datas_text?type=$type")
@@ -880,7 +967,14 @@ class Repository(private val dao: MainDao) : KoinComponent {
         println("respoooo"+responseBody)
 
         json.decodeFromString<AdvertCreateResponse.Success>(responseBody)
-    }.getOrElse { AdvertCreateResponse.Failure(it.stackTraceToString()) }.also { println("it= $it") }
+    }.getOrElse {
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            AdvertCreateResponse.Failure(it.stackTraceToString())
+        } else AdvertCreateResponse.Failure(it.stackTraceToString())
+        }
 
     suspend fun editAdvert(
         id: String,
@@ -942,7 +1036,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
             json.decodeFromString<AdvertListResponse.Failure>(responseBody)
         }
     }.getOrElse {
-        AdvertListResponse.Failure(it.stackTraceToString())
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            AdvertListResponse.Failure(it.stackTraceToString())
+        } else AdvertListResponse.Failure(it.stackTraceToString())
     }
 
     suspend fun getOrderList(category: String? = null): OrderListResponse = kotlin.runCatching {
@@ -973,7 +1072,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
             json.decodeFromString<OrderListResponse.Failure>(responseBody)
         }
     }.getOrElse {
-        OrderListResponse.Failure(it.stackTraceToString())
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            OrderListResponse.Failure(it.stackTraceToString())
+        } else OrderListResponse.Failure(it.stackTraceToString())
     }
 
     suspend fun getAdvertFullList(): AdvertFullListResponse = kotlin.runCatching {
@@ -1003,7 +1107,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
         }
     }.getOrElse {
         println("alcccccccccc"+it.localizedMessage)
-        AdvertFullListResponse.Failure(it.stackTraceToString()) }
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            AdvertFullListResponse.Failure(it.stackTraceToString())
+        } else AdvertFullListResponse.Failure(it.stackTraceToString()) }
 
     suspend fun getOrderFullList(): OrderFullListResponse = kotlin.runCatching {
         //val token = authToken ?: return@runCatching OrderFullListResponse.Failure("token is null")
@@ -1029,7 +1138,12 @@ class Repository(private val dao: MainDao) : KoinComponent {
             }
             json.decodeFromString<OrderFullListResponse.Failure>(responseBody)
         }
-    }.getOrElse {  OrderFullListResponse.Failure(it.stackTraceToString()) }
+    }.getOrElse {  if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+        val intent = Intent(appContext, ErrorActivity::class.java)
+        intent.putExtra("errText", it.localizedMessage)
+        appContext?.startActivity(intent)
+        OrderFullListResponse.Failure(it.stackTraceToString())
+    } else OrderFullListResponse.Failure(it.stackTraceToString()) }
 
     suspend fun getAdvertInfo(id: String): AdvertInfoResponse = kotlin.runCatching {
         val token = authToken ?: return@runCatching AdvertInfoResponse.Failure("token is null")
@@ -1114,7 +1228,14 @@ class Repository(private val dao: MainDao) : KoinComponent {
         val json = Json.Default
 
         json.decodeFromString<AdvertCreateResponse.Success>(responseBody)
-    }.getOrElse {        AdvertCreateResponse.Failure(it.stackTraceToString()) }
+    }.getOrElse {
+        if (it is ClientRequestException && it.response.status == HttpStatusCode.RequestTimeout) {
+            val intent = Intent(appContext, ErrorActivity::class.java)
+            intent.putExtra("errText", it.localizedMessage)
+            appContext?.startActivity(intent)
+            AdvertCreateResponse.Failure(it.stackTraceToString())
+        } else AdvertCreateResponse.Failure(it.stackTraceToString())
+    }
 
     suspend fun editOrder(
         orderId: String,

@@ -66,7 +66,7 @@ class PaymentActivity : AppCompatActivity() {
         descriptionTV = findViewById(R.id.textView4)
         when(paymentMode){
             1->descriptionTV.text = getString(R.string.descr_business_universal)
-            2->descriptionTV.text = getString(R.string.option_title)+""+getString(R.string.option_photo)+"\n"+getString(R.string.option_color)+"\n"+getString(R.string.option_notification)
+            2->descriptionTV.text = /*getString(R.string.option_title)+""+*/getString(R.string.option_photo)+"\n"+getString(R.string.option_color)+"\n"+getString(R.string.option_notification)
         }
 
         //AcquiringSdk.isDeveloperMode = true

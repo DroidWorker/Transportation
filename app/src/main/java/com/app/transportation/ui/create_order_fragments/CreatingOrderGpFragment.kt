@@ -73,8 +73,8 @@ class CreatingOrderGpFragment : Fragment() {
         b.fromCity.setText(strings?.get(0))
         b.toCity.setText(strings?.get(0))
         if(strings?.size!! >1) {
-            b.toArea.setText(strings?.get(strings?.size-1))
-            b.fromArea.setText(strings?.get(strings?.size-1))
+            b.toArea.setText(strings?.get(strings!!.size-1))
+            b.fromArea.setText(strings?.get(strings!!.size-1))
         }
 
         applyInitialData()

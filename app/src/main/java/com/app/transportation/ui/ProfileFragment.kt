@@ -241,7 +241,7 @@ class ProfileFragment : Fragment() {
                 if (it.isNotEmpty()&&!b.payment.text.contains("тариф")) {
                     businessPrice = it.first().amount.toInt()
                     prefs.edit{putString("businessPrice", businessPrice.toString())}
-                    b.payment.text = "активировать бизнесс аккаунт - $businessPrice p"
+                    b.payment.text = "активировать бизнес аккаунт - ${businessPrice/100} p"
                 }
             }
             catch (ex : java.lang.Exception){

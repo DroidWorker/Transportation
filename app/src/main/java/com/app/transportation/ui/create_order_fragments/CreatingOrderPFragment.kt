@@ -113,7 +113,7 @@ class CreatingOrderPFragment : Fragment() {
         var strings = viewModel.profileFlow.value?.cityArea?.split("[","/","*","-","+",",","&","$","#","@","!","^","&","\\","|","]")
         b.toCity.setText(strings?.get(0))
         if(strings?.size!! >1) {
-            b.toArea.setText(strings?.get(strings?.size-1))
+            b.toArea.setText(strings?.get(strings!!.size-1))
         }
 
 

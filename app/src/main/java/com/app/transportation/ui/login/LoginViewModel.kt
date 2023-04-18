@@ -2,6 +2,7 @@ package com.app.transportation.ui.login
 
 import android.app.Application
 import android.content.SharedPreferences
+import android.widget.Toast
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -91,6 +92,7 @@ class LoginViewModel(val app: Application) : AndroidViewModel(app), KoinComponen
                     }
                 }
                 is RegisterResponse.Failure -> {
+                    println("errrrrrr"+result.message)
                     when (result.message) {
                         "Empty field" -> registrationState.tryEmit(
                             RegistrationState.Warning(
@@ -116,7 +118,6 @@ class LoginViewModel(val app: Application) : AndroidViewModel(app), KoinComponen
                             RegistrationState.Failure(app.getString(R.string.unexpected_error))
                         )
                     }
-                    //TODO write exception data from 'it.message' into something
                 }
             }
         }

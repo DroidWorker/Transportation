@@ -4,10 +4,10 @@
     package="com.app.transportation">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.CALL_PHONE"/>
-    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name=".App"
@@ -23,7 +23,9 @@
         android:usesCleartextTraffic="true"
         tools:replace="android:allowBackup"
         tools:targetApi="31">
-
+        <activity
+            android:name=".ui.ErrorActivity"
+            android:exported="false" />
         <activity
             android:name=".PaymentActivity"
             android:exported="false" />
@@ -39,20 +41,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service
-            android:name="com.app.transportation.service.NotificationService"
-            android:enabled="true"
-            android:exported="false">
-        </service>
 
-        <receiver android:name="com.app.transportation.core.AlarmReceiver"
+        <service
+            android:name=".service.NotificationService"
+            android:enabled="true"
+            android:exported="false"></service>
+
+        <receiver
+            android:name=".core.AlarmReceiver"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-
-        <!--<receiver android:name=".core.AlarmReceiver"/>-->
     </application>
 
 </manifest>

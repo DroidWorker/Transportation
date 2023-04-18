@@ -164,8 +164,12 @@ class FeedbacksRequestsFragment : Fragment(), SharedPreferences.OnSharedPreferen
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == "feedbacksRequestsActiveTab") {
-            applyList()
-            applyTabColors()
+            try {
+                applyList()
+                applyTabColors()
+            }catch (e : Exception){
+
+            }
         }
     }
 

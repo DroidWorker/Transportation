@@ -48,7 +48,10 @@ class RegistrationFragment : Fragment() {
     ): View {
         activity = activity
 
-        var gso : GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build()
+        var gso : GoogleSignInOptions = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken("230726406535-spl43c9o2ue3c61na44a9ds4pvuedp0h.apps.googleusercontent.com")
+            .requestEmail()
+            .build()
         mGoogleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
         binding = FragmentRegistrationBinding.inflate(inflater, container, false)

@@ -232,6 +232,10 @@ class MainFragment : Fragment() {
                 bundleOf("categoryId" to -1, "type" to 1))
         }
 
+        b.openMap.setOnClickListener{
+            findNavController().navigate(R.id.mapFragment)
+        }
+
         b.search.setOnEditorActionListener(TextView.OnEditorActionListener() {v, actionId, event ->
             if(actionId == EditorInfo.IME_ACTION_DONE){
                 if (b.search.text.length<2){
