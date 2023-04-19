@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Base64
+import android.util.Pair
 import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -84,6 +85,8 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     val cachedAdvertCategories = MutableStateFlow(emptyList<Int>())
     val cachedOrderNews = MutableStateFlow(emptyMap<Int, Int>())
     val cachedBussinessLast = MutableStateFlow(emptyList<BusinessLastItemDTO>())
+
+    val cachedPlaces = MutableStateFlow(emptyMap<Pair<Float, Float>, Advert>())
 
     val cachedProfile = MutableStateFlow(ProfileShort())
     val cachedNotifications = MutableStateFlow(emptyMap<String, NoticeDTO>())
@@ -407,6 +410,9 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
     fun getBusinessLast() = viewModelScope.launch (Dispatchers.IO){
         getBuisnessSix()
     }
+    fun getPlcs() = viewModelScope.launch (Dispatchers.IO){
+        getPlaces()
+    }
 
     private suspend fun getOrdersFavoriteFull() =
         (repository.getOrderFavoriteList() as? OrderFavResponse.Success)?.let { response ->
@@ -660,6 +666,15 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
                     cachedBussinessLast.tryEmit(responce.categoriesList)
             }
         }
+
+    private suspend fun getPlaces() =
+        cachedPlaces.tryEmit(mapOf(Pair(55.751951f, 37.574545f) to Advert(0,"",3,0,"ctegpory",0,0,"test dada!","","","",null,"",emptyList(),"","","","","","","" ), Pair(55.750183f, 37.576155f) to Advert(0,"",3,0,"ctegporyyyy",0,0,"test dadadada!","","","",null,"",emptyList(),"","","","","","","" )))
+        /*(repository.getPlaces() as? placesResponce.Success)?.let { responce->
+            cachedPlaces.collect{
+                if (it.isEmpty())
+                    cachedPlaces.tryEmit(responce.categoriesList)
+            }
+        }*/
 
     private suspend fun updateFavoriteAdvertsFull() = viewModelScope.launch(Dispatchers.IO) {
         val list = getAdvertsFavoriteFull()
@@ -1641,13 +1656,13 @@ println("dsdsdsdsd"+advertId+"|||"+list.toString())
             val byteArray = Base64.decode(it, Base64.DEFAULT)
             BitmapFactory.decodeByteArray(byteArray, 0, byteArray.size)
         }
-        adfTempPhotoUris.tryEmit(0 to bitmapList)
+        adfTempPhotoUris.tryEmit(Pair(0, bitmapList.toList()))
     }
 
     fun adfPrevPhoto() = viewModelScope.launch(Dispatchers.IO) {
         val position = adfTempPhotoUris.value.first
         if (position > 0) {
-            val newValue = adfTempPhotoUris.value.run { Pair(first-1, second.toMutableList()) }
+            val newValue = adfTempPhotoUris.value.run { Pair(first-1, second.toList()) }
             adfTempPhotoUris.tryEmit(newValue)
         }
     }
@@ -1655,7 +1670,7 @@ println("dsdsdsdsd"+advertId+"|||"+list.toString())
     fun adfNextPhoto() = viewModelScope.launch(Dispatchers.IO) {
         val position = adfTempPhotoUris.value.first
         adfTempPhotoUris.value.second.getOrNull(position) ?: return@launch
-        val newValue = adfTempPhotoUris.value.run { Pair(first+1, second.toMutableList()) }
+        val newValue = adfTempPhotoUris.value.run { Pair(first+1, second.toList()) }
         adfTempPhotoUris.tryEmit(newValue)
     }
 }

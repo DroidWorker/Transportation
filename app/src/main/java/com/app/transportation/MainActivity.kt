@@ -53,6 +53,7 @@ import com.vk.api.sdk.auth.VKAccessToken
 import com.vk.api.sdk.auth.VKAuthCallback
 import com.vk.api.sdk.exceptions.VKAuthException
 import com.vk.api.sdk.requests.VKRequest
+import com.yandex.mapkit.MapKitFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -100,6 +101,14 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 1)
         }
         if (ContextCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+            != PackageManager.PERMISSION_GRANTED) {
+
+            requestPermissions(this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                1)
+        }
+        if (ContextCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_NOTIFICATION_POLICY)
             != PackageManager.PERMISSION_GRANTED) {
 
@@ -118,6 +127,8 @@ class MainActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceCh
                 this.startActivity(intent)
             }
         }
+
+        MapKitFactory.setApiKey("af3124eb-b373-4c99-9249-d501e4c4a539")
 
         applyTheme()
 

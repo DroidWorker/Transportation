@@ -168,7 +168,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/nameLayout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/payment2">
+                app:layout_constraintTop_toBottomOf="@+id/expTV">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/bussinessTerm"
@@ -257,7 +257,7 @@
                 android:clickable="false"
                 android:fontFamily="@font/montserrat"
                 android:paddingTop="12dp"
-                android:text="активировать бизнесс аккаунт\nЭКСПЕРТ-600р"
+                android:text="активировать бизнес аккаунт\nЭКСПЕРТ-600 р"
                 android:textColor="@color/button_text_color"
                 app:backgroundTint="@color/primary_color"
                 app:cornerRadius="10dp"
@@ -266,23 +266,20 @@
                 app:layout_constraintWidth_percent="0.55" />
 
             <TextView
-                android:id="@+id/textView5"
+                android:id="@+id/expTV"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:gravity="center"
-                android:lines="2"
-                android:maxLines="2"
-                android:text="Активен до\n00.00.00"
-                app:layout_constraintBottom_toBottomOf="@+id/payment2"
-                app:layout_constraintEnd_toStartOf="@+id/switchtvunusd"
-                app:layout_constraintStart_toEndOf="@+id/payment2"
-                app:layout_constraintTop_toTopOf="@+id/payment2" />
+                android:text="Тариф УНИВЕРСАЛ. Активен до 00.00.00"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/payment2" />
 
             <Switch
                 android:id="@+id/switch1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="5dp"
+                android:layout_marginBottom="8dp"
                 android:thumbTint="@color/primary_color"
                 app:layout_constraintBottom_toBottomOf="@+id/payment2"
                 app:layout_constraintEnd_toEndOf="@+id/switchtvunusd"
@@ -293,10 +290,11 @@
                 android:id="@+id/switchtvunusd"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:text="автоотклик"
                 app:layout_constraintBottom_toTopOf="@+id/switch1"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/textView5"
+                app:layout_constraintStart_toEndOf="@+id/payment2"
                 app:layout_constraintTop_toTopOf="@+id/payment2" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>

@@ -13,6 +13,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.util.Base64
+import android.util.Pair
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -108,7 +109,7 @@ class CreatingAdvertisementFragment : Fragment() {
 
         if (!flagDataLoaded) {
             viewModel.getMyAdverts()
-            viewModel.adfTempPhotoUris.value = 0 to mutableListOf()
+            viewModel.adfTempPhotoUris.value = Pair(0 , mutableListOf())
         }
 
         super.onViewCreated(view, savedInstanceState)
@@ -525,7 +526,7 @@ class CreatingAdvertisementFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         flagDataLoaded = false
-        viewModel.cafTempPhotoUris.value = 0 to mutableListOf()
+        viewModel.cafTempPhotoUris.value = Pair(0, mutableListOf())
     }
 
 }

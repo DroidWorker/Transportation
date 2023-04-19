@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -30,8 +31,38 @@
         android:layout_marginTop="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/search2" />
+        app:layout_constraintTop_toBottomOf="@+id/search2"
+        app:layout_constraintVertical_bias="0.0">
+
+    </com.yandex.mapkit.mapview.MapView>
+
+
+    <ImageButton
+        android:id="@+id/zoomIn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="16dp"
+        android:background="#00FFFFFF"
+        android:foreground="@color/transparent"
+        app:layout_constraintBottom_toTopOf="@+id/zoomOut"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/ic_baseline_open_in_full_24" />
+
+    <ImageButton
+        android:id="@+id/zoomOut"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:background="#00FFFFFF"
+        android:foreground="@color/transparent"
+        app:layout_constraintBottom_toTopOf="@+id/mapFilter"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/mapView"
+        app:layout_constraintVertical_bias="0.73"
+        app:srcCompat="@drawable/ic_baseline_open_in_full_24" />
 
     <Button
         android:id="@+id/mapFilter"
