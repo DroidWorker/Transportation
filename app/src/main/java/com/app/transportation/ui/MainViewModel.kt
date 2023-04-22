@@ -668,7 +668,7 @@ class MainViewModel(val app: Application) : AndroidViewModel(app), KoinComponent
         }
 
     private suspend fun getPlaces() =
-        cachedPlaces.tryEmit(mapOf(Pair(55.751951f, 37.574545f) to Advert(0,"",3,0,"ctegpory",0,0,"test dada!","","","",null,"",emptyList(),"","","","","","","" ), Pair(55.750183f, 37.576155f) to Advert(0,"",3,0,"ctegporyyyy",0,0,"test dadadada!","","","",null,"",emptyList(),"","","","","","","" )))
+        cachedPlaces.tryEmit(mapOf(Pair(55.751951f, 37.574545f) to Advert(0,"",3,0,"ctegpory",0,0,"test dadafilter!","","","",null,"",emptyList(),"","","","","","","" ), Pair(55.750183f, 37.576155f) to Advert(0,"",3,0,"ctegporyyyy",0,0,"test dadadada!","","","",null,"",emptyList(),"","","","","","","" )))
         /*(repository.getPlaces() as? placesResponce.Success)?.let { responce->
             cachedPlaces.collect{
                 if (it.isEmpty())

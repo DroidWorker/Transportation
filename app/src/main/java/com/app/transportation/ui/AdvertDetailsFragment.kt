@@ -1,6 +1,8 @@
 package com.app.transportation.ui
 
+import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
@@ -11,6 +13,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.PopupWindow
+import android.widget.TextView
+import android.widget.Toast
 import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -34,6 +38,7 @@ class AdvertDetailsFragment : Fragment() {
 
     private val id by lazy { arguments?.getLong("id") ?: 0L }
 
+    var isFullscreen = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -79,7 +84,9 @@ class AdvertDetailsFragment : Fragment() {
                     options.forEach{
                         if(it.option_id=="-1"&&it.status=="ACTIVE"){
                             b.addToFavourites.visibility = View.VISIBLE
-                            return@forEach
+                        }
+                        else if(it.option_id=="4"&&it.status=="ON"){
+                            b.advertTarifMode.visibility = View.VISIBLE
                         }
                     }
                 }
@@ -92,13 +99,16 @@ class AdvertDetailsFragment : Fragment() {
         }
         viewModel.adfTempPhotoUris.collect(this) {
             it.second.getOrNull(it.first)?.let { bitmap ->
+                if (isFullscreen) {
+                    b.fullscreenImage.setImageBitmap(bitmap)
+                }
                 b.photo.scaleType = ImageView.ScaleType.FIT_CENTER
                 b.photo.setImageBitmap(bitmap)
                 val blurred: Bitmap? = blurRenderScript(requireContext(), bitmap, 25)//second parametre is radius//second parametre is radius
                 b.photo.setBackgroundDrawable(BitmapDrawable(blurred))
             } ?: kotlin.run {
-                b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
-                b.photo.setImageResource(R.drawable.ic_photo)
+                /*b.photo.scaleType = ImageView.ScaleType.CENTER_INSIDE
+                b.photo.setImageResource(R.drawable.ic_photo)*/
             }
             b.imageNumber.text =
                 if (it.second.size > 1) {
@@ -110,7 +120,7 @@ class AdvertDetailsFragment : Fragment() {
                 else
                     ""
             b.prevPhoto.isVisible = it.first > 0
-            b.nextPhoto.isGone = it.first+1 > it.second.size
+            b.nextPhoto.isGone = it.first+2 > it.second.size
         }
     }
 
@@ -141,11 +151,55 @@ class AdvertDetailsFragment : Fragment() {
         b.nextPhoto.setOnClickListener {
             viewModel.adfNextPhoto()
         }
+        b.photo.setOnClickListener {
+            b.fullscreenCV.visibility = View.VISIBLE
+            viewModel.adfTempPhotoUris.value.second.getOrNull(viewModel.adfTempPhotoUris.value.first)?.let {
+                b.fullscreenImage.setImageBitmap(it)
+            }
+            isFullscreen = true
+        }
+        b.fullscreenCV.setOnClickListener {
+            b.fullscreenCV.visibility = View.GONE
+            isFullscreen = false
+        }
+        b.fullscreenNext.setOnClickListener {
+            viewModel.adfNextPhoto()
+        }
+        b.fullscreenPrev.setOnClickListener {
+            viewModel.adfPrevPhoto()
+        }
         b.telNumber.setOnClickListener{
-            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${b.telNumber.text}"))
-            //if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
-            startActivity(intent)
-            //}
+            /*val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${b.telNumber.text}"))
+            startActivity(intent)*/
+            val builder = AlertDialog.Builder(requireContext())
+            builder.setTitle("Выберите действие")
+            builder.setItems(arrayOf("Позвонить", "Написать в мессенджер")) { _, which ->
+                val phone = b.telNumber.text.toString().replace("+", "").replace(" ", "")
+                try{
+                    when (which) {
+                        0 -> {
+                            val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${phone}"))
+                            startActivity(intent)
+                        }
+                        1 -> {
+                            val url = "https://api.whatsapp.com/send?phone=$phone"
+                            try {
+                                val pm = context!!.packageManager
+                                pm.getPackageInfo("com.whatsapp", PackageManager.GET_ACTIVITIES)
+                                val i = Intent(Intent.ACTION_VIEW)
+                                i.data = Uri.parse(url)
+                                startActivity(i)
+                            } catch (e: PackageManager.NameNotFoundException) {
+                                val intent = Intent(Intent.ACTION_VIEW)
+                                intent.data = Uri.parse("viber://chat?number=$phone")
+                                startActivity(intent)
+                            }
+                        }
+                    }}catch (ex : Exception){
+                    Toast.makeText(requireContext(), "ошибка", Toast.LENGTH_SHORT).show()
+                }
+            }
+            builder.show()
         }
     }
 

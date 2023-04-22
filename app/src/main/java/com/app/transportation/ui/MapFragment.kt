@@ -1,11 +1,10 @@
 package com.app.transportation.ui
 
 import android.Manifest
-import android.content.Context
 import android.content.IntentSender
 import android.content.pm.PackageManager
-import android.graphics.Color.BLUE
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,16 +12,16 @@ import android.view.inputmethod.EditorInfo
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
-import com.app.transportation.core.collectWithLifecycle
-import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.fragment.findNavController
 import com.app.transportation.MainActivity
 import com.app.transportation.R
+import com.app.transportation.core.collectWithLifecycle
+import com.app.transportation.data.database.entities.Advert
 import com.app.transportation.databinding.FragmentMapBinding
+import com.app.transportation.ui.adapters.CreateOrderCategorySelectorAdapter
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationRequest
@@ -36,9 +35,9 @@ import com.yandex.mapkit.geometry.Point
 import com.yandex.mapkit.map.CameraPosition
 import com.yandex.mapkit.map.IconStyle
 import com.yandex.mapkit.map.MapObjectTapListener
+import com.yandex.mapkit.map.PlacemarkMapObject
 import com.yandex.mapkit.mapview.MapView
 import com.yandex.runtime.image.ImageProvider
-import io.ktor.utils.io.*
 
 
 class MapFragment : Fragment() {
@@ -47,6 +46,9 @@ class MapFragment : Fragment() {
     private val b get() = binding!!
     private lateinit var mapview : MapView
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    var advs : List<Advert> = emptyList()
+
+    private val adapter by lazy { CreateOrderCategorySelectorAdapter() }
 
     private val viewModel by activityViewModels<MainViewModel>()
 
@@ -63,12 +65,14 @@ class MapFragment : Fragment() {
             Animation(Animation.Type.SMOOTH, 0f),
             null
         )
+        adapter.mode = 1
+        b.categoriesView.adapter = adapter
         return b.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         (activity as? MainActivity)?.apply {
-            b.title.text = "Экран"
+            b.title.text = "КАРТА"
             b.toolbars.isVisible = true
             window.navigationBarColor = requireContext().getColor(R.color.bottom_nav_color)
         }
@@ -168,22 +172,40 @@ class MapFragment : Fragment() {
     }
 
     private fun applyObservers() {
+        val listener : MapObjectTapListener = MapObjectTapListener(){ mapObject, point ->
+            if(mapObject is PlacemarkMapObject) {
+                val advert = advs.find {
+                    it.id==mapObject.userData
+                }
+                val dialogFragment = MapDialogFragment()
+                if(advert!=null) {
+                    val bundle = Bundle()
+                    bundle.putInt("id", advert.categoryId)
+                    bundle.putString("title", advert.title)
+                    bundle.putString("price", advert.price)
+                    if (advert.profile.isNotEmpty()) bundle.putString(
+                        "namephone",
+                        advert.profile.first().firstName + "\n " + advert.profile.first().phone
+                    )
+                    bundle.putString("photo", advert.photo.firstOrNull())
+                    dialogFragment.arguments = bundle
+                }
+                dialogFragment.show(requireFragmentManager(), "mapDialog")
+            }
+            true
+        }
         viewModel.cachedPlaces.collectWithLifecycle(viewLifecycleOwner){
+            advs = it.values.toList()
             for ((coords, advert) in it) {
                 val point = Point(coords.first.toDouble(), coords.second.toDouble())
                 val placemark = b.mapView.map.mapObjects.addPlacemark(point)
-
-                val mapObjectTapListener = MapObjectTapListener { mapObject, point ->
-                    /*if (mapObject is Placemark) {
-                        val title = mapObject.captionText
-                        val description = mapObject.description
-                        Toast.makeText(requireContext(), "$title\n$description", Toast.LENGTH_LONG).show()
-                    }*/
-                    false
-                }
-
-                placemark.addTapListener(mapObjectTapListener)
+                placemark.userData = advert.id
+                placemark.setIconStyle(IconStyle().setScale(1.7f))
+                placemark.addTapListener(listener)
             }
+        }
+        viewModel.addAdvertScreenCategoriesFlowAll().collectWithLifecycle(viewLifecycleOwner) {
+            adapter.submitList(it)
         }
     }
 
@@ -208,7 +230,12 @@ class MapFragment : Fragment() {
         }
 
         b.mapFilter.setOnClickListener {
+            b.categoriesView.visibility = View.VISIBLE
+        }
 
+        adapter.onClick={p1, p2->
+
+            b.categoriesView.visibility = View.GONE
         }
 
         b.myLocation.setOnClickListener {
@@ -221,10 +248,11 @@ class MapFragment : Fragment() {
                     Snackbar.make(b.search2, "минимальная длина запроса 2 символа!", Snackbar.LENGTH_LONG).show()
                     return@OnEditorActionListener true
                 }
-                //viewModel.getSearchResult("ер")
-                /*findNavController().navigate(R.id.advertisementsFragment,
-                    bundleOf("categoryId" to lastCheckedCategoryId, "type" to 3, "searchText" to b.search.text.toString()))
-                b.search.setText("")*/
+                //clear points
+                val mapObjects = b.mapView.map.mapObjects
+                mapObjects.clear()
+                val filteredPlaces = viewModel.cachedPlaces.value.filterValues { advert -> advert.title.contains(b.search2.text.toString()) }
+                viewModel.cachedPlaces.tryEmit(filteredPlaces)
                 true
             } else {
                 false
@@ -234,6 +262,7 @@ class MapFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        b.search2.setText("")
         binding = null
     }
 

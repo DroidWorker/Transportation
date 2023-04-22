@@ -97,6 +97,9 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
                 item.options.forEach{
                     if(it.option_id=="2"&&it.status=="ON")
                         backLayout.setBackgroundResource(R.drawable.card_gradient)
+                    else if (it.option_id=="4"&&it.status=="ON"){
+                        tarifMode.visibility = View.VISIBLE
+                    }
                 }
                 Unit
             }
@@ -121,6 +124,8 @@ class AdvertisementsAdapter : ListAdapter<Advert, RecyclerView.ViewHolder>(DiffC
             item.options.forEach{
                 if(it.option_id=="2"&&it.status=="ON")
                     backLayout.setBackgroundResource(R.drawable.card_gradient)
+                else if (it.option_id=="4"&&it.status=="ON")
+                    tariMode.visibility = View.VISIBLE
             }
             if (date.text=="null") date.visibility=View.GONE
             if (time.text=="null") time.visibility=View.GONE

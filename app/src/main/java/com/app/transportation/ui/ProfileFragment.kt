@@ -171,20 +171,23 @@ class ProfileFragment : Fragment() {
                 b.name.text = name
                 b.login.text = login
                 if (profile.bussiness.contains("ACTIVE")&&!profile.bussiness.contains("NO")){
-                    b.payment.isClickable = false
-                    b.payment.text = "Бизнес аккаунт:\nтариф универсал"
+                    b.payment.isEnabled = false
+                    b.payment2.isEnabled = false
                     if (profile.bussiness.contains("|")&&!profile.bussiness.contains("null")) {
                         val dateTo: String = profile.bussiness.split("|")[1]
                         val cal = Calendar.getInstance()
                         val formatter = SimpleDateFormat("dd.MM.yyyy hh:mm", Locale.ENGLISH)
                         formatter.parse(dateTo)?.let { cal.time = it }
                         cal.add(Calendar.DATE, 30)
-                        val resstr = "Бизнесс аккаунт будет отключен ${cal.get(Calendar.DAY_OF_MONTH)} ${cal.getDisplayName(Calendar.MONTH, Calendar.LONG_FORMAT, Locale("ru"))}"
-                        b.bussinessTerm.setText(resstr)
-                        b.paymentCardLayout.visibility = View.VISIBLE
+                        val resstr = if (profile.bussiness.contains("expert", true)) {
+                            b.switch1.isEnabled = true
+                            "Тариф ЭКСПЕРТ. Активен до ${cal.get(Calendar.DAY_OF_MONTH)} ${cal.getDisplayName(Calendar.MONTH, Calendar.LONG_FORMAT, Locale("ru"))} ${cal.get(Calendar.YEAR)}"
+                        }
+                        else "Тариф УНИВЕРСАЛ. Активен до ${cal.get(Calendar.DAY_OF_MONTH)} ${cal.getDisplayName(Calendar.MONTH, Calendar.LONG_FORMAT, Locale("ru"))} ${cal.get(Calendar.YEAR)}"
+                        b.expTV.text = resstr
                     }
                     else{
-                        b.paymentCardLayout.visibility = View.GONE
+                        b.expTV.visibility = View.GONE
                     }
                 }
                 else{
@@ -349,21 +352,28 @@ class ProfileFragment : Fragment() {
         }
 
         b.payment.setOnClickListener{
-            if (businessPrice==-1){
-                viewModel.messageEvent.tryEmit("Пожалуйста, дождитесь загрузки цен!")
-                return@setOnClickListener
-            }
-            if (userEmail.isEmpty() || userId?.toInt()==0) {
-                viewModel.messageEvent.tryEmit("не указан email, либо профиль еще не загружен")
-                return@setOnClickListener
-            }
-            val intent = Intent(activity, PaymentActivity::class.java)
-            intent.putExtra("summ", (prefs.getString("businessPrice", "30000"))?.toInt())
-            intent.putExtra("mode", 1)
-            intent.putExtra("id", userId?.toInt())
-            intent.putExtra("email", userEmail)
-            startActivity(intent)
+            onPayClick(0)
         }
+        b.payment2.setOnClickListener{
+            onPayClick(1)
+        }
+    }
+
+    fun onPayClick(businesstype: Int){
+        if (businessPrice==-1){
+            viewModel.messageEvent.tryEmit("Пожалуйста, дождитесь загрузки цен!")
+            return
+        }
+        if (userEmail.isEmpty() || userId?.toInt()==0) {
+            viewModel.messageEvent.tryEmit("не указан email, либо профиль еще не загружен")
+            return
+        }
+        val intent = Intent(activity, PaymentActivity::class.java)
+        intent.putExtra("summ", if (businesstype==0) 30000 else if (businesstype==1) 60000 else 30000)
+        intent.putExtra("mode", if (businesstype==0) 1 else if (businesstype==1) 3 else 1)
+        intent.putExtra("id", userId?.toInt())
+        intent.putExtra("email", userEmail)
+        startActivity(intent)
     }
 
     private fun checkIfProfileChanged() {

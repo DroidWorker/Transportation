@@ -12,14 +12,32 @@
         android:paddingEnd="@dimen/sideMargin"
         android:paddingStart="@dimen/sideMargin">
 
-        <Spinner
-            android:id="@+id/spinnerSelectCategory"
+        <LinearLayout
+            android:id="@+id/categoriesLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:visibility="gone"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:layout_editor_absoluteX="25dp" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
+
+            <Spinner
+                android:id="@+id/spinnerSelectCategory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/textViewAddCat"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:drawableLeft="@drawable/ic_add"
+                android:foregroundGravity="center"
+                android:gravity="center"
+                android:text="добавить" />
+        </LinearLayout>
 
         <EditText
             android:id="@+id/advertTitle"
@@ -35,7 +53,7 @@
             app:layout_constraintBottom_toTopOf="@+id/cardView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/spinnerSelectCategory"
+            app:layout_constraintTop_toBottomOf="@+id/categoriesLayout"
             app:layout_constraintVertical_bias="0"
             app:layout_constraintVertical_chainStyle="packed" />
 
@@ -47,7 +65,7 @@
             android:backgroundTint="@color/edittext_field_color"
             app:cardCornerRadius="20dp"
             app:cardElevation="0dp"
-            app:layout_constraintBottom_toTopOf="@+id/priceCardView"
+            app:layout_constraintBottom_toTopOf="@+id/rame"
             app:layout_constraintDimensionRatio="h,1.5:1"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -175,16 +193,19 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.5" />
-
+<FrameLayout
+    android:id="@+id/rame"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:layout_constraintBottom_toTopOf="@+id/description"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/cardView">
         <androidx.cardview.widget.CardView
             android:id="@+id/priceCardView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="59dp"
             android:layout_marginTop="15dp"
-            app:layout_constraintBottom_toTopOf="@+id/description"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView"
             app:cardBackgroundColor="@color/secondary_color"
             app:cardCornerRadius="20dp"
             app:contentPaddingBottom="8dp"
@@ -206,6 +227,7 @@
                 android:textStyle="bold" />
 
         </androidx.cardview.widget.CardView>
+</FrameLayout>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/descriptionCardView"
@@ -240,7 +262,7 @@
             app:layout_constraintBottom_toTopOf="@+id/descriptionExpandText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/priceCardView"
+            app:layout_constraintTop_toBottomOf="@+id/rame"
             tools:text="Здесь\nбудет\nописание\nуслуги" />
 
         <TextView
@@ -373,6 +395,24 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/newOrderNotificationCB"
             app:cornerRadius="10dp" />
+
+        <FrameLayout
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/categoriesLayout">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/categoriesView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="#D2FFFFFF"
+                android:orientation="vertical"
+                android:visibility="invisible"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+        </FrameLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

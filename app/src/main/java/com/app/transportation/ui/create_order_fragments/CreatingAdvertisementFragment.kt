@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.ImageDecoder
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
@@ -20,6 +21,8 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ImageView
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.core.view.isGone
@@ -28,12 +31,17 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.setFragmentResultListener
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.app.transportation.MainActivity
 import com.app.transportation.PaymentActivity
 import com.app.transportation.R
 import com.app.transportation.core.*
+import com.app.transportation.data.database.entities.SelectorCategory
 import com.app.transportation.databinding.FragmentCreatingAdvertisementBinding
 import com.app.transportation.ui.MainViewModel
+import com.app.transportation.ui.MapDialogFragment
+import com.app.transportation.ui.CategoriesDialogFragment
+import com.app.transportation.ui.adapters.CreateOrderCategorySelectorAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.koin.android.ext.android.inject
 import org.koin.core.qualifier.named
@@ -61,6 +69,8 @@ class CreatingAdvertisementFragment : Fragment() {
 
     private val viewModel by activityViewModels<MainViewModel>()
 
+    private val adapter by lazy { CreateOrderCategorySelectorAdapter() }
+
     private var ctx : Context? = null
 
     private val prefs: SharedPreferences by inject(named("MainSettings"))
@@ -77,9 +87,12 @@ class CreatingAdvertisementFragment : Fragment() {
     private var catsID : HashMap<String, String> = HashMap<String, String>()
     private var selectedCat : String = ""
     private var spinnerPosition = 0
+    private var spinnerData : ArrayList<String> = ArrayList()
 
     private var flagDataLoaded = false
     private var newImagesCount = 0//use for switch internal/external photo
+
+    private var editableTextView : TextView? = null
 
     private val obtainPhotoUriLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -94,6 +107,8 @@ class CreatingAdvertisementFragment : Fragment() {
     ): View {
         binding = FragmentCreatingAdvertisementBinding.inflate(inflater, container, false)
         ctx = activity
+        adapter.mode = 1
+        b.categoriesView.adapter = adapter
         return b.root
     }
 
@@ -393,6 +408,23 @@ class CreatingAdvertisementFragment : Fragment() {
             viewModel.cafNextPhoto()
             if (isEdit == 1)viewModel.adfNextPhoto()
         }
+
+        b.textViewAddCat.setOnClickListener {
+            if(b.categoriesLayout.childCount==5){
+                b.textViewAddCat.visibility = View.GONE
+            }
+            editableTextView = TextView(context)
+            editableTextView?.setTextColor(Color.BLACK)
+            b.categoriesView.visibility = View.VISIBLE
+
+            val index = b.categoriesLayout.childCount - 1
+            b.categoriesLayout.addView(editableTextView, index)
+        }
+        adapter.onClick = {p1, p2 ->
+            editableTextView?.tag = p2
+            editableTextView?.text = adapter.currentList.find { it.realId == p2 }?.name ?: ""
+            b.categoriesView.visibility = View.GONE
+        }
     }
 
     private fun applyCollectors() = viewLifecycleOwner.repeatOnLifecycle {
@@ -474,6 +506,7 @@ class CreatingAdvertisementFragment : Fragment() {
                     data.add(item.name)
                     catsID[item.name] = item.realId.toString()
                 }
+                spinnerData = data
                 val adapter: ArrayAdapter<String> = ArrayAdapter<String>(ctx!!, android.R.layout.simple_spinner_item, data)
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
                 b.spinnerSelectCategory.adapter = adapter
@@ -496,6 +529,22 @@ class CreatingAdvertisementFragment : Fragment() {
                     }
                 }
             }
+        viewModel.addAdvertScreenCategoriesFlowAll().collectWithLifecycle(viewLifecycleOwner) {
+            adapter.submitList(it)
+        }
+        viewModel.profileFlow.value.let{ profile ->
+            if(profile?.bussiness?.contains("expert", true) == true){
+                b.photoInShowcase.setTextColor(Color.GRAY)
+                b.photoInShowcaseCB.isEnabled = false
+                b.photoInShowcaseCB.isChecked = true
+                b.colorHighlighting.setTextColor(Color.GRAY)
+                b.colorHighlightingCB.isEnabled = false
+                b.colorHighlightingCB.isChecked = true
+                b.newOrderNotification.setTextColor(Color.GRAY)
+                b.newOrderNotificationCB.isEnabled = false
+                b.newOrderNotificationCB.isChecked = true
+            }
+        }
     }
 
     private fun runDescriptionEditor() {

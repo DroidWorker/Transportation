@@ -67,6 +67,7 @@ class PaymentActivity : AppCompatActivity() {
         when(paymentMode){
             1->descriptionTV.text = getString(R.string.descr_business_universal)
             2->descriptionTV.text = /*getString(R.string.option_title)+""+*/getString(R.string.option_photo)+"\n"+getString(R.string.option_color)+"\n"+getString(R.string.option_notification)
+            3->descriptionTV.text = getString(R.string.descr_business_expert)
         }
 
         //AcquiringSdk.isDeveloperMode = true

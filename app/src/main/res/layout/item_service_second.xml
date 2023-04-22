@@ -51,6 +51,18 @@
         tools:text="Тюмень, Тюменская обл., ул. Мельникайте, 55" />
 
     <TextView
+        android:id="@+id/tariMode"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="ЭКСПЕРТ"
+        android:textColor="@color/primary_color"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/location" />
+
+    <TextView
         android:id="@+id/date"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -62,7 +74,7 @@
         android:textSize="16sp"
         app:drawableStartCompat="@drawable/ic_calendar"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/location"
+        app:layout_constraintTop_toBottomOf="@+id/tariMode"
         tools:text="01/12/2022" />
 
     <TextView
@@ -78,7 +90,7 @@
         app:drawableStartCompat="@drawable/ic_time"
         app:layout_constraintEnd_toStartOf="@+id/price"
         app:layout_constraintStart_toEndOf="@+id/date"
-        app:layout_constraintTop_toBottomOf="@+id/location"
+        app:layout_constraintTop_toBottomOf="@+id/tariMode"
         tools:text="12:30" />
 
     <TextView
@@ -93,7 +105,7 @@
         android:textSize="16sp"
         app:drawableStartCompat="@drawable/ic_ruble"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/location"
+        app:layout_constraintTop_toBottomOf="@+id/tariMode"
         tools:text="1000 руб" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

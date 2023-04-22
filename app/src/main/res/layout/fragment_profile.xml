@@ -76,7 +76,7 @@
                 app:layout_constraintBottom_toTopOf="@+id/telNumberLayout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/paymentCardLayout">
+                app:layout_constraintTop_toBottomOf="@+id/expTV">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/nameET"
@@ -134,7 +134,6 @@
                 app:boxStrokeColor="@color/box_stroke_color"
                 app:hintTextAppearance="@style/HintTextAppearance"
                 app:hintTextColor="@color/secondary_color"
-                app:layout_constraintBottom_toTopOf="@+id/paymentCardLayout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/telNumberLayout">
@@ -149,41 +148,6 @@
                     android:hint="E-mail"
                     android:importantForAutofill="no"
                     android:inputType="textEmailAddress"
-                    android:textColor="@color/secondary_color"
-                    android:textCursorDrawable="@null"
-                    android:textSize="16sp" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/paymentCardLayout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="15dp"
-                android:visibility="gone"
-                app:boxStrokeColor="@color/box_stroke_color"
-                app:hintTextAppearance="@style/HintTextAppearance"
-                app:hintTextColor="@color/secondary_color"
-                app:layout_constraintBottom_toTopOf="@+id/nameLayout"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/expTV">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/bussinessTerm"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:backgroundTint="@color/transparent"
-                    android:digits="1234567890+-() "
-                    android:editable="false"
-                    android:enabled="false"
-                    android:focusable="false"
-                    android:fontFamily="@font/montserrat"
-                    android:gravity="start|center_vertical"
-                    android:importantForAutofill="no"
-                    android:inputType="number"
-                    android:text="Бизнесс аккаунт будет отключен через 63 ч"
                     android:textColor="@color/secondary_color"
                     android:textCursorDrawable="@null"
                     android:textSize="16sp" />
@@ -239,6 +203,7 @@
                 android:layout_marginTop="8dp"
                 android:clickable="false"
                 android:fontFamily="@font/montserrat"
+                android:onClick="onPay"
                 android:paddingTop="12dp"
                 android:text="активировать бизнесс аккаунт\nУНИВЕРСАЛ-300р"
                 android:textColor="@color/button_text_color"
@@ -272,6 +237,7 @@
                 android:layout_marginTop="8dp"
                 android:gravity="center"
                 android:text="Тариф УНИВЕРСАЛ. Активен до 00.00.00"
+                android:visibility="invisible"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/payment2" />
 
@@ -280,6 +246,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
+                android:enabled="false"
                 android:thumbTint="@color/primary_color"
                 app:layout_constraintBottom_toBottomOf="@+id/payment2"
                 app:layout_constraintEnd_toEndOf="@+id/switchtvunusd"
